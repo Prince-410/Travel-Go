@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TravelGo - Book Flights, Hotels, Trains & More</title>
+    <meta name="description"
+        content="Book your next journey with ease. Find the best deals on flights, hotels, trains, and holiday packages.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="scripts.js" defer></script>
+</head>
+
+<body>
+    <header class="header">
+        <div class="container nav-container">
+            <div class="logo">
+                <img src="logo.png" alt="TravelGo Logo" class="logo-img">
+                TravelGo
+            </div>
+            <nav class="nav-links">
+                <a href="index.html" class="nav-item active"><span class="icon">✈️</span> Flights</a>
+                <a href="hotels.html" class="nav-item"><span class="icon">🏨</span> Hotels</a>
+                <a href="trains.html" class="nav-item"><span class="icon">🚆</span> Trains</a>
+                <a href="buses.html" class="nav-item"><span class="icon">🚌</span> Buses</a>
+                <a href="cabs.html" class="nav-item"><span class="icon">🚖</span> Cabs</a>
+                <a href="holidays.html" class="nav-item"><span class="icon">⛱️</span> Holidays</a>
+            </nav>
+            <div class="auth-buttons">
+                <a href="login.html" class="login-btn">Login / Sign Up</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero-section hero-flights">
+        <div class="hero-content">
+            <h1>Book Your Next Journey with Ease</h1>
+            <p>Flights, Hotels, Trains & More</p>
+        </div>
+    </section>
+
+    <section class="search-container-wrapper">
+        <div class="search-card">
+            <div class="search-tabs">
+                <button class="tab active" data-type="oneway">One Way</button>
+                <button class="tab" data-type="roundtrip">Round Trip</button>
+                <button class="tab" data-type="multicity">Multi City</button>
+            </div>
+            <form class="search-form" action="index.html">
+                <div class="form-group">
+                    <label for="from">From</label>
+                    <select id="from"></select>
+                    <span class="sub-label">Select Source</span>
+                </div>
+                <div class="form-group">
+                    <label for="to">To</label>
+                    <select id="to"></select>
+                    <span class="sub-label">Select Destination</span>
+                </div>
+                <div class="form-group">
+                    <label for="departure">Departure</label>
+                    <input type="date" id="departure">
+                    <span class="sub-label">Thursday</span>
+                </div>
+                <div class="form-group">
+                    <label for="return">Return</label>
+                    <input type="date" id="return">
+                    <span class="sub-label">Book a round trip</span>
+                </div>
+                <div class="form-group">
+                    <label for="travellers">Travellers & Class</label>
+                    <input type="text" id="travellers" value="1 Traveller, Economy" readonly>
+                    <span class="sub-label">Click to change</span>
+                </div>
+                <div class="search-action">
+                    <button type="submit" class="search-btn">SEARCH</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <section class="section listing-section">
+        <div class="container">
+            <h2 class="section-title">Popular Domestic Flights</h2>
+            <div class="listing-grid" id="listing-grid">
+            </div>
+        </div>
+    </section>
+
+    <section class="section offers-section">
+        <div class="container">
+            <h2 class="section-title">Exclusive Flight Offers</h2>
+            <div class="offers-grid">
+                <div class="offer-card">
+                    <div class="offer-content">
+                        <h3>Flat 12% OFF</h3>
+                        <p>On Domestic Flights with HDFC Credit Cards.</p>
+                        <a href="#" class="book-now-btn">Book Now</a>
+                    </div>
+                </div>
+                <div class="offer-card">
+                    <div class="offer-content">
+                        <h3>International Sale</h3>
+                        <p>Up to ₹50,000 off on flights to Europe & US.</p>
+                        <a href="#" class="book-now-btn">Book Now</a>
+                    </div>
+                </div>
+                <div class="offer-card">
+                    <div class="offer-content">
+                        <h3>Student Discount</h3>
+                        <p>Extra baggage allowance + Flat 10% off for Students.</p>
+                        <a href="#" class="book-now-btn">Book Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>About Us</h4>
+                    <a href="#">Our Story</a>
+                    <a href="#">Careers</a>
+                    <a href="#">Press</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Support</h4>
+                    <a href="#">Contact Us</a>
+                    <a href="#">FAQs</a>
+                    <a href="#">Cancellations</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Legal</h4>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Privacy Policy</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Connect</h4>
+                    <div class="social-links">
+                        <a href="#">Facebook</a>
+                        <a href="#">Twitter</a>
+                        <a href="#">Instagram</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 TravelGo. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+</html>

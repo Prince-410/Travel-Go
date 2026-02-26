@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data>
+    <commonCities>
+        <city>Agra</city>
+        <city>Ahmedabad</city>
+        <city>Bangalore</city>
+        <city>Chennai</city>
+        <city>Delhi</city>
+        <city>Gandhinagar</city>
+        <city>Goa</city>
+        <city>Hyderabad</city>
+        <city>Jaipur</city>
+        <city>Kochi</city>
+        <city>Kolkata</city>
+        <city>Manali</city>
+        <city>Mumbai</city>
+        <city>Pune</city>
+        <city>Shimla</city>
+        <city>Surat</city>
+        <city>Udaipur</city>
+        <city>Varanasi</city>
+    </commonCities>
+    <badges>
+        <badge>Cheapest</badge>
+        <badge>Popular</badge>
+        <badge>Fastest</badge>
+        <badge>Best Seller</badge>
+        <badge>Top Rated</badge>
+        <badge>Luxury</badge>
+        <badge>Deal</badge>
+    </badges>
+    <destinations>
+        <dest>Bali</dest>
+        <dest>Dubai</dest>
+        <dest>Europe</dest>
+        <dest>Goa</dest>
+        <dest>Kerala</dest>
+        <dest>Maldives</dest>
+        <dest>Paris</dest>
+        <dest>Swiss</dest>
+        <dest>Thailand</dest>
+        <dest>Vietnam</dest>
+    </destinations>
+    <airlines>
+        <airline>IndiGo</airline>
+        <airline>Air India</airline>
+        <airline>Vistara</airline>
+        <airline>SpiceJet</airline>
+        <airline>Akasa Air</airline>
+        <airline>AirAsia</airline>
+    </airlines>
+    <hotelChains>
+        <chain>Taj</chain>
+        <chain>Oberoi</chain>
+        <chain>Hyatt</chain>
+        <chain>Marriott</chain>
+        <chain>Radisson</chain>
+        <chain>Lemon Tree</chain>
+        <chain>ITC</chain>
+        <chain>Novotel</chain>
+        <chain>Ibibo</chain>
+    </hotelChains>
+    <hotelTypes>
+        <type>Palace</type>
+        <type>Residency</type>
+        <type>Suites</type>
+        <type>Inn</type>
+        <type>Plaza</type>
+        <type>Grand</type>
+        <type>Resort</type>
+    </hotelTypes>
+    <trainNames>
+        <name>Rajdhani</name>
+        <name>Shatabdi</name>
+        <name>Duronto</name>
+        <name>Vande Bharat</name>
+        <name>Garib Rath</name>
+        <name>Express</name>
+        <name>Mail</name>
+        <name>Superfast</name>
+    </trainNames>
+    <busOperators>
+        <op>VRL</op>
+        <op>Orange</op>
+        <op>SRS</op>
+        <op>KSRTC</op>
+        <op>IntrCity</op>
+        <op>ZingBus</op>
+        <op>Charter</op>
+    </busOperators>
+    <cabTypes>
+        <type>Dzire</type>
+        <type>Etios</type>
+        <type>Innova</type>
+        <type>Ertiga</type>
+        <type>Xylo</type>
+        <type>Mercedes</type>
+        <type>BMW</type>
+        <type>Audi</type>
+    </cabTypes>
+    <offers>
+        <flight>
+            <offer title="Flat 12% OFF" color="#e3f2fd">On Domestic Flights with HDFC Credit Cards.</offer>
+            <offer title="International Sale" color="#fff3e0">Up to ₹50,000 off on flights to Europe &amp; US.</offer>
+            <offer title="Student Discount" color="#f3e5f5">Extra baggage allowance + Flat 10% off for Students.</offer>
+        </flight>
+        <hotel>
+            <offer title="Weekend Getaway" color="#e8f5e9">Up to 40% OFF on weekend hotel bookings.</offer>
+            <offer title="Luxury Stays" color="#fff9c4">Flat ₹3,000 OFF on 5-star hotels with complimentary breakfast.</offer>
+            <offer title="Long Stay Deals" color="#fce4ec">Book 3 nights, get 1 night FREE at select properties.</offer>
+        </hotel>
+        <train>
+            <offer title="First Class Upgrade" color="#e1f5fe">Get 20% OFF on AC First Class bookings.</offer>
+            <offer title="Tatkal Special" color="#f3e5f5">Zero convenience fee on Tatkal bookings this week.</offer>
+            <offer title="Group Travel" color="#fff3e0">Book for 4+ passengers and save up to ₹500 per ticket.</offer>
+        </train>
+        <bus>
+            <offer title="Sleeper Bus Sale" color="#e8f5e9">Flat 25% OFF on AC Sleeper bus bookings.</offer>
+            <offer title="Early Bird Offer" color="#e3f2fd">Book 7 days in advance and get ₹200 OFF.</offer>
+            <offer title="Round Trip Savings" color="#fff9c4">Save up to 30% on round trip bus tickets.</offer>
+        </bus>
+        <cab>
+            <offer title="Airport Transfers" color="#f3e5f5">Flat ₹150 OFF on airport pickup/drop services.</offer>
+            <offer title="Hourly Rentals" color="#e1f5fe">Get 4 hours package at 3 hours price - Limited time!</offer>
+            <offer title="Outstation Deals" color="#fce4ec">Up to 20% OFF on outstation cab bookings.</offer>
+        </cab>
+        <holiday>
+            <offer title="Honeymoon Special" color="#fce4ec">Romantic packages starting at ₹25,999 with FREE candlelight dinner.</offer>
+            <offer title="Family Packages" color="#e8f5e9">Save up to ₹15,000 on family holiday packages for 4+.</offer>
+            <offer title="Adventure Tours" color="#fff3e0">Exclusive 30% OFF on adventure and trekking packages.</offer>
+        </holiday>
+    </offers>
+    <headerNav>
+        <item path="/" label="Flights" icon="Plane" />
+        <item path="/hotels" label="Hotels" icon="Hotel" />
+        <item path="/trains" label="Trains" icon="Train" />
+        <item path="/buses" label="Buses" icon="Bus" />
+        <item path="/cabs" label="Cabs" icon="Car" />
+        <item path="/holidays" label="Holidays" icon="Umbrella" />
+    </headerNav>
+    <footerLinks>
+        <column title="Company">
+            <link path="/about">About Us</link>
+            <link path="/about#our-story">Our Story</link>
+            <link path="/careers">Careers</link>
+            <link path="/blog">Blog</link>
+            <link path="/press">Press</link>
+        </column>
+        <column title="Support">
+            <link path="/contact">Contact Us</link>
+            <link path="/faqs">FAQs</link>
+            <link path="/refund">Cancellations</link>
+            <link path="/refund">Refund Policy</link>
+            <link path="/privacy">Privacy Policy</link>
+        </column>
+        <column title="More Services">
+            <link path="/corporate-travel">Corporate Travel</link>
+            <link path="/gift-cards">Gift Cards</link>
+            <link path="/refer-earn">Refer &amp; Earn</link>
+            <link path="/travel-insurance">Travel Insurance</link>
+            <link path="/list-property">List Your Property</link>
+        </column>
+    </footerLinks>
+</data>
