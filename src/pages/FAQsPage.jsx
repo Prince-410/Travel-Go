@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, HelpCircle, BookOpen, MessageCircle } from 'lucide-react';
 import '../App.css';
 
 const FAQsPage = () => {
@@ -20,10 +20,6 @@ const FAQsPage = () => {
                 {
                     question: 'How will I receive my booking confirmation?',
                     answer: 'You will receive a booking confirmation via email and SMS immediately after successful payment. The confirmation includes your booking reference number and all travel details.'
-                },
-                {
-                    question: 'Can I modify my booking after confirmation?',
-                    answer: 'Yes, you can modify your booking through "My Bookings" section. However, modification charges may apply depending on the airline/hotel policy and fare type.'
                 }
             ]
         },
@@ -37,14 +33,6 @@ const FAQsPage = () => {
                 {
                     question: 'Is it safe to make payments on TravelGo?',
                     answer: 'Absolutely! All transactions are secured with 256-bit SSL encryption. We never store your complete card details. Your payment information is processed through PCI-DSS compliant payment gateways.'
-                },
-                {
-                    question: 'Are there any hidden charges?',
-                    answer: 'No hidden charges! The final price you see at checkout includes all taxes, fees, and charges. We believe in complete transparency.'
-                },
-                {
-                    question: 'Do you offer EMI options?',
-                    answer: 'Yes, we offer EMI options on bookings above ₹10,000 with select credit cards. You can choose from 3, 6, 9, or 12-month EMI plans at checkout.'
                 }
             ]
         },
@@ -58,129 +46,64 @@ const FAQsPage = () => {
                 {
                     question: 'When will I receive my refund?',
                     answer: 'Refunds are processed within 7-10 business days from the date of cancellation. The amount will be credited to your original payment method.'
-                },
-                {
-                    question: 'What are the cancellation charges?',
-                    answer: 'Cancellation charges vary based on the service type, provider policy, and how close to the travel date you cancel. Please refer to our detailed Cancellation & Refund Policy page for specific information.'
-                },
-                {
-                    question: 'Can I get a full refund?',
-                    answer: 'Full refunds are possible if you cancel well in advance (typically 72+ hours for flights, 7+ days for hotels). However, a small service fee may apply. Check the specific terms for your booking.'
-                }
-            ]
-        },
-        {
-            category: 'Account & Profile',
-            questions: [
-                {
-                    question: 'Do I need to create an account to book?',
-                    answer: 'While you can browse without an account, creating one makes booking faster and helps you manage all your trips in one place. You can also earn rewards and get exclusive deals!'
-                },
-                {
-                    question: 'I forgot my password. What should I do?',
-                    answer: 'Click on "Forgot Password" on the login page, enter your registered email address, and we\'ll send you a password reset link.'
-                },
-                {
-                    question: 'How do I update my contact information?',
-                    answer: 'Log in to your account, go to "Profile Settings", and update your contact details. Make sure to save the changes.'
-                },
-                {
-                    question: 'Can I delete my account?',
-                    answer: 'Yes, you can request account deletion by contacting our customer support at support@travelgo.com. Please note this action is irreversible.'
-                }
-            ]
-        },
-        {
-            category: 'Travel Documents & Requirements',
-            questions: [
-                {
-                    question: 'What documents do I need for domestic travel?',
-                    answer: 'For domestic flights, you need a valid government-issued photo ID (Aadhaar Card, Passport, Driving License, Voter ID, or PAN Card).'
-                },
-                {
-                    question: 'What documents are required for international travel?',
-                    answer: 'You need a valid passport (with at least 6 months validity), visa (if required for your destination), and any health certificates or vaccination records as per destination requirements.'
-                },
-                {
-                    question: 'Do children need ID proof for travel?',
-                    answer: 'For domestic travel, children under 12 don\'t need ID if traveling with parents. For international travel, all passengers including infants need a valid passport.'
-                },
-                {
-                    question: 'How do I check visa requirements?',
-                    answer: 'Visa requirements vary by destination and nationality. We recommend checking with the embassy or consulate of your destination country well in advance of travel.'
-                }
-            ]
-        },
-        {
-            category: 'Customer Support',
-            questions: [
-                {
-                    question: 'How can I contact customer support?',
-                    answer: 'You can reach us 24/7 via phone at 1800-123-4567 (toll-free), email at support@travelgo.com, or use the live chat feature on our website.'
-                },
-                {
-                    question: 'What are your customer support hours?',
-                    answer: 'Our customer support team is available 24/7, 365 days a year to assist you with any queries or issues.'
-                },
-                {
-                    question: 'How quickly will I get a response?',
-                    answer: 'Phone and live chat support provide immediate assistance. Email queries are typically responded to within 2-4 hours during business hours and within 24 hours otherwise.'
-                },
-                {
-                    question: 'Can I get support in regional languages?',
-                    answer: 'Yes! We offer support in Hindi, English, and several regional languages including Tamil, Telugu, Kannada, Bengali, and Marathi.'
                 }
             ]
         }
     ];
 
-    const toggleFAQ = (categoryIndex, questionIndex) => {
-        const index = `${categoryIndex}-${questionIndex}`;
+    const toggleFAQ = (catIndex, qIndex) => {
+        const index = `${catIndex}-${qIndex}`;
         setOpenIndex(openIndex === index ? null : index);
     };
 
     return (
-        <div style={{ minHeight: '70vh' }}>
+        <div style={{ minHeight: '100vh', paddingBottom: '100px' }}>
             {/* Hero Section */}
-            <section style={{
-                background: 'linear-gradient(135deg, #008cff 0%, #0066cc 100%)',
-                padding: '80px 20px',
-                textAlign: 'center',
-                color: 'white'
-            }}>
+            <section style={{ padding: '100px 20px', textAlign: 'center' }}>
                 <div className="container">
-                    <h1 style={{ fontSize: '3rem', fontWeight: '800', marginBottom: '20px' }}>
+                    <h1 style={{ 
+                        fontSize: '3.5rem', 
+                        fontWeight: '900', 
+                        marginBottom: '20px',
+                        background: 'linear-gradient(to right, #fff, #9A7EAE)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent'
+                    }}>
                         Frequently Asked Questions
                     </h1>
-                    <p style={{ fontSize: '1.3rem', maxWidth: '800px', margin: '0 auto', lineHeight: '1.8' }}>
-                        Find answers to common questions about booking, payments, cancellations, and more
+                    <p style={{ 
+                        fontSize: '1.2rem', 
+                        maxWidth: '700px', 
+                        margin: '0 auto', 
+                        lineHeight: '1.8', 
+                        color: '#94a3b8' 
+                    }}>
+                        Quick answers to common questions about your travels. We're here to make your journey smoother.
                     </p>
                 </div>
             </section>
 
-            {/* FAQs */}
-            <section style={{ padding: '80px 20px' }}>
-                <div className="container" style={{ maxWidth: '900px', margin: '0 auto' }}>
+            {/* FAQs Grid */}
+            <section className="container" style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 20px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '60px' }}>
                     {faqCategories.map((category, catIndex) => (
-                        <div key={catIndex} style={{ marginBottom: '50px' }}>
-                            <h2 style={{
-                                fontSize: '1.8rem',
-                                fontWeight: '700',
-                                marginBottom: '30px',
-                                color: '#2d3748',
-                                borderBottom: '3px solid #008cff',
-                                paddingBottom: '10px'
-                            }}>
-                                {category.category}
-                            </h2>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                        <div key={catIndex}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '30px' }}>
+                                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(154, 126, 174, 0.1)', color: '#9A7EAE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <HelpCircle size={20} />
+                                </div>
+                                <h2 style={{ fontSize: '1.8rem', fontWeight: '800', color: '#fff' }}>{category.category}</h2>
+                            </div>
+                            
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                                 {category.questions.map((faq, qIndex) => {
                                     const isOpen = openIndex === `${catIndex}-${qIndex}`;
                                     return (
                                         <div key={qIndex} style={{
-                                            background: 'white',
-                                            borderRadius: '12px',
-                                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                            background: 'rgba(30, 41, 59, 0.4)',
+                                            backdropFilter: 'blur(12px)',
+                                            borderRadius: '20px',
+                                            border: '1px solid rgba(255, 255, 255, 0.08)',
                                             overflow: 'hidden',
                                             transition: 'all 0.3s ease'
                                         }}>
@@ -188,44 +111,36 @@ const FAQsPage = () => {
                                                 onClick={() => toggleFAQ(catIndex, qIndex)}
                                                 style={{
                                                     width: '100%',
-                                                    padding: '20px 25px',
-                                                    background: isOpen ? '#f7fafc' : 'white',
+                                                    padding: '24px 30px',
+                                                    background: 'transparent',
                                                     border: 'none',
                                                     textAlign: 'left',
                                                     cursor: 'pointer',
                                                     display: 'flex',
                                                     justifyContent: 'space-between',
                                                     alignItems: 'center',
-                                                    gap: '15px',
-                                                    transition: 'background 0.3s ease'
+                                                    gap: '20px'
                                                 }}
                                             >
-                                                <span style={{
-                                                    fontSize: '1.1rem',
-                                                    fontWeight: '600',
-                                                    color: '#2d3748',
-                                                    flex: 1
-                                                }}>
+                                                <span style={{ fontSize: '1.15rem', fontWeight: '700', color: isOpen ? '#9A7EAE' : '#fff', flex: 1, transition: 'color 0.2s' }}>
                                                     {faq.question}
                                                 </span>
-                                                <span style={{ color: '#008cff', flexShrink: 0 }}>
+                                                <span style={{ color: '#9A7EAE', transition: 'transform 0.3s' }}>
                                                     {isOpen ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
                                                 </span>
                                             </button>
-                                            {isOpen && (
-                                                <div style={{
-                                                    padding: '0 25px 25px 25px',
-                                                    background: '#f7fafc'
-                                                }}>
-                                                    <p style={{
-                                                        color: '#4a5568',
-                                                        lineHeight: '1.8',
-                                                        fontSize: '1rem'
-                                                    }}>
+                                            <div style={{ 
+                                                maxHeight: isOpen ? '500px' : '0', 
+                                                overflow: 'hidden', 
+                                                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)' 
+                                            }}>
+                                                <div style={{ padding: '0 30px 24px 30px' }}>
+                                                    <div style={{ height: '1px', background: 'rgba(255, 255, 255, 0.05)', marginBottom: '20px' }} />
+                                                    <p style={{ color: '#94a3b8', lineHeight: '1.8', fontSize: '1.05rem' }}>
                                                         {faq.answer}
                                                     </p>
                                                 </div>
-                                            )}
+                                            </div>
                                         </div>
                                     );
                                 })}
@@ -233,37 +148,40 @@ const FAQsPage = () => {
                         </div>
                     ))}
                 </div>
-            </section>
 
-            {/* Still Have Questions */}
-            <section style={{
-                padding: '60px 20px',
-                background: '#f7fafc',
-                textAlign: 'center'
-            }}>
-                <div className="container">
-                    <h2 style={{ fontSize: '2rem', fontWeight: '700', marginBottom: '15px', color: '#2d3748' }}>
-                        Still Have Questions?
-                    </h2>
-                    <p style={{ fontSize: '1.1rem', color: '#718096', marginBottom: '30px' }}>
-                        Our customer support team is here to help 24/7
-                    </p>
-                    <button
-                        onClick={() => window.location.href = '/contact'}
-                        style={{
-                            padding: '15px 40px',
-                            background: 'linear-gradient(135deg, #008cff 0%, #0066cc 100%)',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '8px',
-                            fontSize: '1.1rem',
-                            fontWeight: '600',
+                {/* Footer CTA */}
+                <div style={{ 
+                    marginTop: '100px', 
+                    background: 'linear-gradient(135deg, rgba(154, 126, 174, 0.1), rgba(124, 58, 237, 0.05))',
+                    borderRadius: '32px',
+                    padding: '60px',
+                    textAlign: 'center',
+                    border: '1px solid rgba(154, 126, 174, 0.2)'
+                }}>
+                    <h2 style={{ fontSize: '2rem', fontWeight: '900', color: '#fff', marginBottom: '15px' }}>Still have questions?</h2>
+                    <p style={{ color: '#94a3b8', fontSize: '1.1rem', marginBottom: '35px' }}>Our dedicated support team is available 24/7 to assist you.</p>
+                    <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
+                        <button onClick={() => window.location.href = '/contact'} style={{ 
+                            padding: '16px 40px', 
+                            borderRadius: '16px', 
+                            background: '#9A7EAE', 
+                            color: '#fff', 
+                            border: 'none', 
+                            fontWeight: '800', 
                             cursor: 'pointer',
-                            boxShadow: '0 4px 15px rgba(0, 140, 255, 0.3)'
-                        }}
-                    >
-                        Contact Support
-                    </button>
+                            fontSize: '1rem'
+                        }}>Contact Support</button>
+                        <button style={{ 
+                            padding: '16px 40px', 
+                            borderRadius: '16px', 
+                            background: 'rgba(255, 255, 255, 0.05)', 
+                            color: '#fff', 
+                            border: '1px solid rgba(255, 255, 255, 0.1)', 
+                            fontWeight: '800', 
+                            cursor: 'pointer',
+                            fontSize: '1rem'
+                        }}>Live Chat</button>
+                    </div>
                 </div>
             </section>
         </div>

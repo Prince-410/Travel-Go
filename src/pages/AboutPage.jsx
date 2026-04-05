@@ -57,38 +57,44 @@ const AboutPage = () => {
     ];
 
     return (
-        <div className="about-page">
+        <div className="about-page" style={{ color: '#fff' }}>
             {/* Hero Section */}
-            <section className="about-hero" style={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            <section style={{
                 padding: '100px 20px',
-                textAlign: 'center',
-                color: 'white'
+                textAlign: 'center'
             }}>
                 <div className="container">
-                    <h1 style={{ fontSize: '3rem', fontWeight: '800', marginBottom: '20px' }}>
-                        About TravelGo
+                    <h1 style={{ 
+                        fontSize: '3.5rem', 
+                        fontWeight: '900', 
+                        marginBottom: '20px',
+                        background: 'linear-gradient(to right, #fff, #9A7EAE)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent'
+                    }}>
+                        Our Mission & Vision
                     </h1>
-                    <p style={{ fontSize: '1.3rem', maxWidth: '800px', margin: '0 auto', lineHeight: '1.8' }}>
-                        Your trusted companion for seamless travel experiences across the globe
+                    <p style={{ 
+                        fontSize: '1.2rem', 
+                        maxWidth: '700px', 
+                        margin: '0 auto', 
+                        lineHeight: '1.8', 
+                        color: '#94a3b8' 
+                    }}>
+                        Your trusted companion for seamless travel experiences across the globe, building the future of exploration.
                     </p>
                 </div>
             </section>
 
             {/* Company Description */}
-            <section style={{ padding: '80px 20px', background: '#f7fafc' }}>
+            <section style={{ padding: '80px 20px' }}>
                 <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <div style={{ textAlign: 'center', marginBottom: '60px' }}>
                         <h2 className="section-title">Who We Are</h2>
-                        <p style={{ fontSize: '1.1rem', color: '#4a5568', maxWidth: '900px', margin: '20px auto', lineHeight: '1.8' }}>
+                        <p style={{ fontSize: '1.15rem', color: '#94a3b8', maxWidth: '900px', margin: '20px auto', lineHeight: '1.8' }}>
                             TravelGo is a leading online travel platform that simplifies the way you plan and book your journeys.
                             Founded with a vision to make travel accessible and enjoyable for everyone, we've grown to become
                             one of the most trusted names in the travel industry.
-                        </p>
-                        <p style={{ fontSize: '1.1rem', color: '#4a5568', maxWidth: '900px', margin: '20px auto', lineHeight: '1.8' }}>
-                            We offer a comprehensive suite of travel services including flight bookings, hotel reservations,
-                            train tickets, bus bookings, cab services, and curated holiday packages. Our platform brings together
-                            the best deals from thousands of partners worldwide, ensuring you get the most value for your money.
                         </p>
                     </div>
 
@@ -101,22 +107,16 @@ const AboutPage = () => {
                     }}>
                         {stats.map((stat, index) => (
                             <div key={index} style={{
-                                background: 'white',
-                                padding: '40px 20px',
-                                borderRadius: '16px',
+                                background: 'rgba(30,41,59,0.7)',
+                                backdropFilter: 'blur(12px)',
+                                padding: '40px 30px',
+                                borderRadius: '24px',
+                                border: '1px solid rgba(255,255,255,0.08)',
                                 textAlign: 'center',
-                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                                transition: 'transform 0.3s ease'
-                            }}
-                                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
-                                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-                            >
-                                <div style={{ fontSize: '2.5rem', fontWeight: '800', color: '#008cff', marginBottom: '10px' }}>
-                                    {stat.number}
-                                </div>
-                                <div style={{ fontSize: '1rem', color: '#718096', fontWeight: '600' }}>
-                                    {stat.label}
-                                </div>
+                                transition: 'all 0.3s ease'
+                            }}>
+                                <h3 style={{ fontSize: '2.5rem', fontWeight: '900', color: '#9A7EAE', marginBottom: '10px' }}>{stat.number}</h3>
+                                <p style={{ color: '#94a3b8', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.8rem' }}>{stat.label}</p>
                             </div>
                         ))}
                     </div>
@@ -124,42 +124,32 @@ const AboutPage = () => {
             </section>
 
             {/* Our Story Section */}
-            <section id="our-story" style={{ padding: '80px 20px', background: 'white' }}>
+            <section id="our-story" style={{ padding: '80px 20px' }}>
                 <div className="container" style={{ maxWidth: '1000px', margin: '0 auto' }}>
                     <h2 className="section-title">Our Story</h2>
                     <div style={{ marginTop: '40px' }}>
-                        <p style={{ fontSize: '1.1rem', color: '#4a5568', lineHeight: '1.9', marginBottom: '25px' }}>
+                        <p style={{ fontSize: '1.1rem', color: '#94a3b8', lineHeight: '1.9', marginBottom: '25px' }}>
                             TravelGo was born from a simple idea: travel should be easy, affordable, and accessible to everyone.
-                            In 2015, our founders—a group of passionate travelers and tech enthusiasts—noticed a gap in the market.
-                            Booking travel was complicated, time-consuming, and often expensive.
+                            In 2015, our founders recognized that booking travel was unnecessarily complicated and time-consuming.
                         </p>
-                        <p style={{ fontSize: '1.1rem', color: '#4a5568', lineHeight: '1.9', marginBottom: '25px' }}>
-                            Starting from a small office in Bangalore with just five team members, we set out to revolutionize
-                            the travel booking experience. We built a platform that aggregates the best deals from airlines, hotels,
-                            and travel partners, making it easy for users to compare and book in just a few clicks.
-                        </p>
-                        <p style={{ fontSize: '1.1rem', color: '#4a5568', lineHeight: '1.9', marginBottom: '25px' }}>
+                        <p style={{ fontSize: '1.1rem', color: '#94a3b8', lineHeight: '1.9', marginBottom: '25px' }}>
                             Today, TravelGo has grown to serve over 10 million travelers across 100+ countries. Our team of 500+
-                            dedicated professionals works tirelessly to ensure every journey is smooth and memorable. We've expanded
-                            our services to include not just flights and hotels, but also trains, buses, cabs, and complete holiday packages.
+                            dedicated professionals works tirelessly to ensure every journey is smooth and memorable.
                         </p>
-                        <p style={{ fontSize: '1.1rem', color: '#4a5568', lineHeight: '1.9', marginBottom: '25px' }}>
-                            But our story doesn't end here. We continue to innovate, adding new features like AI-powered recommendations,
-                            instant customer support, and exclusive travel deals. Our mission remains the same: to make your travel
-                            dreams a reality, one booking at a time.
-                        </p>
+                        
                         <div style={{
-                            background: 'linear-gradient(135deg, #008cff 0%, #0066cc 100%)',
-                            padding: '40px',
-                            borderRadius: '16px',
-                            color: 'white',
-                            marginTop: '40px',
-                            textAlign: 'center'
-                        }}>
-                            <h3 style={{ fontSize: '1.8rem', fontWeight: '700', marginBottom: '15px' }}>
+                                background: 'rgba(154,126,174,0.1)',
+                                border: '1px solid rgba(154,126,174,0.2)',
+                                padding: '40px',
+                                borderRadius: '24px',
+                                color: 'white',
+                                marginTop: '40px',
+                                textAlign: 'center'
+                            }}>
+                            <h3 style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '15px' }}>
                                 Join Us on This Journey
                             </h3>
-                            <p style={{ fontSize: '1.1rem', lineHeight: '1.7' }}>
+                            <p style={{ fontSize: '1.1rem', lineHeight: '1.7', color: '#cbd5e1' }}>
                                 Whether you're planning a weekend getaway or a dream vacation, TravelGo is here to make it happen.
                                 Thank you for being part of our story.
                             </p>
@@ -174,70 +164,33 @@ const AboutPage = () => {
                     <h2 className="section-title">Why Choose TravelGo</h2>
                     <div style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
                         gap: '40px',
-                        marginTop: '60px'
+                        marginTop: '40px'
                     }}>
                         {features.map((feature, index) => (
                             <div key={index} style={{
+                                background: 'rgba(30,41,59,0.5)',
+                                backdropFilter: 'blur(8px)',
+                                border: '1px solid rgba(255,255,255,0.05)',
+                                borderRadius: '24px',
+                                padding: '40px 30px',
                                 textAlign: 'center',
-                                padding: '30px'
+                                transition: 'all 0.3s ease'
                             }}>
                                 <div style={{
-                                    color: '#008cff',
+                                    color: '#9A7EAE',
                                     marginBottom: '20px',
                                     display: 'flex',
                                     justifyContent: 'center'
                                 }}>
                                     {feature.icon}
                                 </div>
-                                <h3 style={{ fontSize: '1.4rem', fontWeight: '700', marginBottom: '15px', color: '#2d3748' }}>
+                                <h3 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '15px' }}>
                                     {feature.title}
                                 </h3>
-                                <p style={{ color: '#718096', lineHeight: '1.7' }}>
+                                <p style={{ color: '#94a3b8', lineHeight: '1.7' }}>
                                     {feature.description}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Services */}
-            <section style={{ padding: '80px 20px', background: '#f7fafc' }}>
-                <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <h2 className="section-title">Our Services</h2>
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                        gap: '30px',
-                        marginTop: '60px'
-                    }}>
-                        {services.map((service, index) => (
-                            <div key={index} style={{
-                                background: 'white',
-                                padding: '40px 30px',
-                                borderRadius: '16px',
-                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                                transition: 'all 0.3s ease'
-                            }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(-5px)';
-                                    e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,0,0,0.15)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(0)';
-                                    e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
-                                }}
-                            >
-                                <div style={{ color: '#008cff', marginBottom: '20px' }}>
-                                    {service.icon}
-                                </div>
-                                <h3 style={{ fontSize: '1.3rem', fontWeight: '700', marginBottom: '15px', color: '#2d3748' }}>
-                                    {service.title}
-                                </h3>
-                                <p style={{ color: '#718096', lineHeight: '1.7' }}>
-                                    {service.description}
                                 </p>
                             </div>
                         ))}
@@ -251,28 +204,30 @@ const AboutPage = () => {
                     <div style={{
                         display: 'grid',
                         gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                        gap: '50px'
+                        gap: '40px'
                     }}>
                         <div style={{
-                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            background: 'rgba(30,41,59,0.7)',
+                            backdropFilter: 'blur(12px)',
                             padding: '50px 40px',
-                            borderRadius: '20px',
-                            color: 'white'
+                            borderRadius: '24px',
+                            border: '1px solid rgba(255,255,255,0.08)',
                         }}>
-                            <h3 style={{ fontSize: '2rem', fontWeight: '700', marginBottom: '20px' }}>Our Mission</h3>
-                            <p style={{ fontSize: '1.1rem', lineHeight: '1.8' }}>
+                            <h3 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '20px', color: '#9A7EAE' }}>Our Mission</h3>
+                            <p style={{ fontSize: '1.1rem', lineHeight: '1.8', color: '#cbd5e1' }}>
                                 To empower travelers worldwide with innovative technology and exceptional service,
                                 making every journey memorable and hassle-free.
                             </p>
                         </div>
                         <div style={{
-                            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                            background: 'rgba(30,41,59,0.7)',
+                            backdropFilter: 'blur(12px)',
                             padding: '50px 40px',
-                            borderRadius: '20px',
-                            color: 'white'
+                            borderRadius: '24px',
+                            border: '1px solid rgba(255,255,255,0.08)',
                         }}>
-                            <h3 style={{ fontSize: '2rem', fontWeight: '700', marginBottom: '20px' }}>Our Vision</h3>
-                            <p style={{ fontSize: '1.1rem', lineHeight: '1.8' }}>
+                            <h3 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '20px', color: '#9A7EAE' }}>Our Vision</h3>
+                            <p style={{ fontSize: '1.1rem', lineHeight: '1.8', color: '#cbd5e1' }}>
                                 To become the world's most trusted and preferred travel platform, connecting people
                                 to experiences that enrich their lives.
                             </p>
@@ -283,32 +238,34 @@ const AboutPage = () => {
 
             {/* CTA Section */}
             <section style={{
-                padding: '80px 20px',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                textAlign: 'center',
-                color: 'white'
+                padding: '100px 20px',
+                textAlign: 'center'
             }}>
                 <div className="container">
-                    <h2 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '20px' }}>
+                    <h2 style={{ fontSize: '2.5rem', fontWeight: '900', marginBottom: '20px' }}>
                         Ready to Start Your Journey?
                     </h2>
-                    <p style={{ fontSize: '1.2rem', marginBottom: '40px', maxWidth: '700px', margin: '0 auto 40px' }}>
+                    <p style={{ fontSize: '1.2rem', marginBottom: '40px', maxWidth: '700px', margin: '0 auto 40px', color: '#94a3b8' }}>
                         Join millions of travelers who trust TravelGo for their travel needs
                     </p>
                     <button style={{
-                        background: 'white',
-                        color: '#667eea',
-                        padding: '15px 50px',
+                        background: 'linear-gradient(to right, #9A7EAE, #7c3aed)',
+                        color: '#fff',
+                        padding: '18px 60px',
                         fontSize: '1.1rem',
-                        fontWeight: '700',
+                        fontWeight: '800',
                         borderRadius: '50px',
-                        border: 'none',
-                        cursor: 'pointer',
-                        boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
-                        transition: 'transform 0.3s ease'
+                        boxShadow: '0 10px 30px rgba(154, 126, 174, 0.4)',
+                        transition: 'all 0.3s ease'
                     }}
-                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-5px)';
+                            e.currentTarget.style.boxShadow = '0 15px 40px rgba(154, 126, 174, 0.6)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = '0 10px 30px rgba(154, 126, 174, 0.4)';
+                        }}
                         onClick={() => window.location.href = '/'}
                     >
                         Explore Now

@@ -1,432 +1,189 @@
 import React, { useState } from 'react';
-import { Gift, Users, Share2, DollarSign, TrendingUp, Award, Copy, CheckCircle, Sparkles, UserPlus } from 'lucide-react';
+import { Gift, Users, Share2, DollarSign, TrendingUp, Award, Copy, CheckCircle, Sparkles, UserPlus, Send, MessageCircle } from 'lucide-react';
 import '../App.css';
+import { useAuth } from '../context/AuthContext';
+import { useUI } from '../context/UIContext';
 
 const ReferEarnPage = () => {
-    const [referralCode, setReferralCode] = useState('TRAVEL2026XYZ');
+    const { user, token } = useAuth();
+    const { showToast, showConfirm } = useUI();
+    const referralCode = user?.referralCode || 'LOGINGENERATING...';
     const [copied, setCopied] = useState(false);
     const [email, setEmail] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const handleCopy = () => {
+        if (!user) { showToast('Please login to get your referral code.', 'warning'); return; }
         navigator.clipboard.writeText(referralCode);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
 
-    const handleShare = (e) => {
-        e.preventDefault();
-        alert(`Referral link sent to ${email}!`);
-        setEmail('');
+    const handleEmailInvite = async () => {
+        if (!token) { showToast('Please login to invite friends.', 'warning'); return; }
+        if (!email) { showToast('Please enter friend\'s email.', 'warning'); return; }
+        
+        setLoading(true);
+        try {
+            const res = await fetch('http://localhost:5000/api/auth/referral/invite', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ friendEmail: email })
+            });
+
+            if (res.ok) {
+                showConfirm('Invite Sent', `Official invite sent to ${email}! We'll credit your wallet when they book.`, null, 'alert');
+                setEmail('');
+            } else {
+                showToast('Failed to send invite.', 'error');
+            }
+        } catch (e) {
+            showToast('Service error.', 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleWhatsAppShare = () => {
+        const text = `Hey! Use my referral code ${referralCode} to get ₹500 off on your first TravelGo booking! Register at: http://localhost:5173/register`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    };
+
+    const handleSocialShare = async () => {
+        const shareData = {
+            title: 'TravelGo Referral',
+            text: `Join me on TravelGo! Use code ${referralCode} for ₹500 discount.`,
+            url: 'http://localhost:5173/register'
+        };
+        if (navigator.share) {
+            try {
+                await navigator.share(shareData);
+            } catch (err) {
+                console.log('Share failed', err);
+            }
+        } else {
+            showToast('Sharing not supported on this browser. Copy the code instead!', 'warning');
+            handleCopy();
+        }
     };
 
     const benefits = [
-        {
-            icon: <DollarSign size={40} />,
-            title: '₹500 for You',
-            description: 'Earn ₹500 in your wallet for every successful referral'
-        },
-        {
-            icon: <Gift size={40} />,
-            title: '₹500 for Friend',
-            description: 'Your friend gets ₹500 off on their first booking'
-        },
-        {
-            icon: <TrendingUp size={40} />,
-            title: 'Unlimited Earnings',
-            description: 'No limit on how many friends you can refer'
-        },
-        {
-            icon: <Award size={40} />,
-            title: 'Bonus Rewards',
-            description: 'Refer 10+ friends and unlock exclusive travel vouchers'
-        }
-    ];
-
-    const steps = [
-        {
-            step: '1',
-            title: 'Share Your Code',
-            description: 'Copy your unique referral code and share it with friends & family',
-            icon: <Share2 size={32} />
-        },
-        {
-            step: '2',
-            title: 'Friend Books',
-            description: 'Your friend signs up and makes their first booking using your code',
-            icon: <UserPlus size={32} />
-        },
-        {
-            step: '3',
-            title: 'Both Earn',
-            description: 'You get ₹500 in wallet, they get ₹500 off - everyone wins!',
-            icon: <Gift size={32} />
-        }
-    ];
-
-    const stats = [
-        { number: '50K+', label: 'Active Referrers' },
-        { number: '₹2Cr+', label: 'Rewards Earned' },
-        { number: '200K+', label: 'Successful Referrals' },
-        { number: '4.9/5', label: 'Program Rating' }
-    ];
-
-    const faqs = [
-        {
-            question: 'How do I get my referral code?',
-            answer: 'Your unique referral code is automatically generated when you create an account. You can find it on this page or in your account dashboard.'
-        },
-        {
-            question: 'When will I receive my reward?',
-            answer: 'You\'ll receive ₹500 in your TravelGo wallet within 24 hours after your friend completes their first booking.'
-        },
-        {
-            question: 'Is there a limit on referrals?',
-            answer: 'No! You can refer unlimited friends and earn ₹500 for each successful referral. Plus, unlock bonus rewards when you hit milestones.'
-        },
-        {
-            question: 'Can I use my wallet balance immediately?',
-            answer: 'Yes! Your wallet balance can be used immediately for any booking on TravelGo - flights, hotels, trains, buses, and more.'
-        }
+        { icon: <DollarSign size={28} />, title: '₹500 for You', desc: 'Added to your wallet for each referral.', color: '#4ade80' },
+        { icon: <Gift size={28} />, title: '₹500 for Friend', desc: 'Instant discount on their first booking.', color: '#9A7EAE' },
+        { icon: <TrendingUp size={28} />, title: 'No Limits', desc: 'Refer as many friends as you like.', color: '#60a5fa' },
+        { icon: <Award size={28} />, title: 'Tier Rewards', desc: 'Exclsuive vouchers for top referrers.', color: '#fbbf24' }
     ];
 
     return (
-        <div className="refer-earn-page">
+        <div style={{ minHeight: '100vh', paddingBottom: '100px' }}>
             {/* Hero Section */}
-            <section style={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                padding: '100px 20px',
-                textAlign: 'center',
-                color: 'white'
-            }}>
+            <section style={{ padding: '100px 20px', textAlign: 'center' }}>
                 <div className="container">
-                    <Users size={80} style={{ marginBottom: '20px', opacity: 0.9 }} />
-                    <h1 style={{ fontSize: '3rem', fontWeight: '800', marginBottom: '20px' }}>
-                        Refer Friends, Earn Rewards
-                    </h1>
-                    <p style={{ fontSize: '1.3rem', maxWidth: '800px', margin: '0 auto 30px', lineHeight: '1.8' }}>
-                        Share the joy of travel and earn ₹500 for every friend who books with TravelGo
+                    <div style={{ 
+                        width: '70px', height: '70px', borderRadius: '50%', background: 'rgba(154, 126, 174, 0.1)', 
+                        color: '#9A7EAE', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 30px' 
+                    }}>
+                        <Users size={32} />
+                    </div>
+                    <h1 style={{ 
+                        fontSize: '3.5rem', fontWeight: '900', marginBottom: '20px',
+                        background: 'linear-gradient(to right, #fff, #9A7EAE)',
+                        WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
+                    }}>Refer Friends, Earn Together</h1>
+                    <p style={{ fontSize: '1.2rem', maxWidth: '750px', margin: '0 auto', lineHeight: '1.8', color: '#94a3b8' }}>
+                        Share the joy of travel with your network. Every referral brings you and your friends closer to your next dream destination.
                     </p>
-                    <div style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '10px',
-                        background: 'rgba(255,255,255,0.2)',
-                        padding: '10px 20px',
-                        borderRadius: '50px',
-                        backdropFilter: 'blur(10px)'
-                    }}>
-                        <Sparkles size={20} />
-                        <span style={{ fontSize: '1.1rem', fontWeight: '600' }}>Win-Win for Everyone!</span>
-                    </div>
                 </div>
             </section>
 
-            {/* Referral Code Section */}
-            <section style={{ padding: '80px 20px', background: '#f7fafc' }}>
-                <div className="container" style={{ maxWidth: '700px', margin: '0 auto' }}>
-                    <h2 className="section-title">Your Referral Code</h2>
-                    <div style={{
-                        background: 'white',
-                        padding: '50px',
-                        borderRadius: '20px',
-                        boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
-                        marginTop: '40px'
-                    }}>
-                        <div style={{
-                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                            padding: '30px',
-                            borderRadius: '15px',
-                            textAlign: 'center',
-                            color: 'white',
-                            marginBottom: '30px'
-                        }}>
-                            <div style={{ fontSize: '0.9rem', marginBottom: '10px', opacity: 0.9 }}>
-                                Your Unique Code
-                            </div>
-                            <div style={{ fontSize: '2.5rem', fontWeight: '800', letterSpacing: '3px', marginBottom: '20px' }}>
-                                {referralCode}
-                            </div>
-                            <button
-                                onClick={handleCopy}
-                                style={{
-                                    background: 'white',
-                                    color: '#667eea',
-                                    padding: '12px 30px',
-                                    fontSize: '1rem',
-                                    fontWeight: '700',
-                                    borderRadius: '50px',
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '10px',
-                                    transition: 'transform 0.3s ease'
-                                }}
-                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                            >
-                                {copied ? <CheckCircle size={18} /> : <Copy size={18} />}
-                                {copied ? 'Copied!' : 'Copy Code'}
-                            </button>
-                        </div>
-
-                        <div style={{ marginBottom: '20px' }}>
-                            <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '15px', color: '#2d3748' }}>
-                                Share via Email
-                            </h3>
-                            <form onSubmit={handleShare} style={{ display: 'flex', gap: '10px' }}>
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="Enter friend's email"
-                                    required
-                                    style={{
-                                        flex: 1,
-                                        padding: '12px 15px',
-                                        borderRadius: '10px',
-                                        border: '2px solid #e2e8f0',
-                                        fontSize: '1rem'
-                                    }}
-                                />
-                                <button
-                                    type="submit"
-                                    style={{
-                                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                        color: 'white',
-                                        padding: '12px 25px',
-                                        fontSize: '1rem',
-                                        fontWeight: '700',
-                                        borderRadius: '10px',
-                                        border: 'none',
-                                        cursor: 'pointer',
-                                        whiteSpace: 'nowrap'
-                                    }}
-                                >
-                                    Send Invite
-                                </button>
-                            </form>
-                        </div>
-
-                        <div style={{
-                            display: 'flex',
-                            gap: '10px',
-                            justifyContent: 'center',
-                            marginTop: '30px'
-                        }}>
-                            <button style={{
-                                flex: 1,
-                                padding: '12px',
-                                borderRadius: '10px',
-                                border: '2px solid #e2e8f0',
-                                background: 'white',
-                                cursor: 'pointer',
-                                fontWeight: '600',
-                                color: '#2d3748'
-                            }}>
-                                Share on WhatsApp
-                            </button>
-                            <button style={{
-                                flex: 1,
-                                padding: '12px',
-                                borderRadius: '10px',
-                                border: '2px solid #e2e8f0',
-                                background: 'white',
-                                cursor: 'pointer',
-                                fontWeight: '600',
-                                color: '#2d3748'
-                            }}>
-                                Share on Facebook
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Benefits Section */}
-            <section style={{ padding: '80px 20px', background: 'white' }}>
-                <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <h2 className="section-title">Program Benefits</h2>
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                        gap: '30px',
-                        marginTop: '60px'
-                    }}>
-                        {benefits.map((benefit, index) => (
-                            <div key={index} style={{
-                                background: '#f7fafc',
-                                padding: '40px 30px',
-                                borderRadius: '16px',
-                                textAlign: 'center',
-                                transition: 'all 0.3s ease'
-                            }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(-5px)';
-                                    e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,0,0,0.1)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(0)';
-                                    e.currentTarget.style.boxShadow = 'none';
-                                }}
-                            >
-                                <div style={{ color: '#667eea', marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
-                                    {benefit.icon}
-                                </div>
-                                <h3 style={{ fontSize: '1.4rem', fontWeight: '700', marginBottom: '15px', color: '#2d3748' }}>
-                                    {benefit.title}
-                                </h3>
-                                <p style={{ color: '#718096', lineHeight: '1.7' }}>
-                                    {benefit.description}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* How It Works */}
-            <section style={{ padding: '80px 20px', background: '#f7fafc' }}>
-                <div className="container" style={{ maxWidth: '1000px', margin: '0 auto' }}>
-                    <h2 className="section-title">How It Works</h2>
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                        gap: '40px',
-                        marginTop: '60px'
-                    }}>
-                        {steps.map((item, index) => (
-                            <div key={index} style={{
-                                background: 'white',
-                                padding: '40px 30px',
-                                borderRadius: '16px',
-                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                                position: 'relative'
-                            }}>
-                                <div style={{
-                                    position: 'absolute',
-                                    top: '-20px',
-                                    left: '30px',
-                                    width: '50px',
-                                    height: '50px',
-                                    borderRadius: '50%',
-                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                    color: 'white',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: '1.5rem',
-                                    fontWeight: '800'
+            <section className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '60px', alignItems: 'start' }}>
+                    
+                    {/* Left: Benefits & Steps */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '50px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '24px' }}>
+                            {benefits.map((b, i) => (
+                                <div key={i} style={{ 
+                                    background: 'rgba(30, 41, 59, 0.4)', padding: '30px', borderRadius: '24px', 
+                                    border: '1px solid rgba(255, 255, 255, 0.08)', backdropFilter: 'blur(12px)'
                                 }}>
-                                    {item.step}
+                                    <div style={{ color: b.color, marginBottom: '15px' }}>{b.icon}</div>
+                                    <h3 style={{ fontSize: '1.2rem', fontWeight: '800', color: '#fff', marginBottom: '8px' }}>{b.title}</h3>
+                                    <p style={{ fontSize: '0.9rem', color: '#94a3b8', lineHeight: '1.6' }}>{b.desc}</p>
                                 </div>
-                                <div style={{ color: '#667eea', marginBottom: '20px', marginTop: '20px' }}>
-                                    {item.icon}
-                                </div>
-                                <h3 style={{ fontSize: '1.3rem', fontWeight: '700', marginBottom: '10px', color: '#2d3748' }}>
-                                    {item.title}
-                                </h3>
-                                <p style={{ color: '#718096', lineHeight: '1.7' }}>
-                                    {item.description}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
+                            ))}
+                        </div>
 
-            {/* Stats Section */}
-            <section style={{ padding: '80px 20px', background: 'white' }}>
-                <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <h2 className="section-title">Our Referral Success</h2>
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                        gap: '30px',
-                        marginTop: '60px'
+                        <div style={{ 
+                            background: 'rgba(255, 255, 255, 0.02)', padding: '40px', borderRadius: '32px', 
+                            border: '1px solid rgba(255, 255, 255, 0.05)'
+                        }}>
+                            <h2 style={{ fontSize: '1.8rem', fontWeight: '900', color: '#fff', marginBottom: '30px' }}>How It Works</h2>
+                            <div style={{ display: 'grid', gap: '30px' }}>
+                                {[
+                                    { step: '01', title: 'Share Code', desc: 'Copy and send your unique referral code via social media or email.' },
+                                    { step: '02', title: 'Friend Joins', desc: 'Your friend signs up and uses the code on their first travel booking.' },
+                                    { step: '03', title: 'Earn ₹500', desc: 'After their successful trip, both of you receive ₹500 TravelGo credits.' }
+                                ].map((s, i) => (
+                                    <div key={i} style={{ display: 'flex', gap: '25px', alignItems: 'flex-start' }}>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: '900', color: 'rgba(154, 126, 174, 0.4)', fontStyle: 'italic' }}>{s.step}</div>
+                                        <div>
+                                            <h4 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#fff', marginBottom: '5px' }}>{s.title}</h4>
+                                            <p style={{ fontSize: '0.95rem', color: '#94a3b8', lineHeight: '1.6' }}>{s.desc}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right: Referral Action Card */}
+                    <div style={{ 
+                        background: 'rgba(30, 41, 59, 0.4)', backdropFilter: 'blur(16px)', 
+                        borderRadius: '32px', border: '1px solid rgba(255, 255, 255, 0.08)', padding: '50px',
+                        position: 'sticky', top: '100px'
                     }}>
-                        {stats.map((stat, index) => (
-                            <div key={index} style={{
-                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                padding: '40px 20px',
-                                borderRadius: '16px',
-                                textAlign: 'center',
-                                color: 'white',
-                                transition: 'transform 0.3s ease'
-                            }}
-                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                            >
-                                <div style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '10px' }}>
-                                    {stat.number}
-                                </div>
-                                <div style={{ fontSize: '1rem', opacity: 0.9 }}>
-                                    {stat.label}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* FAQs Section */}
-            <section style={{ padding: '80px 20px', background: '#f7fafc' }}>
-                <div className="container" style={{ maxWidth: '900px', margin: '0 auto' }}>
-                    <h2 className="section-title">Frequently Asked Questions</h2>
-                    <div style={{ marginTop: '60px' }}>
-                        {faqs.map((faq, index) => (
-                            <div key={index} style={{
-                                background: 'white',
-                                padding: '30px',
-                                borderRadius: '12px',
-                                marginBottom: '20px',
-                                boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                        <h2 style={{ fontSize: '1.8rem', fontWeight: '900', color: '#fff', marginBottom: '35px' }}>Share Your Link</h2>
+                        
+                        <div style={{ marginBottom: '40px' }}>
+                            <label style={{ fontSize: '0.85rem', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', display: 'block', marginBottom: '15px' }}>Your Unique Referral Code</label>
+                            <div style={{ 
+                                display: 'flex', alignItems: 'center', background: 'rgba(15, 23, 42, 0.6)', 
+                                borderRadius: '16px', padding: '10px', border: '1px solid rgba(255, 255, 255, 0.1)' 
                             }}>
-                                <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '15px', color: '#2d3748' }}>
-                                    {faq.question}
-                                </h3>
-                                <p style={{ color: '#718096', lineHeight: '1.7' }}>
-                                    {faq.answer}
-                                </p>
+                                <div style={{ flex: 1, padding: '10px 15px', fontSize: '1.3rem', fontWeight: '900', color: '#9A7EAE', letterSpacing: '2px' }}>{referralCode}</div>
+                                <button onClick={handleCopy} style={{ 
+                                    padding: '12px 20px', borderRadius: '12px', background: copied ? '#4ade80' : '#9A7EAE', 
+                                    color: '#fff', border: 'none', fontWeight: '800', cursor: 'pointer', transition: 'all 0.3s'
+                                }}>
+                                    {copied ? <CheckCircle size={20}/> : <Copy size={20}/>}
+                                </button>
                             </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
+                        </div>
 
-            {/* CTA Section */}
-            <section style={{
-                padding: '80px 20px',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                textAlign: 'center',
-                color: 'white'
-            }}>
-                <div className="container">
-                    <h2 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '20px' }}>
-                        Start Earning Today!
-                    </h2>
-                    <p style={{ fontSize: '1.2rem', marginBottom: '40px', maxWidth: '700px', margin: '0 auto 40px' }}>
-                        The more you share, the more you earn. It's that simple!
-                    </p>
-                    <button
-                        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                        style={{
-                            background: 'white',
-                            color: '#667eea',
-                            padding: '15px 50px',
-                            fontSize: '1.1rem',
-                            fontWeight: '700',
-                            borderRadius: '50px',
-                            border: 'none',
-                            cursor: 'pointer',
-                            boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
-                            transition: 'transform 0.3s ease'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                    >
-                        Share Your Code Now
-                    </button>
+                        <div style={{ marginBottom: '40px' }}>
+                            <label style={{ fontSize: '0.85rem', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', display: 'block', marginBottom: '15px' }}>Quick Invite via Email</label>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="friend@email.com"
+                                    style={{ flex: 1, padding: '16px', borderRadius: '12px', background: 'rgba(15, 23, 42, 0.4)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff' }} />
+                                <button onClick={handleEmailInvite} style={{ width: '56px', height: '56px', borderRadius: '12px', background: '#9A7EAE', color: '#fff', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                                    <Send size={24} />
+                                </button>
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                            <button onClick={handleWhatsAppShare} style={{ padding: '15px', borderRadius: '12px', background: 'rgba(255, 255, 255, 0.05)', color: '#cbd5e1', border: '1px solid rgba(255, 255, 255, 0.1)', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                                <MessageCircle size={20} color="#25D366" /> WhatsApp
+                            </button>
+                            <button onClick={handleSocialShare} style={{ padding: '15px', borderRadius: '12px', background: 'rgba(255, 255, 255, 0.05)', color: '#cbd5e1', border: '1px solid rgba(255, 255, 255, 0.1)', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                                <Share2 size={20} color="#60a5fa" /> Social
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>

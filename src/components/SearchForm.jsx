@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Search, Calendar, MapPin, User, ArrowRight, ChevronDown, Clock } from 'lucide-react';
+import { Search, Calendar, MapPin, User, Users, ArrowRight, ChevronDown, Clock } from 'lucide-react';
 import { getCities } from '../utils/mockData';
 import '../App.css';
 
@@ -10,22 +10,22 @@ const SearchForm = ({ type = 'flight', onSearch }) => {
         to: '',
         date: '',
         returnDate: '',
-        travellers: '1',
-        class: 'Economy'
+        classType: ''
     });
 
     const [dropdownOpen, setDropdownOpen] = useState(null);
     const [tripType, setTripType] = useState('oneWay');
+    const [citySearch, setCitySearch] = useState('');
 
     const [cities, setCities] = useState([]);
 
     useEffect(() => {
         const fetchCities = async () => {
-            const data = await getCities();
+            const data = await getCities(type);
             setCities(data || []);
         };
         fetchCities();
-    }, []);
+    }, [type]);
 
     const renderRadioOption = (value, label, name) => {
         const isSelected = tripType === value;
@@ -42,22 +42,22 @@ const SearchForm = ({ type = 'flight', onSearch }) => {
                     fontWeight: '600',
                     padding: '10px 20px',
                     borderRadius: '50px',
-                    background: isSelected ? '#ebf8ff' : '#f7fafc',
-                    color: isSelected ? '#008cff' : '#4a5568',
-                    border: isSelected ? '1px solid #bae3ff' : '1px solid #edf2f7',
-                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                    boxShadow: isSelected ? '0 2px 4px rgba(0, 140, 255, 0.1)' : 'none'
+                    background: isSelected ? 'var(--card-bg)' : 'var(--card-bg)',
+                    color: isSelected ? '#9A7EAE' : 'var(--text-light)',
+                    border: isSelected ? '1px solid #9A7EAE' : '1px solid rgba(250, 250, 250, 0.05)',
+                    transition: 'all 0.3s ease',
+                    boxShadow: isSelected ? '0 0 15px rgba(154, 126, 174, 0.5), inset 0 0 10px rgba(154, 126, 174, 0.1)' : 'none'
                 }}
                 onMouseEnter={(e) => {
                     if (!isSelected) {
-                        e.currentTarget.style.background = '#edf2f7';
-                        e.currentTarget.style.color = '#2d3748';
+                        e.currentTarget.style.background = 'rgba(250, 250, 250, 0.05)';
+                        e.currentTarget.style.color = 'var(--text-color)';
                     }
                 }}
                 onMouseLeave={(e) => {
                     if (!isSelected) {
-                        e.currentTarget.style.background = '#f7fafc';
-                        e.currentTarget.style.color = '#4a5568';
+                        e.currentTarget.style.background = 'var(--card-bg)';
+                        e.currentTarget.style.color = 'var(--text-light)';
                     }
                 }}
             >
@@ -69,7 +69,7 @@ const SearchForm = ({ type = 'flight', onSearch }) => {
                     onChange={() => setTripType(value)}
                     style={{ display: 'none' }}
                 />
-                {isSelected && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#008cff' }}></div>}
+                {isSelected && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#9A7EAE' }}></div>}
                 {label}
             </label>
         );
@@ -102,6 +102,7 @@ const SearchForm = ({ type = 'flight', onSearch }) => {
 
     const toggleDropdown = (field) => {
         setDropdownOpen(dropdownOpen === field ? null : field);
+        setCitySearch('');   // reset search when opening a new dropdown
     }
 
     const renderCityDropdown = (field, placeholder) => {
@@ -121,7 +122,7 @@ const SearchForm = ({ type = 'flight', onSearch }) => {
                         padding: '5px 0'
                     }}
                 >
-                    <span style={{ color: filters[field] ? '#2d3748' : '#a0aec0' }}>
+                    <span style={{ color: filters[field] ? 'var(--text-color)' : '#9A7EAE' }}>
                         {filters[field] || placeholder}
                     </span>
                     <ChevronDown size={16} style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
@@ -132,9 +133,9 @@ const SearchForm = ({ type = 'flight', onSearch }) => {
                         top: '100%',
                         left: '-20px',
                         right: '-20px',
-                        background: 'white',
+                        background: 'var(--card-bg)',
                         borderRadius: '12px',
-                        boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
+                        boxShadow: '0 10px 25px rgba(15, 23, 42, 0.15)',
                         zIndex: 100,
                         marginTop: '15px',
                         maxHeight: '300px',
@@ -146,18 +147,20 @@ const SearchForm = ({ type = 'flight', onSearch }) => {
                                 type="text"
                                 placeholder="Search city..."
                                 autoFocus
+                                value={citySearch}
+                                onChange={(e) => setCitySearch(e.target.value)}
                                 onClick={(e) => e.stopPropagation()}
                                 style={{
                                     width: '100%',
                                     padding: '8px 12px',
                                     borderRadius: '8px',
-                                    border: '1px solid #e2e8f0',
+                                    border: '1px solid rgba(250, 250, 250, 0.1)',
                                     outline: 'none'
                                 }}
                             />
                         </div>
                         <div className="dropdown-list">
-                            {cities.map(city => (
+                            {cities.filter(c => c.toLowerCase().includes(citySearch.toLowerCase())).map(city => (
                                 <div
                                     key={city}
                                     className="dropdown-item"
@@ -172,10 +175,10 @@ const SearchForm = ({ type = 'flight', onSearch }) => {
                                         transition: 'background 0.2s',
                                         fontWeight: '500'
                                     }}
-                                    onMouseEnter={(e) => e.currentTarget.style.background = '#f7fafc'}
+                                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--card-bg)'}
                                     onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                                 >
-                                    <MapPin size={14} className="text-primary" style={{ color: '#008cff' }} />
+                                    <MapPin size={14} className="text-primary" style={{ color: '#9A7EAE' }} />
                                     {city}
                                 </div>
                             ))}
@@ -204,7 +207,7 @@ const SearchForm = ({ type = 'flight', onSearch }) => {
                         fontWeight: '700',
                         fontSize: '1.1rem',
                         padding: '5px 0',
-                        color: '#2d3748'
+                        color: 'var(--text-color)'
                     }}
                 >
                     <span style={{
@@ -220,7 +223,7 @@ const SearchForm = ({ type = 'flight', onSearch }) => {
                     <ChevronDown size={16} style={{
                         transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                         transition: 'transform 0.2s',
-                        color: '#008cff',
+                        color: '#9A7EAE',
                         minWidth: '16px'
                     }} />
                 </div>
@@ -230,9 +233,9 @@ const SearchForm = ({ type = 'flight', onSearch }) => {
                         top: '100%',
                         left: '-20px',
                         right: '-20px',
-                        background: 'white',
+                        background: 'var(--card-bg)',
                         borderRadius: '12px',
-                        boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
+                        boxShadow: '0 10px 25px rgba(15, 23, 42, 0.15)',
                         zIndex: 100,
                         marginTop: '15px',
                         maxHeight: '300px',
@@ -254,9 +257,9 @@ const SearchForm = ({ type = 'flight', onSearch }) => {
                                         gap: '10px',
                                         transition: 'background 0.2s',
                                         fontWeight: '600',
-                                        color: '#2d3748'
+                                        color: 'var(--text-color)'
                                     }}
-                                    onMouseEnter={(e) => e.currentTarget.style.background = '#f7fafc'}
+                                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--card-bg)'}
                                     onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                                 >
                                     {option.label}
@@ -281,40 +284,43 @@ const SearchForm = ({ type = 'flight', onSearch }) => {
                         <div className="form-group" style={{ gridColumn: 'span 2', ...getFormGroupStyle('to') }}>
                             <label>Where to?</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <MapPin size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
+                                <MapPin size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
                                 {renderCityDropdown('to', 'Select Destination')}
                             </div>
                         </div>
                         <div className="form-group">
                             <label>Check-in</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <Calendar size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
+                                <Calendar size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
                                 <input type="date" name="date" value={filters.date} onChange={handleChange} className="form-input" />
                             </div>
                         </div>
                         <div className="form-group">
                             <label>Check-out</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <Calendar size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
+                                <Calendar size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
                                 <input type="date" name="returnDate" value={filters.returnDate} onChange={handleChange} className="form-input" />
                             </div>
                         </div>
-                        <div className="form-group" style={getFormGroupStyle('travellers')}>
-                            <label>Guests</label>
+                        <div className="form-group" style={getFormGroupStyle('classType')}>
+                            <label>Room Type</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <User size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
-                                {renderSelectDropdown('travellers', [1, 2, 3, 4, 5, 6].map(n => ({ value: n, label: `${n} Guests` })), User)}
+                                <User size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
+                                {renderSelectDropdown('classType', [
+                                    { value: 'Standard Room', label: 'Standard Room' },
+                                    { value: 'Deluxe Room', label: 'Deluxe Room' },
+                                    { value: 'Suite', label: 'Suite' }
+                                ], User)}
                             </div>
                         </div>
                     </>
                 );
             case 'train':
                 const trainClasses = [
-                    { value: 'All', label: 'All Classes' },
-                    { value: 'SL', label: 'Sleeper (SL)' },
-                    { value: '3A', label: 'AC 3 Tier (3A)' },
-                    { value: '2A', label: 'AC 2 Tier (2A)' },
-                    { value: '1A', label: 'AC First Class (1A)' },
+                    { value: 'Sleeper', label: 'Sleeper' },
+                    { value: 'AC 3 Tier', label: 'AC 3 Tier' },
+                    { value: 'AC 2 Tier', label: 'AC 2 Tier' },
+                    { value: 'AC First', label: 'AC First' },
                 ];
 
                 if (tripType === 'pnr') {
@@ -322,7 +328,7 @@ const SearchForm = ({ type = 'flight', onSearch }) => {
                         <div className="form-group" style={{ gridColumn: '1 / -1' }}>
                             <label>PNR Number</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <Search size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
+                                <Search size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
                                 <input type="text" placeholder="Enter 10-digit PNR Number" className="form-input" />
                             </div>
                         </div>
@@ -335,14 +341,14 @@ const SearchForm = ({ type = 'flight', onSearch }) => {
                             <div className="form-group" style={{ flex: 2 }}>
                                 <label>Train Number / Name</label>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <Search size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
+                                    <Search size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
                                     <input type="text" placeholder="Enter Train No. or Name" className="form-input" />
                                 </div>
                             </div>
                             <div className="form-group">
                                 <label>Start Date</label>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <Calendar size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
+                                    <Calendar size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
                                     <input type="date" name="date" value={filters.date} onChange={handleChange} className="form-input" />
                                 </div>
                             </div>
@@ -355,61 +361,58 @@ const SearchForm = ({ type = 'flight', onSearch }) => {
                         <div className="form-group" style={getFormGroupStyle('from')}>
                             <label>From</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <MapPin size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
+                                <MapPin size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
                                 {renderCityDropdown('from', 'From Station')}
                             </div>
                         </div>
                         <div className="form-group" style={getFormGroupStyle('to')}>
                             <label>To</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <MapPin size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
+                                <MapPin size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
                                 {renderCityDropdown('to', 'To Station')}
                             </div>
                         </div>
                         <div className="form-group">
                             <label>Travel Date</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <Calendar size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
+                                <Calendar size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
                                 <input type="date" name="date" value={filters.date} onChange={handleChange} className="form-input" />
                             </div>
                         </div>
-                        <div className="form-group" style={getFormGroupStyle('class')}>
+                        <div className="form-group" style={getFormGroupStyle('classType')}>
                             <label>Class</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <User size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
-                                {renderSelectDropdown('class', trainClasses, User)}
+                                <User size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
+                                {renderSelectDropdown('classType', trainClasses, User)}
                             </div>
                         </div>
                     </>
                 );
             case 'bus':
                 const busSeats = [
-                    { value: 'Any', label: 'Any Seat Type' },
                     { value: 'Seater', label: 'Seater' },
-                    { value: 'Sleeper', label: 'Sleeper' },
-                    { value: 'AC', label: 'AC' },
-                    { value: 'Non-AC', label: 'Non-AC' },
+                    { value: 'Sleeper', label: 'Sleeper' }
                 ];
                 return (
                     <>
                         <div className="form-group" style={getFormGroupStyle('from')}>
                             <label>From</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <MapPin size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
+                                <MapPin size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
                                 {renderCityDropdown('from', 'From City')}
                             </div>
                         </div>
                         <div className="form-group" style={getFormGroupStyle('to')}>
                             <label>To</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <MapPin size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
+                                <MapPin size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
                                 {renderCityDropdown('to', 'To City')}
                             </div>
                         </div>
                         <div className="form-group">
                             <label>Travel Date</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <Calendar size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
+                                <Calendar size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
                                 <input type="date" name="date" value={filters.date} onChange={handleChange} className="form-input" />
                             </div>
                         </div>
@@ -417,32 +420,32 @@ const SearchForm = ({ type = 'flight', onSearch }) => {
                             <div className="form-group">
                                 <label>Return Date</label>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <Calendar size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
+                                    <Calendar size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
                                     <input type="date" name="returnDate" value={filters.returnDate} onChange={handleChange} className="form-input" />
                                 </div>
                             </div>
                         )}
-                        <div className="form-group" style={getFormGroupStyle('seatType')}>
+                        <div className="form-group" style={getFormGroupStyle('classType')}>
                             <label>Seat Type</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <User size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
-                                {renderSelectDropdown('seatType', busSeats, User)}
+                                <User size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
+                                {renderSelectDropdown('classType', busSeats, User)}
                             </div>
                         </div>
                     </>
                 );
             case 'cab':
-                const cabDurations = [
-                    { value: '4hr', label: '4 hrs / 40 km' },
-                    { value: '8hr', label: '8 hrs / 80 km' },
-                    { value: '12hr', label: '12 hrs / 120 km' },
+                const cabTypes = [
+                    { value: 'Mini', label: 'Mini' },
+                    { value: 'Sedan', label: 'Sedan' },
+                    { value: 'SUV', label: 'SUV' },
                 ];
                 return (
                     <>
                         <div className="form-group" style={getFormGroupStyle('from')}>
                             <label>{tripType === 'airport' ? 'Airport' : 'From'}</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <MapPin size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
+                                <MapPin size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
                                 {renderCityDropdown('from', tripType === 'airport' ? 'Select Airport' : 'Pickup Location')}
                             </div>
                         </div>
@@ -450,7 +453,7 @@ const SearchForm = ({ type = 'flight', onSearch }) => {
                             <div className="form-group" style={getFormGroupStyle('to')}>
                                 <label>{tripType === 'airport' ? 'Drop Location' : 'To'}</label>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <MapPin size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
+                                    <MapPin size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
                                     {renderCityDropdown('to', 'Drop Location')}
                                 </div>
                             </div>
@@ -458,7 +461,7 @@ const SearchForm = ({ type = 'flight', onSearch }) => {
                         <div className="form-group">
                             <label>Pickup Date</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <Calendar size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
+                                <Calendar size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
                                 <input type="date" name="date" value={filters.date} onChange={handleChange} className="form-input" />
                             </div>
                         </div>
@@ -466,7 +469,7 @@ const SearchForm = ({ type = 'flight', onSearch }) => {
                             <div className="form-group">
                                 <label>Return Date</label>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <Calendar size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
+                                    <Calendar size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
                                     <input type="date" name="returnDate" value={filters.returnDate} onChange={handleChange} className="form-input" />
                                 </div>
                             </div>
@@ -474,19 +477,17 @@ const SearchForm = ({ type = 'flight', onSearch }) => {
                         <div className="form-group">
                             <label>Pickup Time</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <Clock size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
+                                <Clock size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
                                 <input type="time" name="time" className="form-input" />
                             </div>
                         </div>
-                        {tripType === 'hourly' && (
-                            <div className="form-group" style={getFormGroupStyle('duration')}>
-                                <label>Duration</label>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <Clock size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
-                                    {renderSelectDropdown('duration', cabDurations, Clock)}
-                                </div>
+                        <div className="form-group" style={getFormGroupStyle('classType')}>
+                            <label>Car Type</label>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <Clock size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
+                                {renderSelectDropdown('classType', cabTypes, Clock)}
                             </div>
-                        )}
+                        </div>
                     </>
                 );
             case 'holiday':
@@ -500,28 +501,28 @@ const SearchForm = ({ type = 'flight', onSearch }) => {
                         <div className="form-group" style={getFormGroupStyle('from')}>
                             <label>From City</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <MapPin size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
+                                <MapPin size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
                                 {renderCityDropdown('from', 'Start City')}
                             </div>
                         </div>
                         <div className="form-group" style={getFormGroupStyle('to')}>
                             <label>To Destination</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <MapPin size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
+                                <MapPin size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
                                 {renderCityDropdown('to', 'Select Destination')}
                             </div>
                         </div>
                         <div className="form-group">
                             <label>Departure Date</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <Calendar size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
+                                <Calendar size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
                                 <input type="date" name="date" value={filters.date} onChange={handleChange} className="form-input" />
                             </div>
                         </div>
                         <div className="form-group" style={getFormGroupStyle('duration')}>
                             <label>Duration</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <Clock size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
+                                <Clock size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
                                 {renderSelectDropdown('duration', durations, Clock)}
                             </div>
                         </div>
@@ -529,49 +530,85 @@ const SearchForm = ({ type = 'flight', onSearch }) => {
                 );
             case 'flight':
             default:
-                const flightTravellers = [
-                    { value: '1', label: '1 Traveller, Economy' },
-                    { value: '2', label: '2 Travellers, Economy' },
-                    { value: '3', label: '3 Travellers, Business' }
+                const flightClasses = [
+                    { value: 'Economy', label: 'Economy' },
+                    { value: 'Business', label: 'Business' },
+                    { value: 'First', label: 'First Class' }
                 ];
                 return (
                     <>
                         <div className="form-group" style={getFormGroupStyle('from')}>
                             <label>From</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <MapPin size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
+                                <MapPin size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
                                 {renderCityDropdown('from', 'From City')}
                             </div>
                         </div>
                         <div className="form-group" style={getFormGroupStyle('to')}>
                             <label>To</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <MapPin size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
+                                <MapPin size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
                                 {renderCityDropdown('to', 'To City')}
                             </div>
                         </div>
                         <div className="form-group">
                             <label>Departure</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <Calendar size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
-                                <input type="date" name="date" value={filters.date} onChange={handleChange} className="form-input" />
+                                <Calendar size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
+                                <input type="date" name="date" value={filters.date || ''} onChange={handleChange} className="form-input" />
                             </div>
                         </div>
                         {tripType === 'roundTrip' && (
                             <div className="form-group">
                                 <label>Return</label>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <Calendar size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
-                                    <input type="date" name="returnDate" value={filters.returnDate} onChange={handleChange} className="form-input" />
+                                    <Calendar size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
+                                    <input type="date" name="returnDate" value={filters.returnDate || ''} onChange={handleChange} className="form-input" />
                                 </div>
                             </div>
                         )}
                         {type === 'flight' && (
-                            <div className="form-group" style={getFormGroupStyle('travellers')}>
-                                <label>Travellers & Class</label>
+                            <div className="form-group" style={getFormGroupStyle('classType')}>
+                                <label>Seat Class</label>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <User size={22} className="text-light" style={{ color: '#008cff', minWidth: '22px' }} />
-                                    {renderSelectDropdown('travellers', flightTravellers, User)}
+                                    <User size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
+                                    {renderSelectDropdown('classType', flightClasses, User)}
+                                </div>
+                            </div>
+                        )}
+                        {type === 'flight' && (
+                            <div className="form-group">
+                                <label>Passengers</label>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <Users size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
+                                    <input type="number" min="1" max="9" name="availableSeats" value={filters.availableSeats || ''} placeholder="1" onChange={handleChange} className="form-input" />
+                                </div>
+                            </div>
+                        )}
+                        {type === 'flight' && tripType === 'multiCity' && (
+                            <div className="form-group" style={{ gridColumn: '1 / -1', marginTop: '10px', paddingTop: '10px', borderTop: '1px dashed rgba(255,255,255,0.2)' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                    <div style={{ flex: 1 }}>
+                                        <label>Flight 2: From</label>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                            <MapPin size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
+                                            {renderCityDropdown('from2', 'From City')}
+                                        </div>
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <label>To</label>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                            <MapPin size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
+                                            {renderCityDropdown('to2', 'To City')}
+                                        </div>
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <label>Departure</label>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                            <Calendar size={22} className="text-light" style={{ color: '#9A7EAE', minWidth: '22px' }} />
+                                            <input type="date" name="date2" value={filters.date2 || ''} onChange={handleChange} className="form-input" />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -588,10 +625,10 @@ const SearchForm = ({ type = 'flight', onSearch }) => {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     marginBottom: '30px',
-                    borderBottom: '1px solid #f0f0f0',
+                    borderBottom: '1px solid #9A7EAE',
                     paddingBottom: '20px'
                 }}>
-                    <div className="search-title" style={{ fontWeight: '700', fontSize: '1.2rem', color: '#2d3748', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div className="search-title" style={{ fontWeight: '700', fontSize: '1.2rem', color: 'var(--text-color)', display: 'flex', alignItems: 'center', gap: '10px' }}>
                         {type === 'flight' && 'Book Flights'}
                         {type === 'hotel' && 'Book Hotels'}
                         {type === 'bus' && 'Book Buses'}

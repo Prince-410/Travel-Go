@@ -22,3 +22,17 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# One-off scripts & temp files (should never be committed)
+temp_*.js
+temp_*.txt
+applyTheme.cjs
+replace-all-colors.cjs
+update-colors.cjs
+update-to-blue.cjs
+
+# Old plain-HTML backup (replaced by React app)
+legacy_backup/
+
+# Old XML mock data (replaced by MongoDB)
+public/data.xml

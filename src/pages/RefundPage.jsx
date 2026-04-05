@@ -1,91 +1,111 @@
 import React from 'react';
+import { ShieldCheck, RefreshCcw, Clock, AlertTriangle } from 'lucide-react';
 import '../App.css';
 
 const RefundPage = () => {
     return (
-        <div style={{ padding: '80px 20px', minHeight: '70vh', background: '#f7fafc' }}>
-            <div className="container" style={{ maxWidth: '900px', margin: '0 auto', background: 'white', padding: '50px', borderRadius: '16px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
-                <h1 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '20px', color: '#2d3748' }}>
-                    Cancellation & Refund Policy
-                </h1>
-                <p style={{ fontSize: '0.9rem', color: '#718096', marginBottom: '40px' }}>
-                    Last Updated: February 2026
-                </p>
-
-                <section style={{ marginBottom: '30px' }}>
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '15px', color: '#008cff' }}>
-                        Flight Cancellations
-                    </h2>
-                    <p style={{ color: '#4a5568', lineHeight: '1.8', marginBottom: '15px' }}>
-                        Cancellation charges vary based on the airline and fare type:
+        <div style={{ minHeight: '100vh', paddingBottom: '100px' }}>
+            {/* Hero Section */}
+            <section style={{ padding: '100px 20px', textAlign: 'center' }}>
+                <div className="container">
+                    <h1 style={{ 
+                        fontSize: '3.5rem', 
+                        fontWeight: '900', 
+                        marginBottom: '20px',
+                        background: 'linear-gradient(to right, #fff, #9A7EAE)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent'
+                    }}>
+                        Refund Policy
+                    </h1>
+                    <p style={{ 
+                        fontSize: '1.2rem', 
+                        maxWidth: '700px', 
+                        margin: '0 auto', 
+                        lineHeight: '1.8', 
+                        color: '#94a3b8' 
+                    }}>
+                        Transparent and traveler-friendly cancellation policies to ensure peace of mind for every booking.
                     </p>
-                    <ul style={{ color: '#4a5568', lineHeight: '1.8', marginLeft: '20px' }}>
-                        <li><strong>0-2 hours before departure:</strong> No refund</li>
-                        <li><strong>2-24 hours before departure:</strong> 50% refund + airline charges</li>
-                        <li><strong>24-72 hours before departure:</strong> 75% refund + airline charges</li>
-                        <li><strong>More than 72 hours:</strong> Full refund minus ₹300 service fee</li>
-                    </ul>
-                </section>
+                </div>
+            </section>
 
-                <section style={{ marginBottom: '30px' }}>
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '15px', color: '#008cff' }}>
-                        Hotel Cancellations
-                    </h2>
-                    <ul style={{ color: '#4a5568', lineHeight: '1.8', marginLeft: '20px' }}>
-                        <li><strong>0-24 hours before check-in:</strong> No refund</li>
-                        <li><strong>1-3 days before check-in:</strong> 50% refund</li>
-                        <li><strong>3-7 days before check-in:</strong> 75% refund</li>
-                        <li><strong>More than 7 days:</strong> Full refund minus ₹200 service fee</li>
-                    </ul>
-                </section>
+            <section className="container" style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 20px' }}>
+                <div style={{
+                    background: 'rgba(30, 41, 59, 0.4)',
+                    backdropFilter: 'blur(12px)',
+                    borderRadius: '32px',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    padding: '60px',
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '40px', color: '#94a3b8', fontSize: '0.9rem' }}>
+                        <Clock size={16} /> Last Updated: February 2026
+                    </div>
 
-                <section style={{ marginBottom: '30px' }}>
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '15px', color: '#008cff' }}>
-                        Train & Bus Cancellations
-                    </h2>
-                    <p style={{ color: '#4a5568', lineHeight: '1.8', marginBottom: '15px' }}>
-                        Cancellation charges as per Indian Railways/Bus operator rules:
-                    </p>
-                    <ul style={{ color: '#4a5568', lineHeight: '1.8', marginLeft: '20px' }}>
-                        <li><strong>More than 48 hours:</strong> ₹240 deduction per passenger</li>
-                        <li><strong>12-48 hours:</strong> 25% of fare</li>
-                        <li><strong>4-12 hours:</strong> 50% of fare</li>
-                        <li><strong>Less than 4 hours:</strong> No refund</li>
-                    </ul>
-                </section>
+                    <div style={{ display: 'grid', gap: '50px' }}>
+                        <section>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
+                                <ShieldCheck size={24} color="#9A7EAE" />
+                                <h2 style={{ fontSize: '1.8rem', fontWeight: '800', color: '#fff' }}>Flight Cancellations</h2>
+                            </div>
+                            <p style={{ color: '#94a3b8', lineHeight: '1.8', marginBottom: '20px' }}>
+                                Cancellation charges vary based on the airline and fare type. Generally, the following rules apply:
+                            </p>
+                            <div style={{ display: 'grid', gap: '12px' }}>
+                                {[
+                                    { time: '0-2 hours before departure', refund: 'No refund possible' },
+                                    { time: '2-24 hours before departure', refund: '50% refund + airline charges' },
+                                    { time: '24-72 hours before departure', refund: '75% refund + airline charges' },
+                                    { time: 'More than 72 hours', refund: 'Full refund minus service fee' }
+                                ].map((item, i) => (
+                                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 20px', background: 'rgba(255, 255, 255, 0.03)', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                                        <span style={{ color: '#cbd5e1', fontWeight: '600' }}>{item.time}</span>
+                                        <span style={{ color: '#9A7EAE', fontWeight: '700' }}>{item.refund}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
 
-                <section style={{ marginBottom: '30px' }}>
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '15px', color: '#008cff' }}>
-                        Holiday Package Cancellations
-                    </h2>
-                    <ul style={{ color: '#4a5568', lineHeight: '1.8', marginLeft: '20px' }}>
-                        <li><strong>0-7 days before departure:</strong> No refund</li>
-                        <li><strong>7-15 days before departure:</strong> 25% refund</li>
-                        <li><strong>15-30 days before departure:</strong> 50% refund</li>
-                        <li><strong>More than 30 days:</strong> 75% refund</li>
-                    </ul>
-                </section>
+                        <section>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
+                                <RefreshCcw size={24} color="#4ade80" />
+                                <h2 style={{ fontSize: '1.8rem', fontWeight: '800', color: '#fff' }}>Refund Processing</h2>
+                            </div>
+                            <p style={{ color: '#94a3b8', lineHeight: '1.8' }}>
+                                All eligible refunds are initiated within <strong>24-48 hours</strong> of cancellation. However, it may take <strong>7-10 business days</strong> for the amount to reflect in your original payment method, depending on your bank's processing cycles.
+                            </p>
+                        </section>
 
-                <section style={{ marginBottom: '30px' }}>
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '15px', color: '#008cff' }}>
-                        Refund Processing Time
-                    </h2>
-                    <p style={{ color: '#4a5568', lineHeight: '1.8' }}>
-                        Refunds are processed within 7-10 business days from the date of cancellation. The refund will be
-                        credited to the original payment method used during booking.
-                    </p>
-                </section>
+                        <section style={{ 
+                            background: 'rgba(248, 113, 113, 0.05)', 
+                            padding: '30px', 
+                            borderRadius: '20px', 
+                            border: '1px solid rgba(248, 113, 113, 0.1)' 
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '15px' }}>
+                                <AlertTriangle size={20} color="#f87171" />
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: '800', color: '#fff' }}>Important Note</h3>
+                            </div>
+                            <p style={{ color: '#94a3b8', fontSize: '0.95rem', lineHeight: '1.6' }}>
+                                Special promotional fares or "non-refundable" bookings will not qualify for refunds upon cancellation. Please review the specific terms and conditions displayed during your booking process.
+                            </p>
+                        </section>
+                    </div>
 
-                <section>
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '15px', color: '#008cff' }}>
-                        Need Help?
-                    </h2>
-                    <p style={{ color: '#4a5568', lineHeight: '1.8' }}>
-                        For cancellation assistance, please contact our 24/7 customer support at 1800-123-4567 or
-                        email us at support@travelgo.com.
-                    </p>
-                </section>
-            </div>
+                    <div style={{ marginTop: '60px', textAlign: 'center', paddingTop: '40px', borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                        <h3 style={{ color: '#fff', fontWeight: '800', marginBottom: '15px' }}>Need assistance with a cancellation?</h3>
+                        <button onClick={() => window.location.href = '/contact'} style={{ 
+                            padding: '16px 32px', 
+                            borderRadius: '12px', 
+                            background: '#9A7EAE', 
+                            color: '#fff', 
+                            border: 'none', 
+                            fontWeight: '700', 
+                            cursor: 'pointer' 
+                        }}>Contact Support</button>
+                    </div>
+                </div>
+            </section>
         </div>
     );
 };

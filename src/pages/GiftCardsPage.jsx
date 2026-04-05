@@ -1,335 +1,210 @@
 import React, { useState } from 'react';
-import { Gift, Heart, CreditCard, Sparkles, Users, Calendar, CheckCircle, ShoppingBag } from 'lucide-react';
+import { Gift, Heart, CreditCard, Sparkles, Users, Calendar, CheckCircle, ShoppingBag, ArrowRight } from 'lucide-react';
 import '../App.css';
+import { useAuth } from '../context/AuthContext';
+import { useUI } from '../context/UIContext';
 
 const GiftCardsPage = () => {
+    const { user, token } = useAuth();
+    const { showToast, showConfirm } = useUI();
     const [selectedAmount, setSelectedAmount] = useState(5000);
     const [customAmount, setCustomAmount] = useState('');
+    const [recipientEmail, setRecipientEmail] = useState('');
+    const [message, setMessage] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const amounts = [1000, 2500, 5000, 10000, 25000, 50000];
 
     const occasions = [
-        { icon: <Heart size={32} />, title: 'Birthdays', color: '#f472b6' },
-        { icon: <Users size={32} />, title: 'Anniversaries', color: '#a78bfa' },
-        { icon: <Gift size={32} />, title: 'Weddings', color: '#fb923c' },
-        { icon: <Sparkles size={32} />, title: 'Festivals', color: '#fbbf24' },
-        { icon: <Calendar size={32} />, title: 'Holidays', color: '#34d399' },
-        { icon: <ShoppingBag size={32} />, title: 'Corporate Gifts', color: '#60a5fa' }
+        { icon: <Heart size={28} />, title: 'Birthdays', color: '#f472b6' },
+        { icon: <Users size={28} />, title: 'Anniversaries', color: '#60a5fa' },
+        { icon: <Gift size={28} />, title: 'Weddings', color: '#fbbf24' },
+        { icon: <Sparkles size={28} />, title: 'Festivals', color: '#a78bfa' },
+        { icon: <Calendar size={28} />, title: 'Holidays', color: '#4ade80' },
+        { icon: <ShoppingBag size={28} />, title: 'Corporate', color: '#94a3b8' }
     ];
 
-    const benefits = [
-        'Valid for 12 months from purchase date',
-        'Use for flights, hotels, trains, buses & more',
-        'No hidden fees or charges',
-        'Easy to redeem online',
-        'Transferable to friends & family',
-        'Balance never expires if used within validity'
-    ];
+    const handlePurchase = async () => {
+        if (!token) {
+            showToast('Please login to send a gift card.', 'warning');
+            return;
+        }
 
-    const handlePurchase = () => {
-        const amount = customAmount || selectedAmount;
-        alert(`Proceeding to purchase ₹${amount} gift card. You'll be redirected to payment gateway.`);
+        if (!recipientEmail) { 
+            showToast('Please enter recipient email.', 'warning'); 
+            return; 
+        }
+        
+        const finalAmount = customAmount || selectedAmount;
+        if (finalAmount < 500) {
+            showToast('Minimum amount is ₹500', 'warning');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            // STEP 1: Still validate user exists (UX)
+            const checkRes = await fetch(`http://localhost:5000/api/auth/check/${recipientEmail}`);
+            const checkData = await checkRes.json();
+            
+            if (!checkRes.ok || !checkData.exists) {
+                showToast('Receiver email does not exist in our system. Please ask them to register first.', 'error');
+                setLoading(false);
+                return;
+            }
+
+            // STEP 2: Actual Purchase & Credit
+            const purchaseRes = await fetch('http://localhost:5000/api/gift-cards/purchase', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    recipientEmail,
+                    amount: finalAmount,
+                    message: message || "Enjoy your travel gift!"
+                })
+            });
+
+            const purchaseData = await purchaseRes.json();
+            
+            if (purchaseRes.ok) {
+                showConfirm('Gift Card Sent', `SUCCESS! ₹${finalAmount} has been credited to ${checkData.name}'s wallet. An official email notification has been sent.`, null, 'alert');
+                setRecipientEmail('');
+                setMessage('');
+                setCustomAmount('');
+            } else {
+                showToast('Purchase Failed: ' + (purchaseData.message || 'Error occurred'), 'error');
+            }
+        } catch (error) {
+            console.error('Purchase error:', error);
+            showToast('Service unavailable. Please try again later.', 'error');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <div className="gift-cards-page">
+        <div style={{ minHeight: '100vh', paddingBottom: '100px' }}>
             {/* Hero Section */}
-            <section style={{
-                background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                padding: '100px 20px',
-                textAlign: 'center',
-                color: 'white'
-            }}>
+            <section style={{ padding: '100px 20px', textAlign: 'center' }}>
                 <div className="container">
-                    <Gift size={80} style={{ marginBottom: '20px', opacity: 0.9 }} />
-                    <h1 style={{ fontSize: '3rem', fontWeight: '800', marginBottom: '20px' }}>
-                        Give the Gift of Travel
-                    </h1>
-                    <p style={{ fontSize: '1.3rem', maxWidth: '800px', margin: '0 auto', lineHeight: '1.8' }}>
-                        Perfect for any occasion. Let your loved ones choose their dream destination.
+                    <div style={{ 
+                        width: '70px', height: '70px', borderRadius: '50%', background: 'rgba(154, 126, 174, 0.1)', 
+                        color: '#9A7EAE', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 30px' 
+                    }}>
+                        <Gift size={32} />
+                    </div>
+                    <h1 style={{ 
+                        fontSize: '3.5rem', fontWeight: '900', marginBottom: '20px',
+                        background: 'linear-gradient(to right, #fff, #9A7EAE)',
+                        WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
+                    }}>Give the Gift of Travel</h1>
+                    <p style={{ fontSize: '1.2rem', maxWidth: '750px', margin: '0 auto', lineHeight: '1.8', color: '#94a3b8' }}>
+                        The perfect gift for explorers. Let your loved ones choose their own adventure with a TravelGo digital gift card.
                     </p>
                 </div>
             </section>
 
-            {/* Gift Card Purchase Section */}
-            <section style={{ padding: '80px 20px', background: '#f7fafc' }}>
-                <div className="container" style={{ maxWidth: '900px', margin: '0 auto' }}>
-                    <h2 className="section-title">Choose Your Gift Card Amount</h2>
-
-                    <div style={{
-                        background: 'white',
-                        padding: '50px',
-                        borderRadius: '20px',
-                        boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
-                        marginTop: '40px'
+            <section className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '60px', alignItems: 'start' }}>
+                    
+                    {/* Left Side: Purchase Card */}
+                    <div style={{ 
+                        background: 'rgba(30, 41, 59, 0.4)', backdropFilter: 'blur(16px)', 
+                        borderRadius: '32px', border: '1px solid rgba(255, 255, 255, 0.08)', padding: '50px' 
                     }}>
-                        {/* Preset Amounts */}
-                        <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-                            gap: '15px',
-                            marginBottom: '30px'
-                        }}>
-                            {amounts.map((amount) => (
-                                <button
-                                    key={amount}
-                                    onClick={() => {
-                                        setSelectedAmount(amount);
-                                        setCustomAmount('');
-                                    }}
-                                    style={{
-                                        padding: '20px',
-                                        borderRadius: '12px',
-                                        border: selectedAmount === amount && !customAmount ? '3px solid #f5576c' : '2px solid #e2e8f0',
-                                        background: selectedAmount === amount && !customAmount ? '#fff5f7' : 'white',
-                                        fontSize: '1.2rem',
-                                        fontWeight: '700',
-                                        color: selectedAmount === amount && !customAmount ? '#f5576c' : '#2d3748',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.3s ease'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        if (selectedAmount !== amount || customAmount) {
-                                            e.currentTarget.style.borderColor = '#f5576c';
-                                            e.currentTarget.style.transform = 'scale(1.05)';
-                                        }
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        if (selectedAmount !== amount || customAmount) {
-                                            e.currentTarget.style.borderColor = '#e2e8f0';
-                                            e.currentTarget.style.transform = 'scale(1)';
-                                        }
-                                    }}
-                                >
-                                    ₹{amount.toLocaleString()}
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* Custom Amount */}
-                        <div style={{ marginBottom: '30px' }}>
-                            <label style={{ display: 'block', marginBottom: '10px', fontWeight: '600', color: '#2d3748' }}>
-                                Or Enter Custom Amount
-                            </label>
-                            <input
-                                type="number"
-                                value={customAmount}
-                                onChange={(e) => setCustomAmount(e.target.value)}
-                                placeholder="Enter amount (Min ₹500)"
-                                min="500"
-                                style={{
-                                    width: '100%',
-                                    padding: '15px',
-                                    borderRadius: '10px',
-                                    border: '2px solid #e2e8f0',
-                                    fontSize: '1.1rem'
-                                }}
-                            />
-                        </div>
-
-                        {/* Selected Amount Display */}
-                        <div style={{
-                            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                            padding: '30px',
-                            borderRadius: '15px',
-                            textAlign: 'center',
-                            color: 'white',
-                            marginBottom: '30px'
-                        }}>
-                            <div style={{ fontSize: '1rem', marginBottom: '10px', opacity: 0.9 }}>
-                                Gift Card Value
-                            </div>
-                            <div style={{ fontSize: '3rem', fontWeight: '800' }}>
-                                ₹{(customAmount || selectedAmount).toLocaleString()}
+                        <h2 style={{ fontSize: '1.8rem', fontWeight: '900', color: '#fff', marginBottom: '35px' }}>Configure Your Gift Card</h2>
+                        
+                        <div style={{ marginBottom: '40px' }}>
+                            <label style={{ fontSize: '0.85rem', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', display: 'block', marginBottom: '15px' }}>Select Amount</label>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px' }}>
+                                {amounts.map((amount) => (
+                                    <button key={amount} onClick={() => { setSelectedAmount(amount); setCustomAmount(''); }}
+                                        style={{ 
+                                            padding: '20px', borderRadius: '16px', background: (selectedAmount === amount && !customAmount) ? '#9A7EAE' : 'rgba(255, 255, 255, 0.03)',
+                                            color: (selectedAmount === amount && !customAmount) ? '#fff' : '#cbd5e1', border: (selectedAmount === amount && !customAmount) ? '1px solid #9A7EAE' : '1px solid rgba(255, 255, 255, 0.1)',
+                                            fontWeight: '800', fontSize: '1.1rem', cursor: 'pointer', transition: 'all 0.2s'
+                                        }}>₹{amount.toLocaleString()}</button>
+                                ))}
                             </div>
                         </div>
 
-                        {/* Purchase Button */}
-                        <button
-                            onClick={handlePurchase}
-                            style={{
-                                width: '100%',
-                                background: 'linear-gradient(135deg, #f5576c 0%, #f093fb 100%)',
-                                color: 'white',
-                                padding: '18px',
-                                fontSize: '1.2rem',
-                                fontWeight: '700',
-                                borderRadius: '12px',
-                                border: 'none',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '10px',
-                                transition: 'transform 0.3s ease'
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-                            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                        >
-                            <CreditCard size={24} />
-                            Purchase Gift Card
+                        <div style={{ marginBottom: '40px' }}>
+                            <label style={{ fontSize: '0.85rem', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', display: 'block', marginBottom: '15px' }}>Custom Amount</label>
+                            <input type="number" value={customAmount} onChange={(e) => { setCustomAmount(e.target.value); setSelectedAmount(0); }} placeholder="Min ₹500"
+                                style={{ width: '100%', padding: '18px', borderRadius: '16px', background: 'rgba(15, 23, 42, 0.4)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff', fontSize: '1.1rem' }} />
+                        </div>
+
+                        <div style={{ marginBottom: '40px' }}>
+                            <label style={{ fontSize: '0.85rem', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', display: 'block', marginBottom: '15px' }}>Receiver's Email</label>
+                            <input type="email" value={recipientEmail} onChange={(e) => setRecipientEmail(e.target.value)} placeholder="name@recipient.com"
+                                style={{ width: '100%', padding: '18px', borderRadius: '16px', background: 'rgba(15, 23, 42, 0.4)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff', fontSize: '1.1rem' }} />
+                        </div>
+
+                        <div style={{ marginBottom: '40px' }}>
+                            <label style={{ fontSize: '0.85rem', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', display: 'block', marginBottom: '15px' }}>Personal Message (Optional)</label>
+                            <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Write something sweet..."
+                                style={{ width: '100%', padding: '18px', borderRadius: '16px', background: 'rgba(15, 23, 42, 0.4)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff', fontSize: '1rem', height: '100px', resize: 'none' }} />
+                        </div>
+
+                        <button onClick={handlePurchase} disabled={loading} style={{ 
+                            width: '100%', padding: '20px', borderRadius: '18px', background: 'linear-gradient(to right, #9A7EAE, #7c3aed)', 
+                            color: '#fff', border: 'none', fontWeight: '900', fontSize: '1.2rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px'
+                        }}>
+                             {loading ? 'Processing...' : <><CreditCard size={24}/> Pay & Send Gift Card</>}
                         </button>
                     </div>
-                </div>
-            </section>
 
-            {/* Occasions Section */}
-            <section style={{ padding: '80px 20px', background: 'white' }}>
-                <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <h2 className="section-title">Perfect for Every Occasion</h2>
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-                        gap: '25px',
-                        marginTop: '60px'
-                    }}>
-                        {occasions.map((occasion, index) => (
-                            <div key={index} style={{
-                                textAlign: 'center',
-                                padding: '30px 20px',
-                                borderRadius: '16px',
-                                background: '#f7fafc',
-                                transition: 'all 0.3s ease'
-                            }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(-5px)';
-                                    e.currentTarget.style.background = occasion.color + '15';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(0)';
-                                    e.currentTarget.style.background = '#f7fafc';
-                                }}
-                            >
-                                <div style={{ color: occasion.color, marginBottom: '15px', display: 'flex', justifyContent: 'center' }}>
-                                    {occasion.icon}
-                                </div>
-                                <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#2d3748' }}>
-                                    {occasion.title}
-                                </h3>
+                    {/* Right Side: Preview & Occasions */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
+                        <div style={{ 
+                            background: 'linear-gradient(135deg, #9A7EAE, #4c1d95)', borderRadius: '32px', 
+                            padding: '40px', position: 'relative', overflow: 'hidden', minHeight: '240px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between'
+                        }}>
+                            <div style={{ position: 'absolute', top: '-10%', right: '-10%', width: '150px', height: '150px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '50%' }}></div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <div style={{ fontSize: '1.5rem', fontWeight: '900', color: '#fff' }}>TravelGo</div>
+                                <Sparkles size={32} color="rgba(255, 255, 255, 0.5)" />
                             </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Benefits Section */}
-            <section style={{ padding: '80px 20px', background: '#f7fafc' }}>
-                <div className="container" style={{ maxWidth: '1000px', margin: '0 auto' }}>
-                    <h2 className="section-title">Why Choose TravelGo Gift Cards</h2>
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                        gap: '20px',
-                        marginTop: '60px'
-                    }}>
-                        {benefits.map((benefit, index) => (
-                            <div key={index} style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '15px',
-                                padding: '25px',
-                                background: 'white',
-                                borderRadius: '12px',
-                                boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-                                transition: 'all 0.3s ease'
-                            }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.1)';
-                                    e.currentTarget.style.transform = 'translateX(5px)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
-                                    e.currentTarget.style.transform = 'translateX(0)';
-                                }}
-                            >
-                                <CheckCircle size={24} style={{ color: '#f5576c', flexShrink: 0 }} />
-                                <span style={{ fontSize: '1.05rem', color: '#2d3748', fontWeight: '500' }}>
-                                    {benefit}
-                                </span>
+                            <div>
+                                <div style={{ fontSize: '0.9rem', color: 'rgba(255, 255, 255, 0.7)', fontWeight: '700', textTransform: 'uppercase', marginBottom: '5px' }}>Gift Card Value</div>
+                                <div style={{ fontSize: '3rem', fontWeight: '900', color: '#fff' }}>₹{(Number(customAmount) || selectedAmount).toLocaleString()}</div>
                             </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
+                        </div>
 
-            {/* How It Works Section */}
-            <section style={{ padding: '80px 20px', background: 'white' }}>
-                <div className="container" style={{ maxWidth: '1000px', margin: '0 auto' }}>
-                    <h2 className="section-title">How It Works</h2>
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                        gap: '40px',
-                        marginTop: '60px'
-                    }}>
-                        {[
-                            { step: '1', title: 'Choose Amount', desc: 'Select a preset amount or enter your custom value' },
-                            { step: '2', title: 'Make Payment', desc: 'Complete secure payment via card, UPI, or net banking' },
-                            { step: '3', title: 'Receive Code', desc: 'Get gift card code instantly via email and SMS' },
-                            { step: '4', title: 'Share & Enjoy', desc: 'Gift it to loved ones or use it for your own bookings' }
-                        ].map((item, index) => (
-                            <div key={index} style={{ textAlign: 'center' }}>
-                                <div style={{
-                                    width: '60px',
-                                    height: '60px',
-                                    borderRadius: '50%',
-                                    background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                                    color: 'white',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: '1.5rem',
-                                    fontWeight: '800',
-                                    margin: '0 auto 20px'
-                                }}>
-                                    {item.step}
+                        <div style={{ 
+                            background: 'rgba(255, 255, 255, 0.02)', borderRadius: '24px', 
+                            border: '1px solid rgba(255, 255, 255, 0.05)', padding: '35px'
+                        }}>
+                            <h3 style={{ fontSize: '1.2rem', fontWeight: '800', color: '#fff', marginBottom: '25px' }}>Perfect For</h3>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
+                                {occasions.map((occ, i) => (
+                                    <div key={i} style={{ textAlign: 'center' }}>
+                                        <div style={{ width: '45px', height: '45px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 10px', color: occ.color }}>
+                                            {occ.icon}
+                                        </div>
+                                        <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: '700' }}>{occ.title}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div style={{ 
+                            background: 'rgba(255, 255, 255, 0.03)', borderRadius: '24px', 
+                            padding: '30px', border: '1px solid rgba(255, 255, 255, 0.05)'
+                        }}>
+                            <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(74, 222, 128, 0.1)', color: '#4ade80', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                    <CheckCircle size={20} />
                                 </div>
-                                <h3 style={{ fontSize: '1.3rem', fontWeight: '700', marginBottom: '10px', color: '#2d3748' }}>
-                                    {item.title}
-                                </h3>
-                                <p style={{ color: '#718096', lineHeight: '1.6' }}>
-                                    {item.desc}
+                                <p style={{ fontSize: '0.9rem', color: '#cbd5e1', lineHeight: '1.6' }}>
+                                    Redeemable across all flights, hotels, and holiday packages. No blackout dates.
                                 </p>
                             </div>
-                        ))}
+                        </div>
                     </div>
-                </div>
-            </section>
-
-            {/* CTA Section */}
-            <section style={{
-                padding: '80px 20px',
-                background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                textAlign: 'center',
-                color: 'white'
-            }}>
-                <div className="container">
-                    <Sparkles size={60} style={{ marginBottom: '20px', opacity: 0.9 }} />
-                    <h2 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '20px' }}>
-                        Spread Joy with Travel
-                    </h2>
-                    <p style={{ fontSize: '1.2rem', marginBottom: '40px', maxWidth: '700px', margin: '0 auto 40px' }}>
-                        Give your loved ones the freedom to explore the world on their terms
-                    </p>
-                    <button
-                        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                        style={{
-                            background: 'white',
-                            color: '#f5576c',
-                            padding: '15px 50px',
-                            fontSize: '1.1rem',
-                            fontWeight: '700',
-                            borderRadius: '50px',
-                            border: 'none',
-                            cursor: 'pointer',
-                            boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
-                            transition: 'transform 0.3s ease'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                    >
-                        Buy Gift Card Now
-                    </button>
                 </div>
             </section>
         </div>

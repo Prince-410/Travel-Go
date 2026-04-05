@@ -1,81 +1,136 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import React, { useState, Suspense, lazy } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { AdminConfigProvider } from './context/AdminConfigContext';
+import { UIProvider } from './context/UIContext';
+
+// Components
 import Header from './components/Header';
 import Footer from './components/Footer';
+import AuthModal from './components/AuthModal';
+import AIChatbot from './components/AIChatbot';
 import ScrollToTop from './components/ScrollToTop';
-import ListingPage from './pages/ListingPage';
-import AboutPage from './pages/AboutPage';
-import AuthPage from './pages/AuthPage';
-import ContactPage from './pages/ContactPage';
-import PrivacyPage from './pages/PrivacyPage';
-import RefundPage from './pages/RefundPage';
-import CareersPage from './pages/CareersPage';
-import BlogPage from './pages/BlogPage';
-import PressPage from './pages/PressPage';
-import FAQsPage from './pages/FAQsPage';
-import CorporateTravelPage from './pages/CorporateTravelPage';
-import GiftCardsPage from './pages/GiftCardsPage';
-import ReferEarnPage from './pages/ReferEarnPage';
-import TravelInsurancePage from './pages/TravelInsurancePage';
-import ListPropertyPage from './pages/ListPropertyPage';
-import AdminPanel from './pages/AdminPanel';
-import './App.css';
+import LiquidBackdrop from './components/LiquidBackdrop';
+
+// Lazy-loaded pages
+const HomePage = lazy(() => import('./pages/HomePage'));
+const FlightPage = lazy(() => import('./pages/FlightPage'));
+const BusPage = lazy(() => import('./pages/BusPage'));
+const TrainPage = lazy(() => import('./pages/TrainPage'));
+const HotelPage = lazy(() => import('./pages/HotelPage'));
+const CabPage = lazy(() => import('./pages/CabPage'));
+const HolidayPage = lazy(() => import('./pages/HolidayPage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const ReferEarnPage = lazy(() => import('./pages/ReferEarnPage'));
+const GiftCardsPage = lazy(() => import('./pages/GiftCardsPage'));
+const TravelInsurancePage = lazy(() => import('./pages/TravelInsurancePage'));
+const CorporateTravelPage = lazy(() => import('./pages/CorporateTravelPage'));
+const ListPropertyPage = lazy(() => import('./pages/ListPropertyPage'));
+const FAQsPage = lazy(() => import('./pages/FAQsPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const CareersPage = lazy(() => import('./pages/CareersPage'));
+const PressPage = lazy(() => import('./pages/PressPage'));
+const BlogPage = lazy(() => import('./pages/BlogPage'));
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
+const RefundPage = lazy(() => import('./pages/RefundPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
+const AdminPanel = lazy(() => import('./pages/AdminPanel'));
 
 function AppContent() {
+  const { isAuthenticated, isAdmin, loading } = useAuth();
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
   const location = useLocation();
-  const isAuthPage = location.pathname === '/login';
-  const isAdminPage = location.pathname === '/admin';
-  const isInfoPage = ['/about', '/contact', '/privacy', '/refund', '/careers', '/blog', '/press', '/faqs', '/corporate-travel', '/gift-cards', '/refer-earn', '/travel-insurance', '/list-property'].includes(location.pathname);
 
-  const getPageType = () => {
-    if (location.pathname === '/hotels') return 'hotel';
-    if (location.pathname === '/trains') return 'train';
-    if (location.pathname === '/buses') return 'bus';
-    if (location.pathname === '/cabs') return 'cab';
-    if (location.pathname === '/holidays') return 'holiday';
-    return 'flight'; 
+  const isAdminPage = location.pathname.startsWith('/admin');
+
+  const handleAuthSuccess = () => {
+    setIsAuthOpen(false);
   };
 
+  const getPageType = () => {
+    const path = location.pathname;
+    if (path === '/') return null;
+    if (path === '/flights') return 'flight';
+    if (path === '/hotels') return 'hotel';
+    if (path === '/trains') return 'train';
+    if (path === '/buses') return 'bus';
+    if (path === '/cabs') return 'cab';
+    if (path === '/holidays') return 'holiday';
+    return 'default';
+  };
+
+  const bgImage = isAdminPage || location.pathname === '/'
+    ? 'none' 
+    : `linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.95)), url("/images/${getPageType()}.png") center/cover fixed no-repeat`;
+
   return (
-    <div className="App">
+    <div className="min-h-screen text-white selection:bg-indigo-500/30" style={{ background: bgImage, position: 'relative' }}>
+      <LiquidBackdrop />
       <ScrollToTop />
-      {!isAuthPage && !isAdminPage && <Header />}
-      <main style={isAuthPage || isAdminPage ? { padding: 0 } : {}}>
-        <Routes>
-          <Route path="/" element={<ListingPage type="flight" title="Book Your Next Journey" subtitle="Flights, Hotels, Trains & More" />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/privacy" element={<PrivacyPage />} />
-          <Route path="/refund" element={<RefundPage />} />
-          <Route path="/careers" element={<CareersPage />} />
-          <Route path="/blog" element={<BlogPage />} />
-          <Route path="/press" element={<PressPage />} />
-          <Route path="/faqs" element={<FAQsPage />} />
-          <Route path="/corporate-travel" element={<CorporateTravelPage />} />
-          <Route path="/gift-cards" element={<GiftCardsPage />} />
-          <Route path="/refer-earn" element={<ReferEarnPage />} />
-          <Route path="/travel-insurance" element={<TravelInsurancePage />} />
-          <Route path="/list-property" element={<ListPropertyPage />} />
-          <Route path="/hotels" element={<ListingPage type="hotel" title="Find Your Perfect Stay" subtitle="Discover luxury hotels, resorts & more" />} />
-          <Route path="/trains" element={<ListingPage type="train" title="Train Ticket Booking" subtitle="Fast & Reliable Train Services" />} />
-          <Route path="/buses" element={<ListingPage type="bus" title="Bus Ticket Booking" subtitle="Comfortable Bus Journeys" />} />
-          <Route path="/cabs" element={<ListingPage type="cab" title="Book a Cab" subtitle="Reliable Cabs for Local & Outstation" />} />
-          <Route path="/holidays" element={<ListingPage type="holiday" title="Holiday Packages" subtitle="Create Memories that Last Forever" />} />
-          <Route path="/login" element={<AuthPage />} />
-          <Route path="/admin" element={<AdminPanel />} />
-        </Routes>
+      {!isAdminPage && <Header onOpenAuth={() => setIsAuthOpen(true)} />}
+      <main style={isAdminPage ? { padding: 0 } : {}}>
+        <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#fff' }}>Loading travel experience...</div>}>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/flights" element={<FlightPage />} />
+            <Route path="/hotels" element={<HotelPage />} />
+            <Route path="/trains" element={<TrainPage />} />
+            <Route path="/buses" element={<BusPage />} />
+            <Route path="/cabs" element={<CabPage />} />
+            <Route path="/holidays" element={<HolidayPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/refer-earn" element={<ReferEarnPage />} />
+            <Route path="/gift-cards" element={<GiftCardsPage />} />
+            <Route path="/travel-insurance" element={<TravelInsurancePage />} />
+            <Route path="/corporate-travel" element={<CorporateTravelPage />} />
+            <Route path="/list-property" element={<ListPropertyPage />} />
+            <Route path="/faqs" element={<FAQsPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/careers" element={<CareersPage />} />
+            <Route path="/press" element={<PressPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/refund" element={<RefundPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route
+              path="/admin"
+              element={
+                loading
+                  ? <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', color: '#fff' }}>Loading admin panel...</div>
+                  : isAuthenticated && isAdmin
+                  ? <AdminPanel />
+                  : <Navigate to="/" />
+              }
+            />
+          </Routes>
+        </Suspense>
       </main>
-      {!isAuthPage && !isAdminPage && <Footer pageType={getPageType()} />}
+      <AuthModal 
+        isOpen={isAuthOpen} 
+        onClose={() => {
+            if (isAuthenticated) setIsAuthOpen(false);
+        }}
+        onSuccess={handleAuthSuccess}
+        isClosable={isAuthenticated}
+      />
+      {!isAdminPage && <Footer pageType={getPageType()} />}
+      {!isAdminPage && <AIChatbot />}
     </div>
   );
 }
 
-function App() {
+const App = () => {
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <UIProvider>
+      <AuthProvider>
+        <AdminConfigProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </AdminConfigProvider>
+      </AuthProvider>
+    </UIProvider>
   );
-}
+};
 
 export default App;
