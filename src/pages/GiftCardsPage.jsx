@@ -44,7 +44,7 @@ const GiftCardsPage = () => {
         setLoading(true);
         try {
             // STEP 1: Still validate user exists (UX)
-            const checkRes = await fetch(`\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/check/${recipientEmail}`);
+            const checkRes = await fetch(`\/api/auth/check/${recipientEmail}`);
             const checkData = await checkRes.json();
             
             if (!checkRes.ok || !checkData.exists) {
@@ -54,7 +54,7 @@ const GiftCardsPage = () => {
             }
 
             // STEP 2: Actual Purchase & Credit
-            const purchaseRes = await fetch(`\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/gift-cards/purchase`, {
+            const purchaseRes = await fetch(`\/api/gift-cards/purchase`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',

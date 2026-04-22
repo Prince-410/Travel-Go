@@ -1,0 +1,4 @@
+const express = require('express');
+const app = require('./index'); // This won't work because index starts the server.
+
+// I'll just look at index.js again.

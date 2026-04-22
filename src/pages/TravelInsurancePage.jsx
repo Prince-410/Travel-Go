@@ -53,7 +53,7 @@ const TravelInsurancePage = () => {
         
         setLoading(true);
         try {
-            const res = await fetch(`\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/insurance/purchase`, {
+            const res = await fetch(`\/api/insurance/purchase`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',

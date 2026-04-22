@@ -2,7 +2,17 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 
 const AuthContext = createContext(null);
 
-const API = `\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api`;
+const getBaseUrl = () => {
+  // Use VITE_API_URL if provided, otherwise fallback to Vite proxy path '/api'
+  let url = import.meta.env.VITE_API_URL || '';
+  if (!url) return '/api';
+  
+  if (url.endsWith('/')) url = url.slice(0, -1);
+  if (!url.endsWith('/api')) url += '/api';
+  return url;
+};
+
+const API = getBaseUrl();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -34,8 +44,11 @@ export const AuthProvider = ({ children }) => {
 
     let res;
     try {
-      res = await fetch(`${API}${url}`, { ...options, headers });
+      const fullUrl = `${API}${url}`;
+      console.log(`[authFetch] Fetching: ${fullUrl}`, options);
+      res = await fetch(fullUrl, { ...options, headers });
     } catch (networkError) {
+      console.error('[authFetch] Network Error:', networkError);
       throw new Error('Cannot connect to server. Please make sure the backend is running.');
     }
 

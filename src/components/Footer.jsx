@@ -21,7 +21,7 @@ const Footer = ({ pageType = 'flight' }) => {
     const handleNewsletter = async (e) => {
         e.preventDefault();
         try {
-            const res = await fetch(`\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/contact`, {
+            const res = await fetch(`\/api/contact`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: 'Newsletter Subscriber', email, message: 'Subscribed to newsletter updates', type: 'newsletter' })

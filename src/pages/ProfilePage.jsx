@@ -86,7 +86,7 @@ const ProfilePage = () => {
     }
     if (tab === 'jobs' && isAuthenticated) {
       setLoadingJobs(true);
-      fetch(`\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/jobs/my-applications`, {
+      fetch(`\/api/jobs/my-applications`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       })
       .then(res => res.json())

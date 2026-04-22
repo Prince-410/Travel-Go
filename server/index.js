@@ -120,6 +120,15 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString(), sockets: io.engine.clientsCount });
 });
 
+// ─── 404 Handler ─────────────────────────────────────────────────────────────
+app.use((req, res, next) => {
+  console.log(`🔍 404 Not Found: ${req.method} ${req.url}`);
+  res.status(404).json({
+    success: false,
+    message: `Route ${req.method} ${req.url} not found on this server.`
+  });
+});
+
 // ─── Global Error Handler ────────────────────────────────────────────────────
 app.use((err, req, res, next) => {
   console.error('🔥 Global Error:', err);

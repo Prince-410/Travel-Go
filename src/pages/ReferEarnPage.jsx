@@ -25,7 +25,7 @@ const ReferEarnPage = () => {
         
         setLoading(true);
         try {
-            const res = await fetch(`\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/referral/invite`, {
+            const res = await fetch(`\/api/auth/referral/invite`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',

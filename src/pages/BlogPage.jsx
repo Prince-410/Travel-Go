@@ -16,7 +16,7 @@ const BlogPage = () => {
 
     const fetchBlogs = async () => {
         try {
-            const res = await fetch(`\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/blogs`);
+            const res = await fetch(`\/api/blogs`);
             if (res.ok) {
                 setBlogs(await res.json());
             }

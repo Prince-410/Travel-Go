@@ -101,9 +101,9 @@ const TYPE_FIELDS = {
   ]
 };
 
-const BOOKING_API = `\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/bookings`;
-const USER_API = `\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/users`;
-const CONTACT_API = `\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/contacts`;
+const BOOKING_API = `\/api/admin/bookings`;
+const USER_API = `\/api/admin/users`;
+const CONTACT_API = `\/api/admin/contacts`;
 
 const AdminPanel = () => {
     const { isAdmin, loading: authLoading } = useAuth();
@@ -176,7 +176,7 @@ const AdminPanel = () => {
     }
     
     try {
-      const url = editingCard ? `\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/cards/${editingCard._id}` : `\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/cards`;
+      const url = editingCard ? `\/api/admin/cards/${editingCard._id}` : `\/api/admin/cards`;
       const method = editingCard ? 'PATCH' : 'POST';
       let parsedFeatures = { ...dynamicFeatures };
       try { 
@@ -211,7 +211,7 @@ const AdminPanel = () => {
   const handleDeleteCard = async (id) => {
     showConfirm('Delete Item', 'Are you sure you want to delete this inventory item? This action cannot be undone.', async () => {
       try {
-        const res = await fetch(`\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/cards/${id}`, { method:'DELETE', headers: getAuth() });
+        const res = await fetch(`\/api/admin/cards/${id}`, { method:'DELETE', headers: getAuth() });
         if (res.ok) {
            showToast('Inventory item deleted.', 'success');
            refreshBookingCards();
@@ -366,7 +366,7 @@ const AdminPanel = () => {
 
   const fetchJobApps = useCallback(async () => {
     try {
-      const res = await fetch(`\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/jobs/admin/all`, { headers: getAuth() });
+      const res = await fetch(`\/api/jobs/admin/all`, { headers: getAuth() });
       if (res.ok) {
         setJobApps(await res.json());
       } else {
@@ -381,7 +381,7 @@ const AdminPanel = () => {
 
   const updateJobStatus = async (id, status, notes = '') => {
     try {
-      const res = await fetch(`\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/jobs/admin/update/${id}`, {
+      const res = await fetch(`\/api/jobs/admin/update/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', ...getAuth() },
         body: JSON.stringify({ status, adminNotes: notes })
@@ -393,7 +393,7 @@ const AdminPanel = () => {
   const handleDeleteJobApp = async (id) => {
     showConfirm('Delete Application', 'Permanently remove this job application?', async () => {
       try {
-        const res = await fetch(`\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/jobs/admin/${id}`, { method: 'DELETE', headers: getAuth() });
+        const res = await fetch(`\/api/jobs/admin/${id}`, { method: 'DELETE', headers: getAuth() });
         if (res.ok) {
            showToast('Job application record deleted.', 'success');
            fetchJobApps();
@@ -413,14 +413,14 @@ const AdminPanel = () => {
 
   const fetchPressReleases = useCallback(async () => {
     try {
-      const res = await fetch(`\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/press`);
+      const res = await fetch(`\/api/press`);
       if (res.ok) setPressReleases(await res.json());
     } catch (e) { console.error(e); }
   }, []);
 
   const handleSavePress = async () => {
     try {
-      const url = editingPress ? `\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/press/${editingPress._id}` : `\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/press`;
+      const url = editingPress ? `\/api/press/${editingPress._id}` : `\/api/press`;
       const method = editingPress ? 'PUT' : 'POST';
       const res = await fetch(url, { 
         method, 
@@ -434,7 +434,7 @@ const AdminPanel = () => {
   const handleDeletePress = async (id) => {
     showConfirm('Delete Press Release', 'Are you sure? This will remove the release from the public press page.', async () => {
       try {
-        const res = await fetch(`\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/press/${id}`, { method: 'DELETE', headers: getAuth() });
+        const res = await fetch(`\/api/press/${id}`, { method: 'DELETE', headers: getAuth() });
         if (res.ok) {
            showToast('Press release removed.', 'success');
            fetchPressReleases();
@@ -454,14 +454,14 @@ const AdminPanel = () => {
 
   const fetchBlogs = useCallback(async () => {
     try {
-      const res = await fetch(`\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/blogs`);
+      const res = await fetch(`\/api/blogs`);
       if (res.ok) setBlogs(await res.json());
     } catch (e) { console.error(e); }
   }, []);
 
   const handleSaveBlog = async () => {
     try {
-      const url = editingBlog ? `\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/blogs/${editingBlog._id}` : `\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/blogs`;
+      const url = editingBlog ? `\/api/blogs/${editingBlog._id}` : `\/api/blogs`;
       const method = editingBlog ? 'PUT' : 'POST';
       const res = await fetch(url, { 
         method, 
@@ -475,7 +475,7 @@ const AdminPanel = () => {
   const handleDeleteBlog = async (id) => {
     showConfirm('Delete Blog Post', 'Remove this story? This action is permanent.', async () => {
       try {
-        const res = await fetch(`\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/blogs/${id}`, { method: 'DELETE', headers: getAuth() });
+        const res = await fetch(`\/api/blogs/${id}`, { method: 'DELETE', headers: getAuth() });
         if (res.ok) {
            showToast('Blog post deleted.', 'success');
            fetchBlogs();
@@ -497,7 +497,7 @@ const AdminPanel = () => {
       if (propertyFilter.status) params.set('status', propertyFilter.status);
       if (propertyFilter.type) params.set('type', propertyFilter.type);
       if (propertyFilter.search) params.set('search', propertyFilter.search);
-      const res = await fetch(`\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/properties?${params}`, { headers: getAuth() });
+      const res = await fetch(`\/api/admin/properties?${params}`, { headers: getAuth() });
       if (res.ok) {
         setProperties(await res.json());
       } else {
@@ -512,7 +512,7 @@ const AdminPanel = () => {
 
   const updatePropertyStatus = async (id, status) => {
     try {
-      await fetch(`\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/properties/${id}/status`, {
+      await fetch(`\/api/admin/properties/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', ...getAuth() },
         body: JSON.stringify({ status })
@@ -524,7 +524,7 @@ const AdminPanel = () => {
   const deleteProperty = async (id) => {
     showConfirm('Remove Application', 'Are you sure you want to delete this property request?', async () => {
       try {
-        const res = await fetch(`\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/properties/${id}`, { method:'DELETE', headers: getAuth() });
+        const res = await fetch(`\/api/admin/properties/${id}`, { method:'DELETE', headers: getAuth() });
         if (res.ok) {
            showToast('Property application deleted.', 'success');
            fetchProperties();
@@ -539,7 +539,7 @@ const AdminPanel = () => {
   const [ledgerStats, setLedgerStats] = useState({ revenue: 0, giftCardRevenue: 0, insuranceRevenue: 0, giftCards: [], insurances: [], topReferrers: [] });
   const fetchLedger = useCallback(async () => {
     try {
-      const res = await fetch(`\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/stats/dashboard`, { headers: getAuth() });
+      const res = await fetch(`\/api/admin/stats/dashboard`, { headers: getAuth() });
       if (res.ok) {
         const data = await res.json();
         setLedgerStats(p => ({ ...p, ...data }));
@@ -547,13 +547,13 @@ const AdminPanel = () => {
         throw new Error('Could not load dashboard statistics');
       }
       
-      const gcRes = await fetch(`\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/stats/gift-cards`, { headers: getAuth() });
+      const gcRes = await fetch(`\/api/admin/stats/gift-cards`, { headers: getAuth() });
       if (gcRes.ok) {
         const gcData = await gcRes.json();
         setLedgerStats(p => ({ ...p, giftCards: gcData }));
       }
       
-      const insRes = await fetch(`\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/insurance/admin/all`, { headers: getAuth() });
+      const insRes = await fetch(`\/api/insurance/admin/all`, { headers: getAuth() });
       if (insRes.ok) {
         const insData = await insRes.json();
         setLedgerStats(p => ({ ...p, insurances: insData }));
