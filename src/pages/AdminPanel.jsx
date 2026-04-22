@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  LayoutDashboard, Users, User, Building2, Plane, Bus, Train, Car, Briefcase, DollarSign, Calendar, Settings, LogOut, Search, Eye, Edit, Trash2, Activity, PlusCircle, Zap, ToggleLeft, ToggleRight, Wifi, WifiOff, MapPin, Clock, Percent, TrendingUp, Sparkles, X, CheckCircle, XCircle, AlertCircle, RefreshCw, FileText, Mail, Link2, BookOpen, ChevronDown, ShieldCheck, Gift, Phone, Shield, Award
+  LayoutDashboard, Users, User, Building2, Plane, Bus, Train, Car, Briefcase, DollarSign, Calendar, Settings, LogOut, Search, Eye, Edit, Trash2, Activity, PlusCircle, Zap, ToggleLeft, ToggleRight, Wifi, WifiOff, MapPin, Clock, Percent, TrendingUp, Sparkles, X, CheckCircle, XCircle, AlertCircle, RefreshCw, FileText, Mail, Link2, BookOpen, ChevronDown, ShieldCheck, Gift, Phone, Shield, Award, Menu
 } from 'lucide-react';
 
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer, BarChart, Bar, Legend, PieChart, Pie, Cell } from 'recharts';
@@ -130,6 +130,12 @@ const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [newFeature, setNewFeature] = useState({ title:'', description:'', type:'promotion', icon:'🎉' });
   const [cityInput, setCityInput] = useState({});
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Mobile Sidebar State
+
+  // Auto-close sidebar on tab change (mobile)
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [activeTab]);
 
   useEffect(() => {
     let savedUser = null;
@@ -2161,8 +2167,16 @@ const AdminPanel = () => {
 
   return (
     <div className="ng-admin-root">
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="ng-admin-sidebar-overlay"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Premium Sidebar */}
-      <div className="ng-admin-sidebar">
+      <div className={`ng-admin-sidebar ${isSidebarOpen ? 'mobile-open' : ''}`}>
         {/* Brand Section */}
         <div className="ng-admin-brand">
           <div className="ng-admin-brand-logo">
@@ -2216,8 +2230,15 @@ const AdminPanel = () => {
       <div className="ng-admin-main">
         {/* Dynamic Top Bar */}
         <header className="ng-admin-topbar">
-          <div>
-            <h2 className="ng-admin-topbar-title">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <button 
+              className="ng-admin-mobile-menu-btn"
+              onClick={() => setIsSidebarOpen(true)}
+            >
+              <Menu size={20} />
+            </button>
+            <div>
+              <h2 className="ng-admin-topbar-title">
               {sidebarItems.find(i => i.id === activeTab)?.label || 'Dashboard'}
             </h2>
             <div className="ng-admin-topbar-sub">
