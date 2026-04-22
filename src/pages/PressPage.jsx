@@ -11,7 +11,7 @@ const PressPage = () => {
     useEffect(() => {
         const fetchPress = async () => {
             try {
-                const res = await fetch('http://localhost:5000/api/press');
+                const res = await fetch(`\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/press`);
                 if (res.ok) setPressReleases(await res.json());
             } catch (err) {
                 console.error('Failed to fetch press releases', err);

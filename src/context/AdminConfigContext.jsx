@@ -4,7 +4,7 @@ import { io } from 'socket.io-client';
 const AdminConfigContext = createContext(null);
 
 const SOCKET_URL = '/';
-const API = 'http://localhost:5000/api/admin';
+const API = `\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin`;
 
 // Default config shape (used before server responds)
 const DEFAULT_CONFIG = {
@@ -44,7 +44,7 @@ export const AdminConfigProvider = ({ children }) => {
 
   const fetchBookingCards = useCallback(async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/cards`);
+      const res = await fetch(`\${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/cards`);
       if (res.ok) {
         const data = await res.json();
         setBookingCards(data.cards || []);
