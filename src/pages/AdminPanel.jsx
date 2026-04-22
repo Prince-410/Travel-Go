@@ -2231,6 +2231,7 @@ const AdminPanel = () => {
               <span style={{ margin: '0 8px', opacity: 0.3 }}>|</span>
               <Calendar size={12} /> {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
             </div>
+            </div>
           </div>
 
           <div className="ng-admin-topbar-user">
