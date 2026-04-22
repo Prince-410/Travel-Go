@@ -31,13 +31,31 @@ export const AuthProvider = ({ children }) => {
   const authFetch = useCallback(async (url, options = {}) => {
     const headers = { 'Content-Type': 'application/json', ...options.headers };
     if (token) headers.Authorization = `Bearer ${token}`;
-    const res = await fetch(`${API}${url}`, { ...options, headers });
-    const data = await res.json();
+
+    let res;
+    try {
+      res = await fetch(`${API}${url}`, { ...options, headers });
+    } catch (networkError) {
+      throw new Error('Cannot connect to server. Please make sure the backend is running.');
+    }
+
+    // Safely parse JSON — handle empty or non-JSON responses
+    let data;
+    try {
+      const text = await res.text();
+      data = text ? JSON.parse(text) : {};
+    } catch (parseError) {
+      throw new Error('Server returned an invalid response. Please try again.');
+    }
+
     if (res.status === 401 && token) {
       logout();
       throw new Error(data.message || 'Session expired. Please login again.');
     } else if (res.status === 401) {
       throw new Error(data.message || 'Invalid credentials.');
+    }
+    if (res.status === 429) {
+      throw new Error(data.message || 'Too many attempts. Please wait a moment and try again.');
     }
     if (!res.ok) throw new Error(data.message || 'Something went wrong');
     return data;

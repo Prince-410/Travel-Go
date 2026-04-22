@@ -15,18 +15,35 @@ router.post('/register', async (req, res) => {
   try {
     const { name, email, phone, password } = req.body;
 
-    // Check existing user
-    const existing = await User.findOne({ email });
-    if (existing) {
-      return res.status(400).json({ message: 'Email already registered. Please login.' });
+    // ── Input validation ─────────────────────────────────────────────
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, message: 'Name is required.' });
+    }
+    if (!email || !email.trim()) {
+      return res.status(400).json({ success: false, message: 'Email is required.' });
+    }
+    // Basic email format check
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ success: false, message: 'Please enter a valid email address.' });
+    }
+    if (!password || password.length < 6) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters.' });
     }
 
-    const user = new User({ name, email, phone, password });
+    // Check existing user
+    const existing = await User.findOne({ email: email.toLowerCase().trim() });
+    if (existing) {
+      return res.status(400).json({ success: false, message: 'Email already registered. Please login.' });
+    }
+
+    const user = new User({ name: name.trim(), email: email.toLowerCase().trim(), phone: phone || '', password });
     await user.save();
 
     const token = generateToken(user._id);
 
     res.status(201).json({
+      success: true,
       message: 'Account created successfully! Welcome to TravelGo.',
       token,
       user: user.toJSON()
@@ -34,9 +51,9 @@ router.post('/register', async (req, res) => {
   } catch (error) {
     console.error('Register error:', error);
     if (error.code === 11000) {
-      return res.status(400).json({ message: 'Email already registered.' });
+      return res.status(400).json({ success: false, message: 'Email already registered.' });
     }
-    res.status(500).json({ message: 'Registration failed. Please try again.' });
+    res.status(500).json({ success: false, message: 'Registration failed. Please try again.' });
   }
 });
 
@@ -45,26 +62,35 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    // ── Input validation ─────────────────────────────────────────────
+    if (!email || !email.trim()) {
+      return res.status(400).json({ success: false, message: 'Email is required.' });
+    }
+    if (!password) {
+      return res.status(400).json({ success: false, message: 'Password is required.' });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
     if (!user) {
-      return res.status(401).json({ message: 'Invalid email or password.' });
+      return res.status(401).json({ success: false, message: 'Invalid email or password.' });
     }
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid email or password.' });
+      return res.status(401).json({ success: false, message: 'Invalid email or password.' });
     }
 
     const token = generateToken(user._id);
 
     res.json({
+      success: true,
       message: 'Login successful! Welcome back.',
       token,
       user: user.toJSON()
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ message: 'Login failed. Please try again.' });
+    res.status(500).json({ success: false, message: 'Login failed. Please try again.' });
   }
 });
 
