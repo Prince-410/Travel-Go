@@ -137,21 +137,6 @@ const AdminPanel = () => {
     setIsSidebarOpen(false);
   }, [activeTab]);
 
-  useEffect(() => {
-    let savedUser = null;
-    try {
-      const userStr = localStorage.getItem('user');
-      savedUser = userStr ? JSON.parse(userStr) : null;
-    } catch {
-      savedUser = null;
-    }
-    const role = savedUser?.role;
-    const isAdmin = role === 'admin' || (typeof role === 'string' && role.toLowerCase().includes('admin'));
-    if (!isAdmin) {
-      window.location.href = '/';
-    }
-  }, []);
-
   const getAuth = () => ({ 'Authorization': `Bearer ${localStorage.getItem('token')}` });
 
   const getInitials = (name) => {
