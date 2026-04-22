@@ -42,14 +42,14 @@ export const AuthProvider = ({ children }) => {
     const headers = { 'Content-Type': 'application/json', ...options.headers };
     if (token) headers.Authorization = `Bearer ${token}`;
 
+    const fullUrl = `${API}${url}`;
     let res;
     try {
-      const fullUrl = `${API}${url}`;
       console.log(`[authFetch] Fetching: ${fullUrl}`, options);
       res = await fetch(fullUrl, { ...options, headers });
     } catch (networkError) {
-      console.error('[authFetch] Network Error:', networkError);
-      throw new Error('Cannot connect to server. Please make sure the backend is running.');
+      console.error(`[authFetch] Network Error for ${fullUrl}:`, networkError);
+      throw new Error(`Cannot connect to server at ${fullUrl}. Please make sure the backend is running.`);
     }
 
     // Safely parse JSON — handle empty or non-JSON responses
@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }) => {
       if (res.status === 404) {
         throw new Error(`API endpoint not found (404) at ${fullUrl}. If this is production, please ensure your VITE_API_URL is configured in Vercel.`);
       }
-      throw new Error('Server returned an invalid response. This often happens if the backend URL is misconfigured in production.');
+      throw new Error(`Server returned an invalid response from ${fullUrl}. This often happens if the backend URL is misconfigured in production.`);
     }
 
     if (res.status === 401) {
