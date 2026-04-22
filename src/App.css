@@ -347,11 +347,23 @@ button {
 
 .search-tabs {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 15px;
   margin-bottom: 30px;
   position: relative;
   z-index: 2;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding-bottom: 10px;
+  scrollbar-width: none;
+}
+.search-tabs::-webkit-scrollbar {
+  display: none;
+}
+@media (min-width: 768px) {
+  .search-tabs {
+    justify-content: center;
+  }
 }
 
 .tab-btn {
@@ -512,7 +524,7 @@ button {
   opacity: 1;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .pill-shaped-filter {
     flex-direction: column;
     border-radius: 24px;
@@ -1005,7 +1017,7 @@ button {
   z-index: 999;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .nav-links {
     position: fixed;
     top: 80px;

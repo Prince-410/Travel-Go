@@ -561,7 +561,7 @@ const AIRecommendationsSection = () => {
           </div>
         </div>
 
-        <div className="ng-ai-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', width: '100%' }}>
+        <div className="ng-ai-grid">
           {AI_RECS.map((rec, i) => {
             const IconComp = rec.icon;
             return (
@@ -670,7 +670,7 @@ const CTASection = () => {
           </div>
 
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <div className="ng-stats-grid">
               {stats.map((s, i) => {
                 const SIcon = s.icon;
                 return (
@@ -723,7 +723,7 @@ const HomePage = () => {
           animation: 'ng-glow-ring 6s ease-in-out infinite', zIndex: 0
         }} />
 
-        <div className="ng-hero-content" style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: 60, alignItems: 'center' }}>
+        <div className="ng-hero-content">
           <div style={{ position: 'relative', zIndex: 5 }}>
             <div className="ng-hero-badge">
               <span className="ng-live-indicator" />

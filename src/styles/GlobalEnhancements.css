@@ -180,3 +180,166 @@ main, .animate-fade-in {
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.5px;
 }
+
+/* ─── ULTIMATE FLUID RESPONSIVENESS (Every Dimension) ───────────────── */
+html {
+  /* Fluid base font size: scales smoothly between 14px and 16px */
+  font-size: clamp(14px, 1vw + 10px, 16px);
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  /* Fluid padding on mobile */
+  padding: 0 clamp(15px, 5vw, 24px) !important;
+}
+
+/* Bulletproof Grids that never overflow on small screens like iPhone SE (320px) */
+.listing-grid, 
+.offers-grid, 
+.ng-destinations-grid, 
+.ng-features-grid,
+.ng-admin-inventory-grid,
+.ng-admin-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)) !important;
+  gap: clamp(16px, 4vw, 30px) !important;
+}
+
+.ng-hero-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+  align-items: center;
+}
+
+.ng-ai-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+  width: 100%;
+  gap: 20px;
+}
+
+.ng-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+@media (min-width: 1024px) {
+  .ng-hero-content {
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 60px;
+  }
+}
+
+
+/* Specifically for destination grid to allow the first item to span on desktop, but stack on mobile */
+@media (min-width: 1024px) {
+  .ng-destinations-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+  .ng-dest-card:first-child {
+    grid-row: span 2;
+  }
+}
+
+/* Fluid Typography for Headers */
+h1, .ng-hero-title {
+  font-size: clamp(2rem, 6vw + 0.5rem, 4.5rem) !important;
+  line-height: 1.1 !important;
+}
+
+h2, .section-title, .ng-section-title {
+  font-size: clamp(1.8rem, 5vw, 3rem) !important;
+  line-height: 1.2 !important;
+}
+
+h3, .offer-card h3 {
+  font-size: clamp(1.3rem, 4vw, 2rem) !important;
+}
+
+p, .ng-hero-subtitle, .ng-section-subtitle {
+  font-size: clamp(0.95rem, 2vw + 0.5rem, 1.2rem) !important;
+}
+
+/* Fluid Padding for Sections */
+.section, .ng-section, .ng-hero {
+  padding-top: clamp(60px, 10vw, 120px) !important;
+  padding-bottom: clamp(40px, 8vw, 80px) !important;
+}
+
+/* Fix mobile Search Bar stacking and width */
+.search-card, .ng-search-glass, .ng-search-bar {
+  width: 100% !important;
+}
+
+.ng-search-glass {
+  padding: clamp(15px, 4vw, 30px) !important;
+  border-radius: clamp(16px, 3vw, 24px) !important;
+}
+
+.ng-booking-tabs {
+  display: flex !important;
+  justify-content: flex-start !important;
+  overflow-x: auto !important;
+  white-space: nowrap !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  padding-bottom: 4px;
+}
+.ng-booking-tabs::-webkit-scrollbar {
+  display: none !important;
+}
+
+@media (min-width: 768px) {
+  .ng-booking-tabs {
+    justify-content: center !important;
+  }
+}
+
+
+.search-inputs-row, .ng-search-row {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 2vw, 12px) !important;
+}
+
+@media (min-width: 900px) {
+  .search-inputs-row, .ng-search-row {
+    flex-direction: row;
+  }
+}
+
+/* Forms and Inputs */
+input, select, textarea, .form-group, .ng-search-field {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Images always fit */
+img {
+  max-width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+/* Mobile Nav Overlay Fixes */
+@media (max-width: 768px) {
+  .nav-links {
+    height: 100vh;
+    overflow-y: auto;
+    padding-bottom: 100px !important;
+  }
+  
+  .header {
+    padding: 0 10px !important;
+  }
+}
+
+/* Prevent any horizontal overflow */
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}

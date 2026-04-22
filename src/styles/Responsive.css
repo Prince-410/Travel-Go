@@ -1,0 +1,670 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   MASTER RESPONSIVE SYSTEM — Mobile-First, All Devices
+   320px → 480px → 768px → 1024px → 1280px → 1536px+
+   Uses !important to override inline styles in JSX
+═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ─── BASE RESET ──────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: clamp(14px, 0.9vw + 10px, 16px);
+  scroll-behavior: smooth;
+}
+
+body {
+  max-width: 100vw;
+  overflow-x: hidden !important;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ─── UNIVERSAL GRID OVERRIDE ─────────────────────────────────────────────── */
+/* Force ALL inline grids to stack on mobile via attribute selectors */
+@media (max-width: 768px) {
+  div[style*="gridTemplateColumns"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Exception: 2-col grids like check-in/check-out can stay as 2-col */
+  div[style*="'1fr 1fr'"],
+  div[style*="1fr 1fr"] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Even 2-col grids stack on very small phones */
+  div[style*="'1fr 1fr'"],
+  div[style*="1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ─── HEADER / NAVBAR ─────────────────────────────────────────────────────── */
+.header {
+  padding: 0 10px !important;
+}
+
+.logo {
+  font-size: clamp(1.2rem, 4vw, 1.8rem) !important;
+  white-space: nowrap;
+}
+
+@media (max-width: 1024px) {
+  .nav-links {
+    height: 100vh;
+    overflow-y: auto;
+    padding-bottom: 100px !important;
+  }
+}
+
+/* ─── HERO SECTIONS (all pages) ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .hero-section {
+    height: auto !important;
+    min-height: 300px !important;
+    padding: 60px 15px 30px !important;
+  }
+
+  .hero-content h1 {
+    font-size: clamp(1.6rem, 7vw, 2.2rem) !important;
+    line-height: 1.15 !important;
+  }
+
+  .hero-content p {
+    font-size: clamp(0.9rem, 3.5vw, 1.1rem) !important;
+  }
+
+  /* Page hero banners with inline padding */
+  div[style*="padding: '80px 20px 40px'"],
+  div[style*="padding:'80px 20px 40px'"] {
+    padding: 60px 15px 25px !important;
+  }
+
+  /* Hero h1 tags inside pages */
+  h1[style*="fontSize:'3rem'"],
+  h1[style*="fontSize: '3rem'"] {
+    font-size: 1.8rem !important;
+    line-height: 1.15 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  h1[style*="fontSize:'3rem'"],
+  h1[style*="fontSize: '3rem'"] {
+    font-size: 1.5rem !important;
+  }
+}
+
+/* ─── SEARCH CARDS (all booking pages) ────────────────────────────────────── */
+@media (max-width: 768px) {
+  .search-card {
+    padding: 20px 15px !important;
+    border-radius: 16px !important;
+  }
+
+  .search-container-wrapper {
+    padding: 15px 10px !important;
+  }
+
+  /* Search form grid overrides — force single column */
+  div[style*="gridTemplateColumns: '1fr auto 1fr 1fr'"],
+  div[style*="gridTemplateColumns:'1fr auto 1fr 1fr'"],
+  div[style*="gridTemplateColumns: '1fr 1fr 1fr auto'"],
+  div[style*="gridTemplateColumns:'1fr 1fr 1fr auto'"],
+  div[style*="gridTemplateColumns: '1fr 1fr auto'"],
+  div[style*="gridTemplateColumns:'1fr 1fr auto'"],
+  div[style*="gridTemplateColumns: '1.5fr 1fr 1fr 1fr 1fr auto'"],
+  div[style*="gridTemplateColumns:'1.5fr 1fr 1fr 1fr 1fr auto'"],
+  div[style*="gridTemplateColumns: '1fr auto 1fr 1fr 1fr auto'"],
+  div[style*="gridTemplateColumns:'1fr auto 1fr 1fr 1fr auto'"] {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* Swap city button — center it */
+  button[style*="borderRadius: '50%'"],
+  button[style*="borderRadius:'50%'"] {
+    align-self: center !important;
+    justify-self: center !important;
+    margin: 0 auto !important;
+  }
+
+  /* Search buttons full width */
+  button[style*="whiteSpace: 'nowrap'"],
+  button[style*="whiteSpace:'nowrap'"] {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+/* ─── BOOKING TABS ────────────────────────────────────────────────────────── */
+.ng-booking-tabs,
+.search-tabs {
+  display: flex !important;
+  overflow-x: auto !important;
+  white-space: nowrap !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 6px;
+}
+
+.ng-booking-tabs::-webkit-scrollbar,
+.search-tabs::-webkit-scrollbar {
+  display: none !important;
+}
+
+@media (min-width: 768px) {
+  .ng-booking-tabs,
+  .search-tabs {
+    justify-content: center !important;
+  }
+}
+
+/* ─── LISTING / RESULT GRIDS ─────────────────────────────────────────────── */
+.listing-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)) !important;
+}
+
+/* Result cards grid */
+div[style*="repeat(auto-fill,minmax(290px"],
+div[style*="repeat(auto-fill,minmax(300px"],
+div[style*="repeat(auto-fill,minmax(320px"],
+div[style*="repeat(auto-fill, minmax(290px"],
+div[style*="repeat(auto-fill, minmax(300px"],
+div[style*="repeat(auto-fill, minmax(320px"],
+div[style*="repeat(auto-fill, minmax(400px"] {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)) !important;
+}
+
+/* Trust badges / features grids */
+div[style*="repeat(auto-fit,minmax(170px"],
+div[style*="repeat(auto-fit, minmax(170px"],
+div[style*="repeat(auto-fit, minmax(180px"],
+div[style*="repeat(auto-fit,minmax(165px"],
+div[style*="repeat(auto-fit, minmax(240px"] {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 170px), 1fr)) !important;
+}
+
+/* ─── FLIGHT CARDS ────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Flight card main row — stack vertically */
+  div[style*="alignItems: 'center', gap: 16, flexWrap: 'wrap'"],
+  div[style*="alignItems:'center',gap:16,flexWrap:'wrap'"] {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  /* Flight card price section */
+  div[style*="textAlign: 'right', minWidth: 140"],
+  div[style*="textAlign:'right',minWidth:140"] {
+    text-align: center !important;
+    width: 100% !important;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding-top: 12px;
+    margin-top: 4px;
+  }
+
+  /* Flight time displays */
+  div[style*="fontSize: '1.8rem'"],
+  div[style*="fontSize:'1.8rem'"] {
+    font-size: 1.3rem !important;
+  }
+
+  /* Flight price */
+  div[style*="fontSize: '1.9rem'"],
+  div[style*="fontSize:'1.9rem'"] {
+    font-size: 1.5rem !important;
+  }
+}
+
+/* ─── HOMEPAGE HERO CONTENT ───────────────────────────────────────────────── */
+.ng-hero-content {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 30px !important;
+  align-items: center !important;
+}
+
+@media (min-width: 1024px) {
+  .ng-hero-content {
+    grid-template-columns: 1.2fr 0.8fr !important;
+    gap: 60px !important;
+  }
+}
+
+.ng-hero-title {
+  font-size: clamp(1.8rem, 6vw, 4rem) !important;
+  line-height: 1.1 !important;
+}
+
+.ng-hero-subtitle {
+  font-size: clamp(0.9rem, 2.5vw, 1.15rem) !important;
+}
+
+.ng-hero-stats {
+  flex-wrap: wrap !important;
+  gap: 15px !important;
+}
+
+@media (max-width: 480px) {
+  .ng-hero-badge {
+    font-size: 0.65rem !important;
+  }
+
+  .ng-hero-stat-value {
+    font-size: 1.3rem !important;
+  }
+
+  /* CTA buttons stack on phone */
+  div[style*="marginTop: 40, display: 'flex'"],
+  div[style*="marginTop:40,display:'flex'"] {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  div[style*="marginTop: 40"] a,
+  div[style*="marginTop: 40"] button {
+    width: 100% !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+}
+
+/* ─── AI RECOMMENDATIONS GRID ─────────────────────────────────────────────── */
+.ng-ai-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)) !important;
+  gap: 16px !important;
+  width: 100% !important;
+}
+
+/* ─── STATS GRID (CTA Section) ────────────────────────────────────────────── */
+.ng-stats-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 12px !important;
+}
+
+@media (max-width: 380px) {
+  .ng-stats-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ─── DESTINATIONS GRID ───────────────────────────────────────────────────── */
+.ng-destinations-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)) !important;
+}
+
+@media (min-width: 1024px) {
+  .ng-destinations-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+  .ng-dest-card:first-child {
+    grid-row: span 2;
+  }
+}
+
+/* ─── DEALS SCROLL ────────────────────────────────────────────────────────── */
+.ng-deals-scroll {
+  padding-bottom: 10px !important;
+}
+
+@media (max-width: 768px) {
+  .ng-deal-card {
+    flex: 0 0 85vw !important;
+    max-width: 340px !important;
+  }
+}
+
+/* ─── SEARCH BAR (Homepage) ───────────────────────────────────────────────── */
+.ng-search-bar {
+  width: 100% !important;
+}
+
+.ng-search-glass {
+  padding: clamp(12px, 3vw, 28px) !important;
+}
+
+@media (max-width: 768px) {
+  .ng-search-row {
+    flex-direction: column !important;
+  }
+
+  .ng-search-field {
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+    width: 100% !important;
+  }
+
+  .ng-search-field:last-of-type {
+    border-bottom: none !important;
+  }
+
+  .ng-search-btn {
+    width: 100% !important;
+    border-radius: 12px !important;
+  }
+}
+
+/* ─── SECTION HEADERS ─────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .ng-section-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .ng-section-title {
+    font-size: clamp(1.4rem, 5vw, 2rem) !important;
+  }
+}
+
+/* ─── FEATURES GRID ───────────────────────────────────────────────────────── */
+.ng-features-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)) !important;
+}
+
+/* ─── CTA SECTION ─────────────────────────────────────────────────────────── */
+.ng-cta-section {
+  flex-direction: column !important;
+}
+
+@media (min-width: 768px) {
+  .ng-cta-section {
+    flex-direction: row !important;
+  }
+}
+
+.ng-cta-title {
+  font-size: clamp(1.5rem, 5vw, 2.5rem) !important;
+}
+
+@media (max-width: 480px) {
+  .ng-cta-buttons {
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+  .ng-cta-btn {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+/* ─── LIVE ACTIVITY FEED (Homepage right panel) ───────────────────────────── */
+@media (max-width: 768px) {
+  div[style*="borderRadius: 32, padding: 28"],
+  div[style*="borderRadius:32,padding:28"] {
+    padding: 18px !important;
+    border-radius: 20px !important;
+  }
+}
+
+/* ─── BUS / TRAIN SEAT GRID WITHIN MODAL ──────────────────────────────────── */
+@media (max-width: 600px) {
+  div[style*="repeat(auto-fit,minmax(80px"] {
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)) !important;
+    gap: 6px !important;
+  }
+}
+
+/* ─── OFFERS GRID ─────────────────────────────────────────────────────────── */
+.offers-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)) !important;
+}
+
+@media (max-width: 480px) {
+  .offer-card {
+    padding: 20px !important;
+  }
+  .offer-card h3 {
+    font-size: 1.2rem !important;
+  }
+}
+
+/* ─── FOOTER ──────────────────────────────────────────────────────────────── */
+.footer-links {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)) !important;
+  gap: 30px !important;
+}
+
+@media (max-width: 480px) {
+  .footer {
+    padding: 40px 0 20px !important;
+  }
+  .footer h4 {
+    font-size: 1rem !important;
+    margin-bottom: 15px !important;
+  }
+}
+
+/* ─── MODALS ──────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Hotel modal, seat selection modal, etc */
+  div[style*="maxWidth:860"],
+  div[style*="maxWidth: 860"],
+  div[style*="max-width: 860px"] {
+    max-width: 100% !important;
+    margin: 10px !important;
+    border-radius: 16px !important;
+  }
+
+  /* Modal tabs */
+  div[style*="display:'flex',borderBottom"] button,
+  div[style*="display: 'flex', borderBottom"] button {
+    padding: 10px 8px !important;
+    font-size: 0.72rem !important;
+  }
+}
+
+/* ─── SORT BUTTONS ROW ────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  div[style*="display: 'flex', gap: 8"] {
+    flex-wrap: wrap !important;
+  }
+}
+
+/* ─── CAB PAGE DYNAMIC GRID ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Cab search grid with dynamic columns */
+  div[style*="'1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ─── MULTI-CITY FLIGHT LEG ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  div[style*="'1fr 1fr 1fr auto'"] {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+}
+
+/* ─── PROFILE PAGE ────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  div[style*="repeat(4, 1fr)"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  div[style*="repeat(3, 1fr)"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  div[style*="'1.2fr 1fr'"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 480px) {
+  div[style*="repeat(4, 1fr)"],
+  div[style*="repeat(2, 1fr)"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ─── GIFT CARDS / REFER-EARN PAGE ────────────────────────────────────────── */
+@media (max-width: 768px) {
+  div[style*="'1.2fr 1fr', gap: '60px'"],
+  div[style*="'1.2fr 1fr',gap:'60px'"] {
+    grid-template-columns: 1fr !important;
+    gap: 30px !important;
+  }
+}
+
+/* ─── CART PAGE ────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  div[style*="'1fr 350px'"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ─── CORPORATE / CONTACT PAGE ────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  div[style*="'1fr 1.2fr'"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  div[style*="'1.5fr 1fr'"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ─── PRESS PAGE ──────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  div[style*="repeat(auto-fit, minmax(260px"],
+  div[style*="repeat(auto-fit,minmax(260px"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ─── INSURANCE PAGE ──────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  div[style*="repeat(auto-fit, minmax(320px"],
+  div[style*="repeat(auto-fit,minmax(320px"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ─── BUTTONS — Full Width on Mobile ──────────────────────────────────────── */
+@media (max-width: 480px) {
+  .login-btn {
+    width: 100% !important;
+    text-align: center !important;
+  }
+}
+
+/* ─── TYPOGRAPHY FLUID ────────────────────────────────────────────────────── */
+h1 {
+  font-size: clamp(1.8rem, 6vw, 3.5rem) !important;
+  line-height: 1.15 !important;
+  word-break: break-word;
+}
+
+h2 {
+  font-size: clamp(1.4rem, 4vw, 2.5rem) !important;
+}
+
+h3 {
+  font-size: clamp(1.1rem, 3vw, 1.6rem) !important;
+}
+
+/* ─── CHEAPEST DAY BAR ────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  div[style*="display: 'flex', gap: 8, flexWrap: 'wrap'"] button {
+    min-width: 60px !important;
+    flex: 1 1 calc(25% - 8px) !important;
+  }
+}
+
+/* ─── ADMIN PANEL RESPONSIVE (already in NextGenAdmin.css) ────────────────── */
+/* Reinforced here for full coverage */
+@media (max-width: 768px) {
+  .ng-admin-sidebar {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 70px !important;
+    flex-direction: row !important;
+    border-right: none !important;
+    border-top: 1px solid rgba(129,140,248,0.2) !important;
+  }
+
+  .ng-admin-brand,
+  .ng-admin-status,
+  .ng-admin-logout,
+  .ng-admin-nav-section {
+    display: none !important;
+  }
+
+  .ng-admin-nav {
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    align-items: center !important;
+  }
+
+  .ng-admin-nav-item {
+    flex-direction: column !important;
+    font-size: 0.6rem !important;
+    min-width: 70px !important;
+    white-space: nowrap !important;
+  }
+
+  .ng-admin-main {
+    margin-left: 0 !important;
+    padding-bottom: 80px !important;
+  }
+
+  .ng-admin-content {
+    padding: 12px !important;
+  }
+
+  .ng-admin-stat-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .ng-admin-inventory-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .ng-admin-toolbar {
+    flex-direction: column !important;
+  }
+
+  .ng-admin-table-wrap {
+    overflow-x: auto !important;
+  }
+
+  .ng-admin-modal {
+    max-width: 95vw !important;
+  }
+}
+
+/* ─── HOLIDAY PAGE SPLIT ──────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  div[style*="'1fr 1fr',gap:0"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ─── PREVENT ALL HORIZONTAL OVERFLOW ─────────────────────────────────────── */
+section, main, .container, [style*="maxWidth"] {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* ─── ULTRA-WIDE SCREENS (2xl: 1536px+) ───────────────────────────────────── */
+@media (min-width: 1536px) {
+  .container {
+    max-width: 1400px !important;
+  }
+}
