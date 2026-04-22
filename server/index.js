@@ -66,18 +66,20 @@ io.on('connection', (socket) => {
   });
 });
 
-// ─── Security ────────────────────────────────────────────────────────────────
+// ─── Middleware ──────────────────────────────────────────────────────────────
+app.use(cors({ origin: corsOriginHandler, credentials: true }));
+app.use(express.json({ limit: '10mb' }));
+
+// ─── Security & Rate Limiting ───────────────────────────────────────────────
 app.use(helmet({ contentSecurityPolicy: false }));
 
-// Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,
-  message: { message: 'Too many requests. Please try again later.' }
+  max: 200,
+  message: { success: false, message: 'Too many requests. Please try again later.' }
 });
 app.use('/api/', limiter);
 
-// Auth-specific rate limit (stricter)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -86,9 +88,14 @@ const authLimiter = rateLimit({
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
 
-// ─── Middleware ──────────────────────────────────────────────────────────────
-app.use(cors({ origin: corsOriginHandler, credentials: true }));
-app.use(express.json({ limit: '10mb' }));
+app.use((req, res, next) => {
+  const originalSend = res.send;
+  res.send = function (body) {
+    console.log(`[DEBUG] ${req.method} ${req.url} - Status: ${res.statusCode} - Body: ${typeof body === 'string' ? body.substring(0, 100) : 'object'}`);
+    return originalSend.apply(this, arguments);
+  };
+  next();
+});
 
 // ─── Routes ──────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
@@ -111,6 +118,18 @@ app.use('/api/admin/stats', adminStatsRoutes);
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString(), sockets: io.engine.clientsCount });
+});
+
+// ─── Global Error Handler ────────────────────────────────────────────────────
+app.use((err, req, res, next) => {
+  console.error('🔥 Global Error:', err);
+  if (res.headersSent) {
+    return next(err);
+  }
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'An unexpected error occurred on the server.'
+  });
 });
 
 // ─── MongoDB ─────────────────────────────────────────────────────────────────

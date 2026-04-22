@@ -43,21 +43,27 @@ export const AuthProvider = ({ children }) => {
     let data;
     try {
       const text = await res.text();
+      console.log(`[authFetch] URL: ${url}, Status: ${res.status}, Body: ${text}`);
       data = text ? JSON.parse(text) : {};
     } catch (parseError) {
+      console.error('[authFetch] Parse error:', parseError);
       throw new Error('Server returned an invalid response. Please try again.');
     }
 
-    if (res.status === 401 && token) {
-      logout();
-      throw new Error(data.message || 'Session expired. Please login again.');
-    } else if (res.status === 401) {
-      throw new Error(data.message || 'Invalid credentials.');
+    if (res.status === 401) {
+      if (token) logout();
+      throw new Error(data.message || 'Invalid or expired session. Please login again.');
     }
+    
     if (res.status === 429) {
-      throw new Error(data.message || 'Too many attempts. Please wait a moment and try again.');
+      throw new Error(data.message || 'Too many attempts. Please try again in 15 minutes.');
     }
-    if (!res.ok) throw new Error(data.message || 'Something went wrong');
+
+    if (!res.ok) {
+      console.error(`[authFetch] API Error ${res.status}:`, data);
+      const errorMsg = data.message || data.error || (res.statusText ? `Error ${res.status}: ${res.statusText}` : `Server error (${res.status})`);
+      throw new Error(errorMsg);
+    }
     return data;
   }, [token]);
 

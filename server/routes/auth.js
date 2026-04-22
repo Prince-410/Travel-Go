@@ -7,6 +7,10 @@ const router = express.Router();
 
 // Generate JWT
 const generateToken = (userId) => {
+  if (!process.env.JWT_SECRET) {
+    console.error('❌ CRITICAL: JWT_SECRET is not defined in .env');
+    throw new Error('JWT_SECRET missing');
+  }
   return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
 };
 
