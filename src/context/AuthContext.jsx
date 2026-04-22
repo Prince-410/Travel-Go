@@ -60,7 +60,11 @@ export const AuthProvider = ({ children }) => {
       data = text ? JSON.parse(text) : {};
     } catch (parseError) {
       console.error('[authFetch] Parse error:', parseError);
-      throw new Error('Server returned an invalid response. Please try again.');
+      // Detailed error for production debugging
+      if (res.status === 404) {
+        throw new Error(`API endpoint not found (404) at ${fullUrl}. If this is production, please ensure your VITE_API_URL is configured in Vercel.`);
+      }
+      throw new Error('Server returned an invalid response. This often happens if the backend URL is misconfigured in production.');
     }
 
     if (res.status === 401) {
