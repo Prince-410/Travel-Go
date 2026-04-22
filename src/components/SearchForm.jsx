@@ -681,12 +681,13 @@ const SearchForm = ({ type = 'flight', onSearch }) => {
                 </div>
 
                 <form className="search-form" onSubmit={handleSearch}>
-                    <div className="search-inputs-row">
-                        {renderFields()}
-                    </div>
-                    <div className="search-btn-container">
-                        <button type="submit" className="search-submit-btn">
-                            SEARCH
+                    <div className="pill-shaped-filter">
+                        <div className="search-inputs-row">
+                            {renderFields()}
+                        </div>
+                        <button type="submit" className="search-submit-btn-inline">
+                            <Search size={22} className="search-btn-icon" />
+                            <span className="search-btn-text">Search</span>
                         </button>
                     </div>
                 </form>

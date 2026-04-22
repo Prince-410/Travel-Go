@@ -24,6 +24,9 @@ const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const ReferEarnPage = lazy(() => import('./pages/ReferEarnPage'));
 const GiftCardsPage = lazy(() => import('./pages/GiftCardsPage'));
 const TravelInsurancePage = lazy(() => import('./pages/TravelInsurancePage'));
+const ActivityPage = lazy(() => import('./pages/ActivityPage'));
+const OffersPage = lazy(() => import('./pages/OffersPage'));
+const CartPage = lazy(() => import('./pages/CartPage'));
 const CorporateTravelPage = lazy(() => import('./pages/CorporateTravelPage'));
 const ListPropertyPage = lazy(() => import('./pages/ListPropertyPage'));
 const FAQsPage = lazy(() => import('./pages/FAQsPage'));
@@ -81,6 +84,9 @@ function AppContent() {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/refer-earn" element={<ReferEarnPage />} />
             <Route path="/gift-cards" element={<GiftCardsPage />} />
+            <Route path="/activity" element={<ActivityPage />} />
+            <Route path="/offers" element={<OffersPage />} />
+            <Route path="/cart" element={<CartPage />} />
             <Route path="/travel-insurance" element={<TravelInsurancePage />} />
             <Route path="/corporate-travel" element={<CorporateTravelPage />} />
             <Route path="/list-property" element={<ListPropertyPage />} />

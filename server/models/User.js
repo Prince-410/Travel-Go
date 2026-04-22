@@ -69,7 +69,7 @@ const userSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Pre-save for hashing and referral code
-userSchema.pre('save', async function (next) {
+userSchema.pre('save', async function () {
   // Hash password
   if (this.isModified('password')) {
     const salt = await bcrypt.genSalt(12);
@@ -80,7 +80,6 @@ userSchema.pre('save', async function (next) {
   if (!this.referralCode) {
     this.referralCode = 'TG' + Math.random().toString(36).substr(2, 6).toUpperCase();
   }
-  next();
 });
 
 // Compare password method
