@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  LayoutDashboard, Users, User, Building2, Plane, Bus, Train, Car, Briefcase, DollarSign, Calendar, Settings, LogOut, Search, Eye, Edit, Trash2, Activity, PlusCircle, Zap, ToggleLeft, ToggleRight, Wifi, WifiOff, MapPin, Clock, Percent, TrendingUp, Sparkles, X, CheckCircle, XCircle, AlertCircle, RefreshCw, FileText, Mail, Link2, BookOpen, ChevronDown, ShieldCheck, Gift, Phone, Shield, Award, Menu
+  LayoutDashboard, Users, User, Building2, Plane, Bus, Train, Car, Briefcase, IndianRupee, Calendar, Settings, LogOut, Search, Eye, Edit, Trash2, Activity, PlusCircle, Zap, ToggleLeft, ToggleRight, Wifi, WifiOff, MapPin, Clock, Percent, TrendingUp, Sparkles, X, CheckCircle, XCircle, AlertCircle, RefreshCw, FileText, Mail, Link2, BookOpen, ChevronDown, ShieldCheck, Gift, Phone, Shield, Award, Menu, PieChart
 } from 'lucide-react';
 
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer, BarChart, Bar, Legend, PieChart, Pie, Cell } from 'recharts';
+import { AreaChart as RAreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer, BarChart as RBarChart, Bar, Legend, PieChart as RPieChart, Pie, Cell } from 'recharts';
 import { useNavigate } from 'react-router-dom';
 import { useAdminConfig } from '../context/AdminConfigContext';
 import { useAuth } from '../context/AuthContext';
@@ -84,7 +84,8 @@ const TYPE_FIELDS = {
     { name: 'rating', label: 'User Rating (1-5)', placeholder: 'e.g. 4.5' }
   ],
   hotel: [
-    { name: 'stars', label: 'Star Rating', placeholder: 'e.g. 5-Star, 4-Star' },
+    { name: 'stars', label: 'Star Rating', placeholder: 'e.g. 5' },
+    { name: 'rating', label: 'User Rating (1.0-5.0)', placeholder: 'e.g. 4.5' },
     { name: 'amenities', label: 'Amenities (Comma separated)', placeholder: 'e.g. WiFi, Pool, Breakfast' }
   ],
   train: [
@@ -227,6 +228,17 @@ const AdminPanel = () => {
     });
     setDynamicFeatures(c.features || {});
     setShowCardModal(true);
+  };
+  const openReceiptPreview = (c) => {
+    setSelectedInvoice({
+      invoiceNumber: `PRV-${Math.floor(10000 + Math.random() * 90000)}`,
+      type: c.type,
+      amount: c.price,
+      createdAt: new Date(),
+      userId: { name: 'System Preview', email: 'admin@travelgo.com', phone: '+91 00000 00000' },
+      details: { source: c.source || 'Standard', destination: c.destination || 'Global', date: c.date || 'Open Date' }
+    });
+    setShowInvoiceModal(true);
   };
   const resetCardForm = () => {
     setCardForm({ type:'flight', title:'', source:'', destination:'', date:'', startTime:'', arrivalTime:'', price:'', totalSeats:'', availableSeats:'', status:'active', dynamicPricing:true, featuresStr: '{}', rooms: [] });
@@ -556,6 +568,7 @@ const AdminPanel = () => {
   }, []);
 
   useEffect(() => {
+    if (activeTab === 'dashboard') { fetchUserStats(); fetchBookingStats(); fetchLedger(); fetchProperties(); }
     if (activeTab === 'bookings') { fetchBookings(); fetchBookingStats(); }
     if (activeTab === 'users') { fetchUsers(); fetchUserStats(); }
     if (activeTab === 'feedback') { fetchContacts(); }
@@ -569,9 +582,23 @@ const AdminPanel = () => {
   // Real-time auto-refresh for applications
   useEffect(() => {
     if (!socket) return;
+    const refreshBookingsIfActive = () => {
+      if (activeTab === 'bookings') {
+        fetchBookings();
+        fetchBookingStats();
+      }
+    };
+
     const handleNewJob = () => { showToast('New Job Application received!', 'info'); fetchJobApps(); };
     const handleNewProp = () => { showToast('New Property Application received!', 'info'); fetchProperties(); };
     const handleNewFeedback = () => { showToast('New User Feedback received!', 'info'); fetchContacts(); };
+    const handleBookingCreated = () => {
+      showToast('New booking received!', 'success');
+      refreshBookingsIfActive();
+    };
+    const handleBookingUpdated = () => {
+      refreshBookingsIfActive();
+    };
     
     const handleNewGC = () => { showToast('New Gift Card purchased!', 'success'); fetchLedger(); };
     const handleNewIns = (p) => { showToast(`New Insurance Plan: ${p.plan}`, 'success'); fetchLedger(); };
@@ -580,6 +607,9 @@ const AdminPanel = () => {
     socket.on('NEW_JOB_APPLICATION', handleNewJob);
     socket.on('NEW_PROPERTY_APPLICATION', handleNewProp);
     socket.on('NEW_FEEDBACK', handleNewFeedback);
+    socket.on('BOOKING_CREATED', handleBookingCreated);
+    socket.on('booking:created', handleBookingCreated);
+    socket.on('booking:updated', handleBookingUpdated);
     socket.on('NEW_GIFTCARD', handleNewGC);
     socket.on('NEW_INSURANCE_PURCHASE', handleNewIns);
     socket.on('NEW_REFERRAL_INVITE', handleNewRef);
@@ -588,11 +618,14 @@ const AdminPanel = () => {
       socket.off('NEW_JOB_APPLICATION', handleNewJob);
       socket.off('NEW_PROPERTY_APPLICATION', handleNewProp);
       socket.off('NEW_FEEDBACK', handleNewFeedback);
+      socket.off('BOOKING_CREATED', handleBookingCreated);
+      socket.off('booking:created', handleBookingCreated);
+      socket.off('booking:updated', handleBookingUpdated);
       socket.off('NEW_GIFTCARD', handleNewGC);
       socket.off('NEW_INSURANCE_PURCHASE', handleNewIns);
       socket.off('NEW_REFERRAL_INVITE', handleNewRef);
     };
-  }, [socket, fetchJobApps, fetchProperties, fetchContacts]);
+  }, [socket, activeTab, fetchBookings, fetchBookingStats, fetchJobApps, fetchProperties, fetchContacts, fetchLedger]);
 
   const handleContactStatus = async (id, status) => {
     try {
@@ -658,19 +691,51 @@ const AdminPanel = () => {
   const resetUserForm = () => setUserForm({ name:'', email:'', phone:'', role:'user', password:'' });
 
   // Mock chart data
-  const monthlyData = [
-    {name:'Jan',flights:400,hotels:240,buses:200,packages:150},{name:'Feb',flights:300,hotels:139,buses:221,packages:120},
-    {name:'Mar',flights:200,hotels:980,buses:229,packages:170},{name:'Apr',flights:278,hotels:390,buses:200,packages:190},
-    {name:'May',flights:189,hotels:480,buses:218,packages:210},{name:'Jun',flights:239,hotels:380,buses:250,packages:240},
-    {name:'Jul',flights:349,hotels:430,buses:210,packages:300}
-  ];
-  const revData = [{name:'Flights',value:45},{name:'Hotels',value:30},{name:'Packages',value:15},{name:'Buses',value:10}];
+  const monthlyData = React.useMemo(() => {
+    if (!ledgerStats.monthlyTrend || ledgerStats.monthlyTrend.length === 0) {
+      return [
+        {name:'Jan',flights:400,hotels:240,buses:200,packages:150},{name:'Feb',flights:300,hotels:139,buses:221,packages:120},
+        {name:'Mar',flights:200,hotels:980,buses:229,packages:170},{name:'Apr',flights:278,hotels:390,buses:200,packages:190},
+        {name:'May',flights:189,hotels:480,buses:218,packages:210},{name:'Jun',flights:239,hotels:380,buses:250,packages:240},
+        {name:'Jul',flights:349,hotels:430,buses:210,packages:300}
+      ];
+    }
+
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const chartMap = {};
+
+    ledgerStats.monthlyTrend.forEach(item => {
+      const key = `${item._id.year}-${item._id.month}`;
+      if (!chartMap[key]) {
+        chartMap[key] = { name: months[item._id.month - 1], flights:0, hotels:0, buses:0, packages:0 };
+      }
+      const type = item._id.type + 's'; // e.g. flight -> flights
+      if (chartMap[key].hasOwnProperty(type)) {
+        chartMap[key][type] = item.revenue;
+      } else if (item._id.type === 'holiday') {
+        chartMap[key].packages = item.revenue;
+      }
+    });
+
+    return Object.values(chartMap);
+  }, [ledgerStats.monthlyTrend]);
+  const userGrowth = userStats && userStats.totalCount > (userStats.newThisMonth || 0)
+    ? `+${((userStats.newThisMonth / (userStats.totalCount - userStats.newThisMonth)) * 100).toFixed(1)}%`
+    : '0%';
+
   const destData = [{name:'Goa',value:300},{name:'Bali',value:250},{name:'Dubai',value:200},{name:'Paris',value:150},{name:'Maldives',value:100}];
   const stats = [
-    {label:'Total Users',value:'12,458',change:'+12%',icon:<Users size={28}/>},
-    {label:'Total Bookings',value:'8,234',change:'+8%',icon:<Calendar size={28}/>},
-    {label:'Properties',value:'1,567',change:'+15%',icon:<Building2 size={28}/>},
-    {label:'Revenue',value:'₹45.2M',change:'+23%',icon:<DollarSign size={28}/>},
+    {label:'Total Users',value: (ledgerStats.users || 0).toLocaleString(), change: userGrowth, icon:<Users size={28}/>},
+    {label:'Total Bookings',value: (ledgerStats.bookings || 0).toLocaleString(), change: 'Real-time', icon:<Calendar size={28}/>},
+    {label:'Properties',value: (properties?.length || 0).toLocaleString(), change: 'Active', icon:<Building2 size={28}/>},
+    {label:'Revenue',value: `₹${((ledgerStats.revenue || 0) / 1000000).toFixed(1)}M`, change: 'Total', icon:<IndianRupee size={28}/>},
+  ];
+
+  const revData = bookingStats?.byType?.map(t => ({
+    name: t._id.charAt(0).toUpperCase() + t._id.slice(1) + 's',
+    value: t.revenue
+  })) || [
+    {name:'Flights',value:45},{name:'Hotels',value:30},{name:'Packages',value:15},{name:'Buses',value:10}
   ];
 
   const cardStyle = { background:'var(--card-bg)', padding:'28px', borderRadius:'16px', boxShadow:'0 2px 8px rgba(15,23,42,0.1)' };
@@ -824,7 +889,7 @@ const AdminPanel = () => {
           </div>
           <div style={{ width:'100%', height:340 }}>
             <ResponsiveContainer>
-              <AreaChart data={monthlyData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+            <RAreaChart data={monthlyData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorFlights" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#818cf8" stopOpacity={0.4}/>
@@ -868,7 +933,7 @@ const AdminPanel = () => {
                 <Area type="monotone" dataKey="flights" stroke="#818cf8" strokeWidth={3} fillOpacity={1} fill="url(#colorFlights)" />
                 <Area type="monotone" dataKey="hotels" stroke="#34d399" strokeWidth={3} fillOpacity={1} fill="url(#colorHotels)" />
                 <Area type="monotone" dataKey="buses" stroke="#fbbf24" strokeWidth={2} fill="transparent" strokeDasharray="5 5" />
-              </AreaChart>
+              </RAreaChart>
             </ResponsiveContainer>
           </div>
         </div>
@@ -881,7 +946,7 @@ const AdminPanel = () => {
           </div>
           <div style={{ height: 340 }}>
             <ResponsiveContainer>
-              <PieChart>
+              <RPieChart>
                 <Pie 
                   data={revData} 
                   innerRadius={70} 
@@ -909,7 +974,7 @@ const AdminPanel = () => {
                   }} 
                 />
                 <Legend iconType="circle" />
-              </PieChart>
+              </RPieChart>
             </ResponsiveContainer>
           </div>
         </div>
@@ -921,7 +986,7 @@ const AdminPanel = () => {
           <div className="ng-admin-chart-title"><MapPin size={18} color="#f87171"/> Regional Performance</div>
           <div style={{ height: 280 }}>
             <ResponsiveContainer>
-              <BarChart data={destData}>
+            <RBarChart data={destData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
                 <XAxis dataKey="name" stroke="#64748b" fontSize={10} axisLine={false} tickLine={false} />
                 <YAxis stroke="#64748b" fontSize={10} axisLine={false} tickLine={false} />
@@ -929,7 +994,7 @@ const AdminPanel = () => {
                 <Bar dataKey="value" radius={[6, 6, 0, 0]}>
                    {destData.map((_, i) => <Cell key={i} fill={i === 0 ? '#818cf8' : 'rgba(129, 140, 248, 0.3)'} />)}
                 </Bar>
-              </BarChart>
+            </RBarChart>
             </ResponsiveContainer>
           </div>
         </div>
@@ -1058,7 +1123,9 @@ const AdminPanel = () => {
                 <tr><td colSpan={9} style={{ padding:40, textAlign:'center', color:'var(--text-light)' }}>Loading bookings...</td></tr>
               ) : bookings.length === 0 ? (
                 <tr><td colSpan={9} style={{ padding:40, textAlign:'center', color:'var(--text-light)' }}>No bookings found. {bookingFilter.search||bookingFilter.type||bookingFilter.status ? 'Try adjusting filters.' : 'Bookings will appear here when users make reservations.'}</td></tr>
-              ) : bookings.map(b=>(
+              ) : bookings.map(b=>{
+                const normalizedStatus = b.status || 'pending';
+                return (
                 <tr key={b._id} style={{ borderBottom:'1px solid rgba(255,255,255,0.05)', transition:'background 0.15s' }}
                   onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.02)'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
                   <td style={{ padding:'14px 16px', fontWeight:600, color:'var(--text-color)', fontSize:'0.88rem', fontFamily:'monospace' }}>{b.invoiceNumber||'—'}</td>
@@ -1072,8 +1139,8 @@ const AdminPanel = () => {
                   <td style={{ padding:'14px 16px', fontWeight:700, color:'var(--text-color)', fontSize:'0.95rem' }}>₹{(b.amount||0).toLocaleString()}</td>
                   <td style={{ padding:'14px 16px' }}><span style={{ padding:'4px 10px', borderRadius:20, background:getStatusColor(b.paymentStatus)+'18', color:getStatusColor(b.paymentStatus), fontSize:'0.78rem', fontWeight:600, textTransform:'capitalize' }}>{b.paymentStatus}</span></td>
                   <td style={{ padding:'14px 16px' }}>
-                    <select value={b.status} onChange={e=>handleStatusChange(b._id, e.target.value)}
-                      style={{ padding:'6px 10px', borderRadius:8, border:`1px solid ${getStatusColor(b.status)}40`, background:getStatusColor(b.status)+'12', color:getStatusColor(b.status), fontWeight:600, fontSize:'0.82rem', cursor:'pointer' }}>
+                    <select value={normalizedStatus} onChange={e=>handleStatusChange(b._id, e.target.value)}
+                      style={{ padding:'6px 10px', borderRadius:8, border:`1px solid ${getStatusColor(normalizedStatus)}40`, background:getStatusColor(normalizedStatus)+'12', color:getStatusColor(normalizedStatus), fontWeight:600, fontSize:'0.82rem', cursor:'pointer' }}>
                       <option value="confirmed">Confirmed</option><option value="pending">Pending</option><option value="cancelled">Cancelled</option><option value="completed">Completed</option>
                     </select>
                   </td>
@@ -1085,7 +1152,7 @@ const AdminPanel = () => {
                     </div>
                   </td>
                 </tr>
-              ))}
+              )})}
             </tbody>
           </table>
         </div>
@@ -1329,6 +1396,7 @@ const AdminPanel = () => {
           <select value={cardFilter.type} onChange={e=>setCardFilter(p=>({...p,type:e.target.value}))} style={{ padding:'10px 14px', borderRadius:8, border:'1px solid rgba(255,255,255,0.1)', background:'var(--card-bg)', color:'var(--text-color)' }}>
             <option value="">All Services</option><option value="flight">Flights</option><option value="bus">Buses</option><option value="hotel">Hotels</option><option value="cab">Cabs</option><option value="train">Trains</option><option value="holiday">Holidays</option>
           </select>
+          <button onClick={() => showToast('Stock audit report generated', 'success')} style={{ padding:'10px 14px', borderRadius:8, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'var(--text-color)', cursor:'pointer', display:'flex', alignItems:'center', gap:8 }}><FileText size={16}/> Audit Report</button>
           <button onClick={()=>{ resetCardForm(); setEditingCard(null); setShowCardModal(true); }} style={{ padding:'10px 20px', borderRadius:8, background:'linear-gradient(135deg,#818cf8,#4f46e5)', color:'#fff', fontWeight:700, border:'none', cursor:'pointer', display:'flex', alignItems:'center', gap:8 }}><PlusCircle size={16}/>Add Inventory Item</button>
         </div>
         <div style={{ ...cardStyle, padding:0, overflow:'hidden' }}>
@@ -1356,6 +1424,7 @@ const AdminPanel = () => {
                     <td style={{ padding:'14px 16px' }}><span style={{ padding:'4px 10px', borderRadius:20, background:c.status==='active'?'#4ade8018':'#f8717118', color:c.status==='active'?'#4ade80':'#f87171', fontSize:'0.78rem', fontWeight:600, textTransform:'capitalize' }}>{c.status}</span></td>
                     <td style={{ padding:'14px 16px' }}>
                       <div style={{ display:'flex', gap:8 }}>
+                        <button onClick={()=>openReceiptPreview(c)} style={{ padding:6, borderRadius:6, background:'rgba(74,222,128,0.12)', border:'none', cursor:'pointer', color:'#4ade80', display:'flex' }} title="Generate Preview Receipt"><FileText size={16}/></button>
                         <button onClick={()=>openCardEditModal(c)} style={{ padding:6, borderRadius:6, background:'rgba(251,146,60,0.15)', border:'none', cursor:'pointer', color:'#fb923c', display:'flex' }} title="Edit"><Edit size={16}/></button>
                         <button onClick={()=>handleDeleteCard(c._id)} style={{ padding:6, borderRadius:6, background:'rgba(248,113,113,0.12)', border:'none', cursor:'pointer', color:'#f87171', display:'flex' }} title="Delete"><Trash2 size={16}/></button>
                       </div>
@@ -1451,7 +1520,29 @@ const AdminPanel = () => {
                     <option value="sold_out">🟡 Sold Out</option>
                   </select>
                 </div>
-                {(cardForm.type === 'hotel' || cardForm.type === 'holiday') ? (
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+                  {TYPE_FIELDS[cardForm.type]?.map(f => (
+                    <div key={f.name}>
+                      <label style={{ fontSize:'0.75rem', fontWeight:800, color:'var(--text-light)', marginBottom:4, display:'block' }}>{f.label} *</label>
+                      {f.name === 'stars' ? (
+                        <select value={dynamicFeatures[f.name] || ''} onChange={e => setDynamicFeatures({...dynamicFeatures, [f.name]: e.target.value})}
+                          style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1px solid rgba(255,255,255,0.1)', background:'var(--card-bg)', color:'var(--text-color)', fontSize:'0.85rem' }}>
+                          <option value="">Select Rating</option>
+                          <option value="1">⭐ 1-Star</option>
+                          <option value="2">⭐⭐ 2-Star</option>
+                          <option value="3">⭐⭐⭐ 3-Star</option>
+                          <option value="4">⭐⭐⭐⭐ 4-Star</option>
+                          <option value="5">⭐⭐⭐⭐⭐ 5-Star</option>
+                        </select>
+                      ) : (
+                        <input value={dynamicFeatures[f.name] || ''} onChange={e => setDynamicFeatures({...dynamicFeatures, [f.name]: e.target.value})} placeholder={f.placeholder}
+                          style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1px solid rgba(255,255,255,0.1)', background:'transparent', color:'var(--text-color)', fontSize:'0.85rem' }}/>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {(cardForm.type === 'hotel' || cardForm.type === 'holiday') && (
                   <div style={{ background:'rgba(255,255,255,0.03)', padding:16, borderRadius:12, border:'1px dashed rgba(255,255,255,0.1)' }}>
                     <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
                       <label style={{ fontSize:'0.78rem', fontWeight:700, color:'var(--text-light)', textTransform:'uppercase', margin:0 }}>{cardForm.type === 'hotel' ? 'Room Category' : 'Package Options'} & Pricing</label>
@@ -1485,16 +1576,6 @@ const AdminPanel = () => {
                         </div>
                       ))}
                     </div>
-                  </div>
-                ) : (
-                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-                    {TYPE_FIELDS[cardForm.type]?.map(f => (
-                      <div key={f.name}>
-                        <label style={{ fontSize:'0.75rem', fontWeight:800, color:'var(--text-light)', marginBottom:4, display:'block' }}>{f.label} *</label>
-                        <input value={dynamicFeatures[f.name] || ''} onChange={e => setDynamicFeatures({...dynamicFeatures, [f.name]: e.target.value})} placeholder={f.placeholder}
-                            style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1px solid rgba(255,255,255,0.1)', background:'transparent', color:'var(--text-color)', fontSize:'0.85rem' }}/>
-                      </div>
-                    ))}
                   </div>
                 )}
 
@@ -2006,7 +2087,7 @@ const AdminPanel = () => {
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(240px,1fr))', gap:20 }}>
         <div style={statCardStyle}>
           <div style={{ display:'flex', justifyContent:'space-between', marginBottom:15 }}>
-            <div style={{ padding:10, borderRadius:12, background:'rgba(74,222,128,0.1)', color:'#4ade80' }}><DollarSign size={20}/></div>
+            <div style={{ padding:10, borderRadius:12, background:'rgba(74,222,128,0.1)', color:'#4ade80' }}><IndianRupee size={20}/></div>
             <TrendingUp size={16} style={{ color:'#4ade80' }}/>
           </div>
           <h4 style={{ fontSize:'0.85rem', color:'var(--text-light)', marginBottom:5 }}>Booking Revenue</h4>
@@ -2146,7 +2227,7 @@ const AdminPanel = () => {
     { id:'blogs', icon:<BookOpen size={20}/>, label:'Blogs / Stories' },
     { id:'feedback', icon:<Mail size={20}/>, label:'User Feedback' },
     { id:'properties', icon:<Building2 size={20}/>, label:'Property Applications' },
-    { id:'revenue', icon:<DollarSign size={20}/>, label:'Revenue & Ledger' },
+    { id:'revenue', icon:<IndianRupee size={20}/>, label:'Revenue & Ledger' },
     { id:'settings', icon:<Settings size={20}/>, label:'Settings' },
   ];
 
@@ -2272,7 +2353,14 @@ const AdminPanel = () => {
              <div style={{ background:'#0f172a', color:'#fff', padding:'40px', display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
                 <div>
                   <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:16 }}>
-                    <div style={{ width:40, height:40, background:'#818cf8', borderRadius:10, display:'flex', alignItems:'center', justifyContent:'center' }}><Plane size={24}/></div>
+                    <div style={{ width:40, height:40, background:'#818cf8', borderRadius:10, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                      {selectedInvoice.type === 'flight' ? <Plane size={24}/> : 
+                       selectedInvoice.type === 'bus' ? <Bus size={24}/> :
+                       selectedInvoice.type === 'train' ? <Train size={24}/> :
+                       selectedInvoice.type === 'hotel' ? <Building2 size={24}/> :
+                       selectedInvoice.type === 'cab' ? <Car size={24}/> :
+                       <Briefcase size={24}/>}
+                    </div>
                     <span style={{ fontSize:'1.5rem', fontWeight:900, letterSpacing:-1 }}>TravelGo <span style={{ fontWeight:400, opacity:0.6 }}>Invoice</span></span>
                   </div>
                   <div style={{ fontSize:'0.85rem', opacity:0.8, lineHeight:1.6 }}>

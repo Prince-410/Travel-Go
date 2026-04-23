@@ -3,7 +3,8 @@ const crypto = require('crypto');
 const Razorpay = require('razorpay');
 const Booking = require('../models/Booking');
 const { auth } = require('../middleware/auth');
-const { applyConfirmedInventory, releaseConfirmedInventory } = require('../utils/bookingInventory');
+const { applyConfirmedInventory, releaseConfirmedInventory, getRequestedUnits, getSeatNumbers } = require('../utils/bookingInventory');
+const { buildReceiptSnapshot, formatDate, formatTime } = require('../utils/receipt');
 
 const router = express.Router();
 
@@ -17,13 +18,32 @@ const razorpay = new Razorpay({
 router.post('/create-order', auth, async (req, res) => {
   try {
     const { amount, type, details } = req.body;
+    const requestedUnits = getRequestedUnits(details || {});
+    const totalAmount = Number(amount || 0);
+    const tax = Number(details?.tax ?? Math.round(totalAmount * 0.05));
+    const extraCharges = Number(details?.extraCharges ?? 0);
+    const finalAmount = totalAmount + tax + extraCharges;
+    const pricePerSeat = requestedUnits > 0 ? Math.round(totalAmount / requestedUnits) : totalAmount;
+    const now = new Date();
 
     // Create booking record
     const booking = new Booking({
       userId: req.userId,
+      userName: req.user?.name || '',
       type,
       details,
       amount,
+      totalAmount,
+      tax,
+      extraCharges,
+      finalAmount,
+      pricePerSeat,
+      source: details?.source || '',
+      destination: details?.destination || '',
+      journeyDate: details?.journeyDate || details?.date || details?.checkIn || '',
+      bookingDate: formatDate(now),
+      bookingTime: formatTime(now),
+      seats: getSeatNumbers(details || {}),
       status: 'pending',
       paymentStatus: 'pending'
     });
@@ -98,10 +118,24 @@ router.post('/verify-payment', auth, async (req, res) => {
     }
 
     await booking.save();
+    const populated = await Booking.findById(booking._id).populate('userId', 'name email phone');
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('BOOKING_CREATED', populated);
+      io.emit('AVAILABILITY_CHANGED', {
+        cardId: booking.details?.cardId || booking.details?.flightId || booking.details?.busId || booking.details?.trainId || booking.details?.hotelId || booking.details?.holidayId || booking.details?.cabId || null,
+        type: booking.type,
+        source: booking.source || booking.details?.source || '',
+        destination: booking.destination || booking.details?.destination || '',
+        date: booking.journeyDate || booking.details?.date || '',
+        status: booking.status
+      });
+    }
 
     res.json({
       message: 'Payment verified! Booking confirmed.',
-      booking: booking.toJSON()
+      booking: populated.toJSON(),
+      receipt: buildReceiptSnapshot(populated, populated.userId)
     });
   } catch (error) {
     console.error('Verify payment error:', error);
@@ -204,7 +238,8 @@ router.get('/invoice/:bookingId', auth, async (req, res) => {
       refund: {
         amount: booking.refundAmount,
         status: booking.refundStatus
-      }
+      },
+      receipt: buildReceiptSnapshot(booking, booking.userId)
     };
 
     res.json({ invoice });

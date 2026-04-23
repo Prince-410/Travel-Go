@@ -23,6 +23,7 @@ const propertyRoutes = require('./routes/property');
 const adminPropertyRoutes = require('./routes/adminProperties');
 const insuranceRoutes = require('./routes/insurance');
 const adminStatsRoutes = require('./routes/adminStats');
+const bookingRoutes = require('./routes/booking');
 
 const app = express();
 const httpServer = createServer(app);
@@ -114,6 +115,7 @@ app.use('/api/properties', propertyRoutes);
 app.use('/api/admin/properties', adminPropertyRoutes);
 app.use('/api/insurance', insuranceRoutes);
 app.use('/api/admin/stats', adminStatsRoutes);
+app.use('/api/booking', bookingRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

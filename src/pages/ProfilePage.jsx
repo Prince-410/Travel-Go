@@ -203,7 +203,7 @@ const ProfilePage = () => {
               {TABS.map(t => (
                 <button key={t.id} onClick={() => setTab(t.id)}
                   style={{
-                    width: '100%', padding: '16px 20px', border: 'none', cursor: 'pointer',
+                    width: '100%', padding: '16px 20px', cursor: 'pointer',
                     background: tab === t.id ? 'linear-gradient(135deg, rgba(129,140,248,0.15), rgba(129,140,248,0.05))' : 'transparent',
                     color: tab === t.id ? '#fff' : '#64748b', fontWeight: 800, fontSize: '0.9rem',
                     display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left',

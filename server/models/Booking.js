@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 
 const bookingSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  bookingId: { type: String, unique: true, index: true },
+  userName: { type: String },
 
   type: {
     type: String,
@@ -71,6 +73,11 @@ const bookingSchema = new mongoose.Schema({
 
   // Payment
   amount: { type: Number, required: true },
+  pricePerSeat: { type: Number, default: 0 },
+  totalAmount: { type: Number, default: 0 },
+  tax: { type: Number, default: 0 },
+  extraCharges: { type: Number, default: 0 },
+  finalAmount: { type: Number, default: 0 },
   currency: { type: String, default: 'INR' },
   paymentId: String,
   razorpayOrderId: String,
@@ -85,6 +92,12 @@ const bookingSchema = new mongoose.Schema({
 
   // Invoice
   invoiceNumber: String,
+  source: { type: String, default: '' },
+  destination: { type: String, default: '' },
+  journeyDate: { type: String, default: '' },
+  bookingDate: { type: String, default: '' },
+  bookingTime: { type: String, default: '' },
+  seats: { type: [String], default: [] },
 
   // Refund
   refundAmount: { type: Number, default: 0 },
@@ -94,6 +107,9 @@ const bookingSchema = new mongoose.Schema({
 
 // Auto-generate invoice number
 bookingSchema.pre('save', function () {
+  if (!this.bookingId) {
+    this.bookingId = 'BK' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 6).toUpperCase();
+  }
   if (!this.invoiceNumber) {
     this.invoiceNumber = 'TG-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
   }

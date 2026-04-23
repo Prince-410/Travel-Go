@@ -18,17 +18,28 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [localBookings, setLocalBookings] = useState([]);
   const isAdmin = typeof user?.role === 'string' && user.role.toLowerCase().includes('admin');
 
   // Auto-login from localStorage
   useEffect(() => {
-    const savedToken = localStorage.getItem('token');
-    const savedUser = localStorage.getItem('user');
-    if (savedToken && savedUser) {
-      setToken(savedToken);
-      setUser(JSON.parse(savedUser));
+    try {
+      const savedToken = localStorage.getItem('token');
+      const savedUser = localStorage.getItem('user');
+      if (savedToken && savedUser) {
+        const parsedUser = JSON.parse(savedUser);
+        setToken(savedToken);
+        setUser(parsedUser);
+      }
+    } catch (error) {
+      console.error('Failed to restore auth session:', error);
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setToken(null);
+      setUser(null);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   const logout = () => {
@@ -163,7 +174,31 @@ export const AuthProvider = ({ children }) => {
   };
 
   const getBookings = async () => {
-    return authFetch('/payment/bookings');
+    try {
+      const serverData = await authFetch('/payment/bookings');
+      // Merge local and server bookings
+      const serverBookings = Array.isArray(serverData.bookings) ? serverData.bookings : [];
+      
+      // De-duplicate and reconcile: filter out local bookings that already exist on the server
+      const serverIds = new Set(serverBookings.map(b => b._id));
+      const serverInvoices = new Set(serverBookings.map(b => b.invoiceNumber));
+      
+      const uniqueLocal = localBookings.filter(b => !serverIds.has(b._id) && !serverInvoices.has(b.invoiceNumber));
+      
+      // Update local state to remove reconciled items (prevents growth and duplicates)
+      if (uniqueLocal.length !== localBookings.length) {
+        setLocalBookings(uniqueLocal);
+      }
+      
+      return { bookings: [...uniqueLocal, ...serverBookings] };
+    } catch (e) {
+      // Fallback to local if server fails
+      return { bookings: localBookings };
+    }
+  };
+
+  const addLocalBooking = (booking) => {
+    setLocalBookings(prev => [booking, ...prev]);
   };
 
   const getBooking = async (id) => {
@@ -187,6 +222,7 @@ export const AuthProvider = ({ children }) => {
       saveTrip, removeTrip, toggleWishlist,
       addPaymentMethod, removePaymentMethod,
       createOrder, verifyPayment, getBookings, getBooking, requestRefund, getInvoice,
+      addLocalBooking,
       authFetch
     }}>
       {children}

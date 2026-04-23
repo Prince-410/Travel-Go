@@ -419,7 +419,7 @@ const FlightPage = () => {
     ];
 
     return (
-        <div style={{ minHeight: '100vh', background: 'transparent', fontFamily: "'Outfit', sans-serif", color: '#fff', paddingBottom: 60 }}>
+        <div style={{ position: 'relative', minHeight: '100vh', background: 'transparent', fontFamily: "'Outfit', sans-serif", color: '#fff', paddingBottom: 60 }}>
             {/* Hero Banner */}
             <div style={{
                 position: 'relative', padding: '80px 20px 40px',

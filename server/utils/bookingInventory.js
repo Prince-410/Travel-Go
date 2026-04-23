@@ -127,6 +127,15 @@ const emitCardUpdate = (app, card) => {
   const io = app?.get?.('io');
   if (io) {
     io.emit('UPDATE_BOOKING_CARD', card);
+    io.emit('AVAILABILITY_CHANGED', {
+      cardId: card._id,
+      type: card.type,
+      source: card.source,
+      destination: card.destination,
+      date: card.date,
+      availableSeats: card.availableSeats,
+      status: card.status
+    });
   }
 };
 

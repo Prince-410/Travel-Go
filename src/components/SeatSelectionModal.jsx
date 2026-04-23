@@ -4,6 +4,8 @@ import { useUI } from '../context/UIContext';
 import { useAdminConfig } from '../context/AdminConfigContext';
 import '../App.css';
 import PaymentModal from './PaymentModal';
+import BookingReceipt from './BookingReceipt';
+import { useAuth } from '../context/AuthContext';
 
 const SeatSelectionModal = ({ flight, onClose }) => {
     const { showToast, showConfirm } = useUI();
@@ -11,14 +13,34 @@ const SeatSelectionModal = ({ flight, onClose }) => {
     const liveFlight = bookingCards.find(card => card._id === flight._id) || flight;
     const [selectedSeats, setSelectedSeats] = useState([]);
     const [showPayment, setShowPayment] = useState(false);
+    const [currentBooking, setCurrentBooking] = useState(null);
     const selectedSeatsRef = useRef([]);
-    
+    const { authFetch, user } = useAuth();
+    const [viewport, setViewport] = useState({
+        width: typeof window !== 'undefined' ? window.innerWidth : 1280,
+        height: typeof window !== 'undefined' ? window.innerHeight : 800
+    });
+
+    useEffect(() => {
+        const onResize = () => {
+            setViewport({
+                width: window.innerWidth,
+                height: window.innerHeight
+            });
+        };
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
+    }, []);
+
+    const isTabletOrSmaller = viewport.width < 1024;
+    const isMobile = viewport.width < 768;
+
     // Fallback default seat map if admin hasn't defined one
     const defaultSeatMap = Array.from({ length: 10 }, (_, i) => [
         `${i + 1}A`, `${i + 1}B`, `${i + 1}C`, `${i + 1}D`, `${i + 1}E`, `${i + 1}F`
     ]);
     const seatMap = (liveFlight.seatMap && liveFlight.seatMap.length > 0) ? liveFlight.seatMap : defaultSeatMap;
-    
+
     // Check if deadline is gone or flight is running
     const isDeadlinePassed = () => {
         const departureTime = liveFlight.startTime || liveFlight.time;
@@ -29,7 +51,7 @@ const SeatSelectionModal = ({ flight, onClose }) => {
             let hour = parseInt(h);
             if (ampm?.toLowerCase() === 'pm' && hour < 12) hour += 12;
             if (ampm?.toLowerCase() === 'am' && hour === 12) hour = 0;
-            
+
             const departure = new Date(liveFlight.date);
             departure.setHours(hour, parseInt(minutes), 0, 0);
             return new Date() > departure;
@@ -37,7 +59,7 @@ const SeatSelectionModal = ({ flight, onClose }) => {
     };
 
     const isLocked = isDeadlinePassed() || liveFlight.status === 'inactive' || liveFlight.status === 'sold_out';
-    
+
     // Real-time unavailable seats from the Global Context (updated via WebSocket)
     const unavailable = [...new Set([...(liveFlight.lockedSeats || []), ...(liveFlight.occupiedSeats || [])])];
 
@@ -103,34 +125,34 @@ const SeatSelectionModal = ({ flight, onClose }) => {
 
     return (
         <div style={{
-            position: 'fixed',
+            position: 'absolute',
             inset: 0,
-            background: 'rgba(0, 0, 0, 0.75)',
-            backdropFilter: 'blur(12px)',
-            zIndex: 10000,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '20px',
-            animation: 'fadeIn 0.3s ease-out'
+            background: 'rgba(0, 0, 0, 0.7)',
+            backdropFilter: 'blur(8px)',
+            zIndex: 1000,
+            padding: isMobile ? '10px' : '20px',
+            animation: 'fadeIn 0.3s ease-out',
+            borderRadius: 'inherit' // Match parent curvature if any
         }}>
             <div style={{
                 background: 'linear-gradient(145deg, #0f172a 0%, #1e1b4b 100%)',
                 borderRadius: '28px',
-                width: '100%',
-                maxWidth: '850px',
+                width: isTabletOrSmaller ? 'min(96vw, 860px)' : 'min(92vw, 850px)',
                 border: '1px solid rgba(167, 139, 250, 0.15)',
                 boxShadow: '0 30px 60px -12px rgba(0, 0, 0, 0.8), 0 0 40px rgba(167, 139, 250, 0.1)',
-                display: 'flex',
+                display: isTabletOrSmaller ? 'block' : 'flex',
                 overflow: 'hidden',
-                maxHeight: '92vh',
-                position: 'relative'
+                maxHeight: isTabletOrSmaller ? '92vh' : 'min(88vh, 760px)',
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)'
             }}>
                 {/* Left Side: Seat Map */}
                 <div style={{
                     flex: 1,
-                    padding: '36px',
-                    borderRight: '1px solid rgba(167, 139, 250, 0.1)',
+                    padding: isMobile ? '18px' : '28px',
+                    borderRight: isTabletOrSmaller ? 'none' : '1px solid rgba(167, 139, 250, 0.1)',
                     background: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23a78bfa\' fill-opacity=\'0.03\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'/%3E%3C/g%3E%3C/svg%3E")',
                     overflowY: 'auto',
                     position: 'relative'
@@ -138,22 +160,22 @@ const SeatSelectionModal = ({ flight, onClose }) => {
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '25px', alignItems: 'center' }}>
                         <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 800, background: 'linear-gradient(to right, #fff, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Select your seats</h3>
                         <div style={{ display: 'flex', gap: '16px', fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px'}}>
-                                <div style={{width: 14, height: 14, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 4}}></div> Available
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <div style={{ width: 14, height: 14, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 4 }}></div> Available
                             </span>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px'}}>
-                                <div style={{width: 14, height: 14, background: 'linear-gradient(135deg, #a78bfa, #8b5cf6)', borderRadius: 4, boxShadow: '0 0 8px rgba(167,139,250,0.5)'}}></div> Selected
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <div style={{ width: 14, height: 14, background: 'linear-gradient(135deg, #a78bfa, #8b5cf6)', borderRadius: 4, boxShadow: '0 0 8px rgba(167,139,250,0.5)' }}></div> Selected
                             </span>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px'}}>
-                                <div style={{width: 14, height: 14, background: 'rgba(255,255,255,0.08)', borderRadius: 4}}></div> Unavailable
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <div style={{ width: 14, height: 14, background: 'rgba(255,255,255,0.08)', borderRadius: 4 }}></div> Unavailable
                             </span>
                         </div>
                     </div>
 
-                    <div style={{ 
-                        background: 'rgba(0,0,0,0.2)', 
+                    <div style={{
+                        background: 'rgba(0,0,0,0.2)',
                         border: '1px solid rgba(167, 139, 250, 0.08)',
-                        borderRadius: '60px 60px 30px 30px', 
+                        borderRadius: '60px 60px 30px 30px',
                         padding: '40px 20px',
                         display: 'flex',
                         flexDirection: 'column',
@@ -175,16 +197,16 @@ const SeatSelectionModal = ({ flight, onClose }) => {
                         {!isLocked ? (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
                                 {seatMap.map((rowArr, rIdx) => (
-                                    <div key={rIdx} style={{ display: 'flex', gap: '30px', alignItems: 'center' }}>
+                                    <div key={rIdx} style={{ display: 'flex', gap: isMobile ? '12px' : '30px', alignItems: 'center' }}>
                                         <div style={{ display: 'flex', gap: '8px' }}>
                                             {rowArr.slice(0, Math.ceil(rowArr.length / 2)).map((seatId) => {
                                                 const isAvail = !unavailable.includes(seatId);
                                                 const isSel = selectedSeats.includes(seatId);
                                                 return (
-                                                    <button 
+                                                    <button
                                                         key={seatId}
                                                         onClick={() => toggleSeat(seatId)}
-                                                        onMouseEnter={(e) => { if(isAvail && !isSel) e.currentTarget.style.transform = 'scale(1.1) translateY(-2px)'; }}
+                                                        onMouseEnter={(e) => { if (isAvail && !isSel) e.currentTarget.style.transform = 'scale(1.1) translateY(-2px)'; }}
                                                         onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; }}
                                                         style={{
                                                             width: '42px', height: '46px', borderRadius: '12px 12px 6px 6px',
@@ -195,7 +217,7 @@ const SeatSelectionModal = ({ flight, onClose }) => {
                                                             display: 'flex', justifyContent: 'center', alignItems: 'center', transition: 'all 0.2s', fontSize: '0.8rem', fontWeight: 800
                                                         }}
                                                     >
-                                                        {isSel ? <User size={16}/> : (isAvail ? seatId : '')}
+                                                        {isSel ? <User size={16} /> : (isAvail ? seatId : '')}
                                                     </button>
                                                 )
                                             })}
@@ -206,10 +228,10 @@ const SeatSelectionModal = ({ flight, onClose }) => {
                                                 const isAvail = !unavailable.includes(seatId);
                                                 const isSel = selectedSeats.includes(seatId);
                                                 return (
-                                                    <button 
+                                                    <button
                                                         key={seatId}
                                                         onClick={() => toggleSeat(seatId)}
-                                                        onMouseEnter={(e) => { if(isAvail && !isSel) e.currentTarget.style.transform = 'scale(1.1) translateY(-2px)'; }}
+                                                        onMouseEnter={(e) => { if (isAvail && !isSel) e.currentTarget.style.transform = 'scale(1.1) translateY(-2px)'; }}
                                                         onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; }}
                                                         style={{
                                                             width: '42px', height: '46px', borderRadius: '12px 12px 6px 6px',
@@ -220,7 +242,7 @@ const SeatSelectionModal = ({ flight, onClose }) => {
                                                             display: 'flex', justifyContent: 'center', alignItems: 'center', transition: 'all 0.2s', fontSize: '0.8rem', fontWeight: 800
                                                         }}
                                                     >
-                                                        {isSel ? <User size={16}/> : (isAvail ? seatId : '')}
+                                                        {isSel ? <User size={16} /> : (isAvail ? seatId : '')}
                                                     </button>
                                                 )
                                             })}
@@ -230,7 +252,7 @@ const SeatSelectionModal = ({ flight, onClose }) => {
                             </div>
                         ) : (
                             /* THE "ADMIN DECIDES" STATE - SHOWS WHEN DEADLINE GONE OR RUNNING */
-                            <div style={{ 
+                            <div style={{
                                 padding: '60px 40px', textAlign: 'center', animation: 'fadeIn 0.5s ease-out',
                                 background: 'rgba(15,23,42,0.4)', borderRadius: '24px', border: '1px solid rgba(248,113,113,0.2)',
                                 maxWidth: '350px'
@@ -240,7 +262,7 @@ const SeatSelectionModal = ({ flight, onClose }) => {
                                 <p style={{ color: '#94a3b8', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: 24 }}>
                                     The deadline for this journey has passed or the vehicle is currently in transit. Online bookings are now restricted.
                                 </p>
-                                <div style={{ 
+                                <div style={{
                                     display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px',
                                     background: 'rgba(248,113,113,0.05)', borderRadius: 12, border: '1px solid rgba(248,113,113,0.1)'
                                 }}>
@@ -254,16 +276,17 @@ const SeatSelectionModal = ({ flight, onClose }) => {
 
                 {/* Right Side: Summary */}
                 <div style={{
-                    width: '340px',
-                    padding: '36px',
+                    width: isTabletOrSmaller ? '100%' : '340px',
+                    padding: isMobile ? '18px' : '28px',
                     display: 'flex',
                     flexDirection: 'column',
-                    background: 'rgba(255,255,255,0.02)'
+                    background: 'rgba(255,255,255,0.02)',
+                    borderTop: isTabletOrSmaller ? '1px solid rgba(167, 139, 250, 0.1)' : 'none'
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '24px' }}>
                         <button onClick={onClose} style={{ color: '#94a3b8', background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '50%', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
-                            onMouseEnter={(e)=>e.currentTarget.style.background='rgba(255,255,255,0.1)'}
-                            onMouseLeave={(e)=>e.currentTarget.style.background='rgba(255,255,255,0.05)'}>
+                            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                            onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}>
                             <X size={18} />
                         </button>
                     </div>
@@ -272,7 +295,7 @@ const SeatSelectionModal = ({ flight, onClose }) => {
                         <h4 style={{ color: '#a78bfa', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>Journey Details</h4>
                         <h2 style={{ margin: '0 0 4px 0', fontSize: '1.4rem', fontWeight: 800 }}>{liveFlight.airline || 'Flight'} {liveFlight.flightNumber}</h2>
                         <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.85rem', fontWeight: 500 }}>
-                            {liveFlight.source?.city || liveFlight.source} <span style={{color: '#64748b', margin: '0 4px'}}>→</span> {liveFlight.destination?.city || liveFlight.destination}
+                            {liveFlight.source?.city || liveFlight.source} <span style={{ color: '#64748b', margin: '0 4px' }}>→</span> {liveFlight.destination?.city || liveFlight.destination}
                         </p>
                     </div>
 
@@ -289,8 +312,8 @@ const SeatSelectionModal = ({ flight, onClose }) => {
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                 {selectedSeats.map(seat => (
-                                    <div key={seat} style={{ 
-                                        display: 'flex', 
+                                    <div key={seat} style={{
+                                        display: 'flex',
                                         justifyContent: 'space-between',
                                         background: 'rgba(167,139,250,0.08)',
                                         border: '1px solid rgba(167,139,250,0.2)',
@@ -306,39 +329,84 @@ const SeatSelectionModal = ({ flight, onClose }) => {
                         )}
                     </div>
 
-                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '24px', marginTop: '24px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16, alignItems: 'center' }}>
-                            <span style={{ color: '#94a3b8', fontSize: '0.9rem', fontWeight: 600 }}>Total Fare</span>
-                            <span style={{ fontSize: '1.4rem', fontWeight: 900, color: '#fff' }}>₹{(liveFlight.price * (selectedSeats.length || 1)).toLocaleString('en-IN')}</span>
+                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '24px', marginTop: '24px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16, alignItems: 'center' }}>
+                                <span style={{ color: '#94a3b8', fontSize: '0.9rem', fontWeight: 600 }}>Total Fare</span>
+                                <span style={{ fontSize: '1.4rem', fontWeight: 900, color: '#fff' }}>₹{(liveFlight.price * (selectedSeats.length || 1)).toLocaleString('en-IN')}</span>
+                            </div>
+                            <button
+                                disabled={selectedSeats.length === 0}
+                                style={{
+                                    width: '100%',
+                                    padding: '16px',
+                                    background: selectedSeats.length > 0 ? 'linear-gradient(135deg, #a78bfa, #8b5cf6)' : 'rgba(255,255,255,0.05)',
+                                    color: selectedSeats.length > 0 ? '#fff' : 'rgba(255,255,255,0.3)',
+                                    border: 'none',
+                                    borderRadius: '14px',
+                                    fontWeight: 800,
+                                    fontSize: '1.05rem',
+                                    cursor: selectedSeats.length > 0 ? 'pointer' : 'not-allowed',
+                                    transition: 'all 0.3s',
+                                    boxShadow: selectedSeats.length > 0 ? '0 10px 25px rgba(167, 139, 250, 0.4)' : 'none',
+                                    transform: selectedSeats.length > 0 ? 'translateY(0)' : 'none'
+                                }}
+                                onMouseEnter={e => { if (selectedSeats.length > 0) e.currentTarget.style.transform = 'translateY(-2px)' }}
+                                onMouseLeave={e => { if (selectedSeats.length > 0) e.currentTarget.style.transform = 'translateY(0)' }}
+                                onClick={async () => {
+                                    try {
+                                        const bookingData = {
+                                            userId: user?._id,
+                                            type: 'flight',
+                                            amount: liveFlight.price * selectedSeats.length,
+                                            details: {
+                                                cardId: liveFlight._id,
+                                                flightId: liveFlight._id,
+                                                flightNumber: liveFlight.flightNumber,
+                                                airline: liveFlight.airline,
+                                                source: liveFlight.source?.city || liveFlight.source,
+                                                destination: liveFlight.destination?.city || liveFlight.destination,
+                                                departureTime: liveFlight.departureTime || liveFlight.startTime,
+                                                passengers: selectedSeats.length,
+                                                seatNumbers: selectedSeats
+                                            },
+                                            status: 'confirmed',
+                                            paymentStatus: 'completed'
+                                        };
+
+                                        // Use the new instant booking endpoint
+                                        const response = await authFetch('/booking', {
+                                            method: 'POST',
+                                            body: JSON.stringify(bookingData)
+                                        });
+
+                                        addLocalBooking(response.booking);
+                                        setCurrentBooking(response.booking);
+                                        showToast('Booking confirmed successfully!', 'success');
+                                        
+                                        // Clear selection but don't close yet - let user see receipt
+                                        selectedSeatsRef.current = [];
+                                        setSelectedSeats([]);
+                                    } catch (err) {
+                                        console.error('Booking failed:', err);
+                                        showToast(err.message || 'Failed to confirm booking', 'error');
+                                    }
+                                }}
+                            >
+                                Confirm Reservation
+                            </button>
                         </div>
-                        <button 
-                            disabled={selectedSeats.length === 0}
-                            style={{ 
-                                width: '100%',
-                                padding: '16px', 
-                                background: selectedSeats.length > 0 ? 'linear-gradient(135deg, #a78bfa, #8b5cf6)' : 'rgba(255,255,255,0.05)',
-                                color: selectedSeats.length > 0 ? '#fff' : 'rgba(255,255,255,0.3)',
-                                border: 'none',
-                                borderRadius: '14px',
-                                fontWeight: 800,
-                                fontSize: '1.05rem',
-                                cursor: selectedSeats.length > 0 ? 'pointer' : 'not-allowed',
-                                transition: 'all 0.3s',
-                                boxShadow: selectedSeats.length > 0 ? '0 10px 25px rgba(167, 139, 250, 0.4)' : 'none',
-                                transform: selectedSeats.length > 0 ? 'translateY(0)' : 'none'
-                            }}
-                            onMouseEnter={e => { if(selectedSeats.length > 0) e.currentTarget.style.transform = 'translateY(-2px)' }}
-                            onMouseLeave={e => { if(selectedSeats.length > 0) e.currentTarget.style.transform = 'translateY(0)' }}
-                            onClick={() => {
-                                showConfirm('Seat Reservation Received', `Your seat request (${selectedSeats.join(', ')}) for ${liveFlight.airline} ${liveFlight.flightNumber} has been successfully logged. Our travel desk will contact you shortly to finalize your booking.`, null, 'alert');
-                                onClose();
-                            }}
-                        >
-                            Confirm Reservation
-                        </button>
                     </div>
                 </div>
-            </div>
+
+                {currentBooking && (
+                <BookingReceipt 
+                    booking={currentBooking} 
+                    onClose={() => {
+                        setCurrentBooking(null);
+                        onClose();
+                    }} 
+                />
+            )}
 
             {showPayment && (
                 <PaymentModal

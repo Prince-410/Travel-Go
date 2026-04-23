@@ -1,13 +1,18 @@
 import React,{useState} from 'react';
-import {Plane,Hotel,MapPin,Clock,Star,ArrowRight,X,Zap,ChevronDown,CheckCircle2,Gift,Shield,Navigation} from 'lucide-react';
+import {Plane,Hotel,MapPin,Clock,Star,ArrowRight,X,Zap,ChevronDown,CheckCircle2,Gift,Shield,Navigation, Sparkles} from 'lucide-react';
 import { useAdminConfig } from '../context/AdminConfigContext';
+import { useAuth } from '../context/AuthContext';
 import Offers from '../components/Offers';
 import { useUI } from '../context/UIContext';
+import BookingReceipt from '../components/BookingReceipt';
 
 const ACC='#f472b6';
 const TYPES=['all','Beach','Adventure','City Tour','Honeymoon','Nature','Hills'];
 
-const ItineraryModal=({pkg,onClose})=>{
+const ItineraryModal=({pkg,onClose,setCurrentBooking})=>{
+    const { addLocalBooking, authFetch, user } = useAuth();
+    const { showToast } = useUI();
+    const [bookingLoading, setBookingLoading] = useState(false);
     const tips=pkg.features?.aiTips || ['Pack light clothing','Carry local currency'];
     const itinerary = pkg.features?.itinerary || ['Arrival & Check-in','Local sightseeing','Departure'];
     const inclusions = pkg.features?.inclusions || ['Flights','Hotels'];
@@ -17,7 +22,52 @@ const ItineraryModal=({pkg,onClose})=>{
     const activitiesList = pkg.features?.activities || ['Sightseeing'];
     const startDatesList = pkg.features?.startDates || ['Coming soon'];
 
-    return(<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.9)',backdropFilter:'blur(10px)',zIndex:10000,display:'flex',alignItems:'center',justifyContent:'center',padding:20,overflowY:'auto'}}>
+    const handleConfirmHolidayBooking = async () => {
+        if (bookingLoading) return;
+        setBookingLoading(true);
+        const bookingData = {
+            userId: user?._id,
+            type: 'holiday',
+            amount: pkg.price,
+            status: 'confirmed',
+            paymentStatus: 'completed',
+            details: {
+                cardId: pkg._id,
+                holidayId: pkg._id,
+                source: 'TravelGo HQ',
+                destination: pkg.destination,
+                date: startDatesList[0] || new Date().toLocaleDateString(),
+                duration: pkg.features?.duration,
+                meals: pkg.features?.meals
+            }
+        };
+
+        try {
+            const response = await authFetch('/booking', {
+                method: 'POST',
+                body: JSON.stringify(bookingData)
+            });
+
+            const finalBooking = response.booking || {
+                ...bookingData,
+                _id: 'BK-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+                invoiceNumber: 'INV-' + Math.floor(100000 + Math.random() * 900000),
+                createdAt: new Date().toISOString()
+            };
+
+            addLocalBooking(finalBooking);
+            onClose();
+            setCurrentBooking(finalBooking);
+            showToast('Holiday package booked!', 'success');
+        } catch (err) {
+            console.error('Holiday booking failed:', err);
+            showToast(err.message || 'Failed to book holiday', 'error');
+        } finally {
+            setBookingLoading(false);
+        }
+    };
+
+    return(<div style={{position:'absolute',inset:0,background:'rgba(0,0,0,0.85)',backdropFilter:'blur(8px)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:20,overflowY:'auto',borderRadius:'inherit'}}>
         <div style={{background:'linear-gradient(135deg,#1a0a18,#0d0a1a)',border:`1px solid rgba(244,114,182,0.25)`,borderRadius:24,width:'100%',maxWidth:820,boxShadow:'0 30px 60px rgba(0,0,0,0.7)',overflow:'hidden'}}>
             {/* Header */}
             <div style={{padding:'24px 28px',background:'linear-gradient(135deg,rgba(244,114,182,0.08),rgba(30,10,30,0.95))',borderBottom:`1px solid rgba(244,114,182,0.12)`,display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
@@ -67,14 +117,14 @@ const ItineraryModal=({pkg,onClose})=>{
                         <button 
                           onClick={() => {
                             if (startDatesList[0] === 'Coming soon') {
-                              showToast('Registration for this package is coming soon! We will notify you once dates are announced.', 'info');
+                               showToast('Registration for this package is coming soon! We will notify you once dates are announced.', 'info');
                             } else {
-                              showConfirm('Booking Requested', `Your request for "${pkg.title}" has been received. Our travel experts will contact you within 24 hours to finalize your itinerary.`, null, 'alert');
+                               handleConfirmHolidayBooking();
                             }
                           }} 
                           style={{width:'100%',background:`linear-gradient(135deg,${ACC},#ec4899)`,color:'#fff',border:'none',borderRadius:11,padding:'12px',fontWeight:800,fontSize:'0.95rem',cursor:'pointer',boxShadow:`0 8px 25px rgba(244,114,182,0.35)`,display:'flex',alignItems:'center',justifyContent:'center',gap:8}}
                         >
-                          {startDatesList[0] === 'Coming soon' ? 'Notify Me' : 'Book This Package'} <ArrowRight size={15}/>
+                          {startDatesList[0] === 'Coming soon' ? 'Notify Me' : (bookingLoading ? 'Booking...' : 'Book This Package')} <ArrowRight size={15}/>
                         </button>
                     </div>
                 </div>
@@ -85,7 +135,7 @@ const ItineraryModal=({pkg,onClose})=>{
 
 // Compare modal
 const CompareModal=({packages,onClose})=>(
-    <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.9)',backdropFilter:'blur(10px)',zIndex:10000,display:'flex',alignItems:'center',justifyContent:'center',padding:20,overflowY:'auto'}}>
+    <div style={{position:'absolute',inset:0,background:'rgba(0,0,0,0.85)',backdropFilter:'blur(8px)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:20,overflowY:'auto',borderRadius:'inherit'}}>
         <div style={{background:'linear-gradient(135deg,#1a0a18,#0d0a1a)',border:`1px solid rgba(244,114,182,0.25)`,borderRadius:24,width:'100%',maxWidth:860,boxShadow:'0 30px 60px rgba(0,0,0,0.7)',overflow:'hidden'}}>
             <div style={{padding:'22px 28px',borderBottom:`1px solid rgba(244,114,182,0.12)`,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
                 <span style={{fontWeight:900,fontSize:'1.2rem'}}>Package Comparison</span>
@@ -145,11 +195,12 @@ const PkgCard=({pkg,onView,onCompare,comparing})=>{
 
 const HolidayPage=()=>{
     const { bookingCards } = useAdminConfig();
-    const { showConfirm } = useUI();
+    const { showConfirm, showToast } = useUI();
     const liveHolidays = bookingCards.filter(c=>c.type==='holiday'&&c.status==='active');
 
     const [typeFilter,setTypeFilter]=useState('all');const [maxPrice,setMaxPrice]=useState('');const [dest,setDest]=useState('');
-    const [selectedPkg,setSelectedPkg]=useState(null);const [comparing,setComparing]=useState([]);const [showCompare,setShowCompare]=useState(false);
+    const [selectedPkg,setSelectedPkg]=useState(null);const [selectedPackages,setComparing]=useState([]);const [showCompare,setShowCompare]=useState(false);
+    const [currentBooking, setCurrentBooking] = useState(null);
 
     const results=liveHolidays.filter(p=>{
         if(dest&&!p.destination.toLowerCase().includes(dest.toLowerCase()))return false;
@@ -162,7 +213,7 @@ const HolidayPage=()=>{
         setComparing(prev=>prev.find(p=>p._id===pkg._id)?prev.filter(p=>p._id!==pkg._id):[...prev.slice(-1),pkg]);
     };
 
-    return(<div style={{minHeight:'100vh',background:'transparent',fontFamily:"'Outfit',sans-serif",color:'#fff',paddingBottom:60}}>
+    return(<div style={{position:'relative',minHeight:'100vh',background:'transparent',fontFamily:"'Outfit',sans-serif",color:'#fff',paddingBottom:60}}>
         {/* Hero */}
         <div style={{position:'relative',padding:'80px 20px 50px',background:'rgba(26, 10, 24, 0.5)',borderBottom:`1px solid rgba(244,114,182,0.15)`,overflow:'hidden'}}>
             <div style={{position:'absolute',top:-80,left:'20%',width:400,height:400,borderRadius:'50%',background:'radial-gradient(circle,rgba(244,114,182,0.08) 0%,transparent 70%)',pointerEvents:'none'}}/>
@@ -177,43 +228,45 @@ const HolidayPage=()=>{
                         <MapPin size={14} color={ACC}/>
                         <input value={dest} onChange={e=>setDest(e.target.value)} placeholder="Search destination (e.g. Goa, Dubai...)" style={{background:'transparent',border:'none',outline:'none',color:'#fff',fontSize:'0.9rem',width:240}}/>
                     </div>
-                    <div style={{display:'flex',alignItems:'center',gap:8,background:'rgba(255,255,255,0.07)',border:`1px solid rgba(244,114,182,0.2)`,borderRadius:12,padding:'10px 16px'}}>
-                        <span style={{color:'#64748b',fontSize:'0.85rem'}}>Max ₹</span>
-                        <input type="number" value={maxPrice} onChange={e=>setMaxPrice(e.target.value)} placeholder="Any budget" style={{background:'transparent',border:'none',outline:'none',color:'#fff',fontSize:'0.9rem',width:110}}/>
-                    </div>
                 </div>
             </div>
         </div>
-        <div style={{maxWidth:1200,margin:'0 auto',padding:'28px 20px 0'}}>
-            {/* Type filter */}
-            <div style={{display:'flex',gap:8,marginBottom:28,flexWrap:'wrap',justifyContent:'center'}}>
+        <div style={{maxWidth:1200,margin:'0 auto',padding:'0 20px'}}>
+            {/* Filters */}
+            <div style={{display:'flex',gap:12,marginBottom:28,overflowX:'auto',padding:'10px 0',scrollbarWidth:'none'}}>
                 {TYPES.map(t=><button key={t} onClick={()=>setTypeFilter(t)} style={{padding:'8px 18px',borderRadius:50,border:'none',cursor:'pointer',fontWeight:700,fontSize:'0.82rem',background:typeFilter===t?`linear-gradient(135deg,${ACC},#ec4899)`:'rgba(255,255,255,0.06)',color:typeFilter===t?'#fff':'#94a3b8',boxShadow:typeFilter===t?`0 4px 14px rgba(244,114,182,0.35)`:'none'}}>{t==='all'?'🌍 All':t}</button>)}
             </div>
             {/* Compare bar */}
-            {comparing.length>0&&<div style={{background:`rgba(244,114,182,0.07)`,border:`1px solid rgba(244,114,182,0.25)`,borderRadius:14,padding:'14px 20px',marginBottom:20,display:'flex',alignItems:'center',gap:14,flexWrap:'wrap'}}>
-                <span style={{fontWeight:700,fontSize:'0.85rem',color:ACC}}>Comparing {comparing.length}/2 packages:</span>
-                {comparing.map(p=><span key={p._id} style={{background:`rgba(244,114,182,0.12)`,borderRadius:20,padding:'5px 12px',fontWeight:700,fontSize:'0.8rem'}}>{p.features?.image||'🌴'} {p.title}</span>)}
-                <button onClick={()=>setShowCompare(true)} disabled={comparing.length<2} style={{marginLeft:'auto',background:comparing.length>=2?`linear-gradient(135deg,${ACC},#ec4899)`:'rgba(255,255,255,0.07)',color:comparing.length>=2?'#fff':'#64748b',border:'none',borderRadius:9,padding:'8px 18px',fontWeight:800,fontSize:'0.82rem',cursor:comparing.length>=2?'pointer':'not-allowed'}}>Compare Now</button>
+            {selectedPackages.length>0&&<div style={{background:`rgba(244,114,182,0.07)`,border:`1px solid rgba(244,114,182,0.25)`,borderRadius:14,padding:'14px 20px',marginBottom:20,display:'flex',alignItems:'center',gap:14,flexWrap:'wrap'}}>
+                <span style={{fontWeight:700,fontSize:'0.85rem',color:ACC}}>Comparing {selectedPackages.length}/2 packages:</span>
+                {selectedPackages.map(p=><span key={p._id} style={{background:`rgba(244,114,182,0.12)`,borderRadius:20,padding:'5px 12px',fontWeight:700,fontSize:'0.8rem'}}>{p.features?.image||'🌴'} {p.title}</span>)}
+                <button onClick={()=>setShowCompare(true)} disabled={selectedPackages.length<2} style={{marginLeft:'auto',background:selectedPackages.length>=2?`linear-gradient(135deg,${ACC},#ec4899)`:'rgba(255,255,255,0.07)',color:selectedPackages.length>=2?'#fff':'#64748b',border:'none',borderRadius:9,padding:'8px 18px',fontWeight:800,fontSize:'0.82rem',cursor:selectedPackages.length>=2?'pointer':'not-allowed'}}>Compare Now</button>
                 <button onClick={()=>setComparing([])} style={{background:'rgba(255,255,255,0.06)',border:'none',borderRadius:8,padding:'7px 12px',color:'#64748b',cursor:'pointer',fontWeight:700,fontSize:'0.78rem'}}>Clear</button>
             </div>}
             {/* Result count */}
-            <div style={{marginBottom:18}}><h2 style={{fontSize:'1.4rem',fontWeight:800,margin:0}}>{results.length} Package{results.length!==1?'s':''} Found</h2></div>
+            <div style={{marginBottom:18}}><h2 style={{fontSize:'1.4rem',fontWeight:800,margin:0}}>{dest?`Results for "${dest}"`:'Popular Packages'}</h2><p style={{color:ACC,fontSize:'0.82rem',margin:'4px 0 0',fontWeight:600}}>{results.length} unique experiences found</p></div>
             {/* Grid */}
             <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))',gap:22, marginBottom: 40}}>
-                {results.map(p=><PkgCard key={p._id} pkg={p} onView={setSelectedPkg} onCompare={toggleCompare} comparing={!!comparing.find(c=>c._id===p._id)}/>)}
+                {results.map(p=><PkgCard key={p._id} pkg={p} onView={setSelectedPkg} onCompare={toggleCompare} comparing={!!selectedPackages.find(c=>c._id===p._id)}/>)}
             </div>
             {results.length===0&&<div style={{textAlign:'center',padding:'80px 0'}}><div style={{fontSize:'3rem',marginBottom:16}}>🌍</div><p style={{fontWeight:700,fontSize:'1.2rem'}}>No packages found</p><p style={{color:'#64748b'}}>Try a different destination or budget.</p></div>}
 
             {/* Offers */}
             <Offers type="holiday" />
 
-            {/* Trust Badges */}
-            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(170px,1fr))',gap:14,marginTop:48}}>
+            {/* Trust */}
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:14,marginTop:48}}>
                 {[{icon:<Shield size={19} color={ACC}/>,t:'Safe Holidays',d:'Bonded tour operators'},{icon:<Navigation size={19} color={'#4ade80'}/>,t:'Full Support',d:'24/7 travel assistance'},{icon:<Zap size={19} color={'#fbbf24'}/>,t:'Instant Booking',d:'Confirmed itineraries'},{icon:<Star size={19} color={'#f472b6'}/>,t:'Top Rated',d:'Handpicked experiences'}].map((b,i)=>(<div key={i} style={{background:'rgba(15,23,42,0.85)',backdropFilter:'blur(10px)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:14,padding:'16px 18px',display:'flex',alignItems:'center',gap:12}}><div style={{flexShrink:0}}>{b.icon}</div><div><div style={{fontWeight:700,fontSize:'0.88rem'}}>{b.t}</div><div style={{fontSize:'0.73rem',color:'#64748b',marginTop:2}}>{b.d}</div></div></div>))}
             </div>
         </div>
-        {selectedPkg&&<ItineraryModal pkg={selectedPkg} onClose={()=>setSelectedPkg(null)}/>}
-        {showCompare&&<CompareModal packages={comparing} onClose={()=>setShowCompare(false)}/>}
+            {selectedPkg && <ItineraryModal pkg={selectedPkg} onClose={()=>setSelectedPkg(null)} setCurrentBooking={setCurrentBooking} />}
+            {showCompare && <CompareModal packages={selectedPackages} onClose={()=>setShowCompare(false)} />}
+            {currentBooking && (
+                <BookingReceipt 
+                    booking={currentBooking} 
+                    onClose={() => setCurrentBooking(null)} 
+                />
+            )}
     </div>);
 };
 export default HolidayPage;

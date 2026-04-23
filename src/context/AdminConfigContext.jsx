@@ -84,9 +84,16 @@ export const AdminConfigProvider = ({ children }) => {
     socket.on('SEAT_UPDATE', ({ cardId, seatId, locked }) => {
       setBookingCards(prev => prev.map(c => {
         if (c._id !== cardId) return c;
-        const newLocked = locked ? [...c.lockedSeats, seatId] : c.lockedSeats.filter(id => id !== seatId);
+        const currentLocked = Array.isArray(c.lockedSeats) ? c.lockedSeats : [];
+        const newLocked = locked ? [...currentLocked, seatId] : currentLocked.filter(id => id !== seatId);
         return { ...c, lockedSeats: newLocked };
       }));
+    });
+
+    socket.on('AVAILABILITY_CHANGED', ({ cardId, availableSeats, status }) => {
+      setBookingCards(prev =>
+        prev.map(c => (c._id === cardId ? { ...c, availableSeats, status: status || c.status } : c))
+      );
     });
 
     socket.on('DELETE_BOOKING_CARD', ({ id }) => {

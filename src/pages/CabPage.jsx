@@ -1,8 +1,10 @@
 import React,{useState,useEffect} from 'react';
 import {Car,MapPin,Clock,Star,ArrowRight,X,Navigation,Zap,Shield,ChevronDown} from 'lucide-react';
 import { useAdminConfig } from '../context/AdminConfigContext';
+import { useAuth } from '../context/AuthContext';
 import Offers from '../components/Offers';
 import { useUI } from '../context/UIContext';
+import BookingReceipt from '../components/BookingReceipt';
 
 const CAB_TYPES=[{id:'local',label:'Local',desc:'Within city',icon:'🚕'},{id:'outstation',label:'Outstation',desc:'Inter-city trips',icon:'🛣️'},{id:'hourly',label:'Hourly Rental',desc:'Keep cab for hours',icon:'⏱️'}];
 const VEHICLE_TYPES=[{type:'Go Mini',icon:'🚗'},{type:'Go Sedan',icon:'🚙'},{type:'Go SUV',icon:'🚐'}];
@@ -13,7 +15,7 @@ const ACC='#a78bfa';
 const TrackModal=({cab,onClose})=>{
     const [pos,setPos]=useState(20);
     useEffect(()=>{const t=setInterval(()=>setPos(p=>Math.min(p+2,95)),600);return()=>clearInterval(t)},[]);
-    return(<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.87)',backdropFilter:'blur(8px)',zIndex:10000,display:'flex',alignItems:'center',justifyContent:'center',padding:20}}>
+    return(<div style={{position:'absolute',inset:0,background:'rgba(0,0,0,0.85)',backdropFilter:'blur(8px)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:20,borderRadius:'inherit'}}>
         <div style={{background:'linear-gradient(135deg,#0d0a1a,#120d24)',border:`1px solid rgba(167,139,250,0.25)`,borderRadius:24,width:'100%',maxWidth:520,padding:28,boxShadow:'0 30px 60px rgba(0,0,0,0.6)'}}>
             <div style={{display:'flex',justifyContent:'space-between',marginBottom:20}}>
                 <div style={{display:'flex',alignItems:'center',gap:8}}><div style={{width:9,height:9,borderRadius:'50%',background:ACC,boxShadow:`0 0 8px ${ACC}`,animation:'pulse 1.5s infinite'}}/><span style={{fontWeight:800,fontSize:'1.1rem'}}>Driver is on the way</span></div>
@@ -53,7 +55,7 @@ const TrackModal=({cab,onClose})=>{
 };
 
 // Cab Card
-const CabCard=({cab,onTrack,onBook})=>{
+const CabCard=({cab,onTrack,onBook,bookingLoading})=>{
     return(<div style={{background:'linear-gradient(135deg,#0d0a1a,#1a1133)',border:`1px solid rgba(167,139,250,0.12)`,borderRadius:16,transition:'transform .25s,box-shadow .25s',boxShadow:'0 4px 24px rgba(0,0,0,0.35)',overflow:'hidden'}} onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-3px)';e.currentTarget.style.boxShadow='0 16px 40px rgba(0,0,0,0.5),0 0 0 1px rgba(167,139,250,0.3)'}} onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow='0 4px 24px rgba(0,0,0,0.35)'}}>
         {cab.dynamicPricing&&<div style={{background:'rgba(251,191,36,0.08)',borderBottom:'1px solid rgba(251,191,36,0.15)',padding:'6px 16px',fontSize:'0.67rem',color:'#fbbf24',fontWeight:800,display:'flex',alignItems:'center',gap:5}}><Zap size={10}/>Surge pricing active</div>}
         <div style={{padding:'16px 20px',display:'flex',alignItems:'center',gap:16,flexWrap:'wrap'}}>
@@ -83,7 +85,7 @@ const CabCard=({cab,onTrack,onBook})=>{
                 <div style={{fontSize:'0.68rem',color:'#64748b',marginBottom:10}}>{cab.features?.estimatedTime||'~'} · {cab.features?.distanceKm||'~'} km</div>
                 <div style={{display:'flex',gap:8,justifyContent:'flex-end'}}>
                     <button onClick={()=>onTrack(cab)} style={{background:`rgba(167,139,250,0.1)`,border:`1px solid rgba(167,139,250,0.25)`,borderRadius:9,padding:'8px 12px',color:ACC,fontWeight:700,fontSize:'0.78rem',cursor:'pointer',display:'flex',alignItems:'center',gap:5}}><Navigation size={13}/>Track</button>
-                    <button onClick={()=>onBook(cab)} style={{background:`linear-gradient(135deg,${ACC},#7c3aed)`,color:'#fff',border:'none',borderRadius:9,padding:'8px 14px',fontWeight:800,fontSize:'0.82rem',cursor:'pointer',display:'flex',alignItems:'center',gap:5,boxShadow:`0 4px 15px rgba(167,139,250,0.3)`}}>Book <ArrowRight size={13}/></button>
+                    <button disabled={bookingLoading} onClick={()=>onBook(cab)} style={{background:bookingLoading?'rgba(255,255,255,0.05)':`linear-gradient(135deg,${ACC},#7c3aed)`,color:bookingLoading?'rgba(255,255,255,0.3)':'#fff',border:'none',borderRadius:9,padding:'8px 14px',fontWeight:800,fontSize:'0.82rem',cursor:bookingLoading?'not-allowed':'pointer',display:'flex',alignItems:'center',gap:5,boxShadow:bookingLoading?'none':`0 4px 15px rgba(167,139,250,0.3)`}}>{bookingLoading?'Booking...':'Book'} <ArrowRight size={13}/></button>
                 </div>
             </div>
         </div>
@@ -92,11 +94,65 @@ const CabCard=({cab,onTrack,onBook})=>{
 
 const CabPage=()=>{
     const { bookingCards } = useAdminConfig();
+    const { addLocalBooking, authFetch, user } = useAuth();
     const { showConfirm } = useUI();
 
-    const [source,setSource]=useState('Ahmedabad');const [destination,setDestination]=useState('');const [cabType,setCabType]=useState('local');const [vehicleType,setVehicleType]=useState('');
-    const [date,setDate]=useState('');const [hours,setHours]=useState(4);const [distKm,setDistKm]=useState(10);
-    const [results,setResults]=useState([]);const [loading,setLoading]=useState(false);const [resultMsg,setResultMsg]=useState('');const [trackingCab,setTrackingCab]=useState(null);
+    const [source,setSource]=useState('Ahmedabad');
+    const [destination,setDestination]=useState('');
+    const [cabType,setCabType]=useState('local');
+    const [vehicleType,setVehicleType]=useState('');
+    const [date,setDate]=useState('');
+    const [hours,setHours]=useState(4);
+    const [distKm,setDistKm]=useState(10);
+    const [results,setResults]=useState([]);
+    const [loading,setLoading]=useState(false);
+    const [resultMsg,setResultMsg]=useState('');
+    const [trackingCab,setTrackingCab]=useState(null);
+    const [currentBooking, setCurrentBooking] = useState(null);
+    const [bookingLoading, setBookingLoading] = useState(false);
+
+    const handleConfirmCabBooking = async (cab) => {
+        if (bookingLoading) return;
+        setBookingLoading(true);
+        const bookingData = {
+            userId: user?._id,
+            type: 'cab',
+            amount: cab.price,
+            status: 'confirmed',
+            paymentStatus: 'completed',
+            details: {
+                cardId: cab._id,
+                cabId: cab._id,
+                source: source || 'Current Location',
+                destination: destination || 'Drop Location',
+                date: new Date().toLocaleDateString(),
+                vehicle: cab.features?.vehicleType,
+                driver: cab.features?.driver || 'Assigning...',
+                eta: cab.features?.eta
+            }
+        };
+
+        try {
+            const response = await authFetch('/booking', {
+                method: 'POST',
+                body: JSON.stringify(bookingData)
+            });
+
+            const finalBooking = response.booking || {
+                ...bookingData,
+                _id: 'BK-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+                invoiceNumber: 'INV-' + Math.floor(100000 + Math.random() * 900000),
+                createdAt: new Date().toISOString()
+            };
+
+            addLocalBooking(finalBooking);
+            setCurrentBooking(finalBooking);
+        } catch (err) {
+            console.error('Cab booking failed:', err);
+        } finally {
+            setBookingLoading(false);
+        }
+    };
 
     const liveCabs=bookingCards.filter(c=>c.type==='cab'&&c.status==='active');
     const liveCities=[...new Set(liveCabs.map(c=>[c.source,c.destination]).flat())].filter(Boolean);
@@ -120,7 +176,7 @@ const CabPage=()=>{
         },400);
     };
 
-    return(<div style={{minHeight:'100vh',background:'transparent',fontFamily:"'Outfit',sans-serif",color:'#fff',paddingBottom:60}}>
+    return(<div style={{position:'relative',minHeight:'100vh',background:'transparent',fontFamily:"'Outfit',sans-serif",color:'#fff',paddingBottom:60}}>
         <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}`}</style>
         {/* Hero */}
         <div style={{position:'relative',padding:'80px 20px 40px',background:'rgba(13, 10, 26, 0.5)',borderBottom:`1px solid rgba(167,139,250,0.15)`,overflow:'hidden'}}>
@@ -185,7 +241,7 @@ const CabPage=()=>{
             </div>
             {loading?<div style={{textAlign:'center',padding:'80px 0'}}><div style={{fontSize:'3rem',marginBottom:16}}>🚗</div><p style={{color:ACC,fontWeight:700}}>Finding cabs near you…</p></div>:
             <div style={{display:'flex',flexDirection:'column',gap:13}}>
-                {results.map(c=><CabCard key={c._id} cab={c} onTrack={setTrackingCab} onBook={(cab)=>showConfirm('Confirm Ride', `Booking ${cab.features?.vehicleType || 'Cab'} with ${cab.features?.operator || 'fleet'}\nEstimated Fare: ₹${cab.price}\nDriver Assignment: ${cab.features?.driver || 'Will be assigned in 2 mins'}`, null, 'alert')}/>)}
+                {results.map(c=><CabCard key={c._id} cab={c} onTrack={setTrackingCab} bookingLoading={bookingLoading} onBook={(cab)=>handleConfirmCabBooking(cab)}/>)}
             </div>}
             {/* Offers */}
             <Offers type="cab" />
@@ -196,6 +252,12 @@ const CabPage=()=>{
             </div>
         </div>
         {trackingCab&&<TrackModal cab={trackingCab} onClose={()=>setTrackingCab(null)}/>}
+        {currentBooking && (
+            <BookingReceipt 
+                booking={currentBooking} 
+                onClose={() => setCurrentBooking(null)} 
+            />
+        )}
     </div>);
 };
 export default CabPage;

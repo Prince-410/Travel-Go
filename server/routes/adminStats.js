@@ -31,13 +31,33 @@ router.get('/dashboard', auth, adminAuth, async (req, res) => {
       { $project: { name: 1, email: 1, referralCode: 1, referralHistory: 1 } }
     ]);
 
+    // Monthly trend (last 6 months)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+    sixMonthsAgo.setDate(1);
+    sixMonthsAgo.setHours(0,0,0,0);
+    
+    const monthlyTrend = await Booking.aggregate([
+      { $match: { createdAt: { $gte: sixMonthsAgo } } },
+      { $group: {
+          _id: { 
+            month: { $month: '$createdAt' }, 
+            year: { $year: '$createdAt' },
+            type: '$type' 
+          },
+          revenue: { $sum: '$amount' }
+      }},
+      { $sort: { '_id.year': 1, '_id.month': 1 } }
+    ]);
+
     res.json({
       users: totalUsers,
       bookings: totalBookings,
       revenue: totalRevenue[0]?.total || 0,
       giftCardRevenue: giftCardRevenue[0]?.total || 0,
       insuranceRevenue: insuranceRevenue[0]?.total || 0,
-      topReferrers
+      topReferrers,
+      monthlyTrend
     });
   } catch (error) {
     console.error('Stats error:', error);

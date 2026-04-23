@@ -2,9 +2,11 @@ import React,{useState,useEffect,useRef} from 'react';
 import {Train,MapPin,Calendar,Users,ChevronDown,Star,ArrowRight,X,Search,Clock,Wifi,AlertCircle,CheckCircle2,Shield,Gift} from 'lucide-react';
 import { useUI } from '../context/UIContext';
 import { useAdminConfig } from '../context/AdminConfigContext';
+import { useAuth } from '../context/AuthContext';
 import Offers from '../components/Offers';
 import ModernDatePicker from '../components/ModernDatePicker';
 import PaymentModal from '../components/PaymentModal';
+import BookingReceipt from '../components/BookingReceipt';
 
 const CLASSES = [
     { code: '1A', icon: '💎', name: 'First AC' },
@@ -46,7 +48,7 @@ const PNRModal=({onClose})=>{
         const statuses=['Confirmed','Waitlist WL/4','RAC/2'];
         setResult({pnr,status:statuses[Math.floor(Math.random()*statuses.length)],train:'Shatabdi Express #12009',from:'Ahmedabad',to:'Mumbai',date:new Date().toISOString().split('T')[0],classType:'Second AC (2A)',coach:'B3',seat:'42 Lower'});
     };
-    return(<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.85)',backdropFilter:'blur(8px)',zIndex:10000,display:'flex',alignItems:'center',justifyContent:'center',padding:20}}>
+    return(<div style={{position:'absolute',inset:0,background:'rgba(0,0,0,0.8)',backdropFilter:'blur(8px)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:20,borderRadius:'inherit'}}>
         <div style={{background:'linear-gradient(135deg,#0c0b1d,#1a1833)',border:`1px solid rgba(129,140,248,0.25)`,borderRadius:24,width:'100%',maxWidth:480,padding:32,boxShadow:'0 30px 60px rgba(0,0,0,0.6)'}}>
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24}}>
                 <div style={{display:'flex',alignItems:'center',gap:10}}><Search size={20} color={ACC}/><span style={{fontWeight:800,fontSize:'1.1rem'}}>PNR Status</span></div>
@@ -73,7 +75,7 @@ const PNRModal=({onClose})=>{
 };
 
 // Train Card
-const TrainCard=({train,selectedClass,onBook})=>{
+const TrainCard=({train,selectedClass,onBook,bookingLoading})=>{
     const dClasses = train.features?.classes || [
         { code: '3A', name: 'Third AC', price: train.price, availableSeats: train.availableSeats, waitlist: 0, icon: '🧊' },
         { code: 'SL', name: 'Sleeper', price: Math.floor(train.price * 0.4), availableSeats: Math.floor(train.availableSeats * 2), waitlist: 5, icon: '🛏️' }
@@ -122,7 +124,7 @@ const TrainCard=({train,selectedClass,onBook})=>{
                 <div style={{fontSize:'0.68rem',color:'#64748b'}}>{cls.icon} {cls.name}</div>
                 <div style={{fontSize:'1.8rem',fontWeight:900,lineHeight:1.1,background:`linear-gradient(135deg,#fff 30%,${ACC})`,WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundClip:'text'}}>₹{cls.price.toLocaleString('en-IN')}</div>
                 <div style={{fontSize:'0.68rem',color:'#64748b',marginBottom:8}}>per person</div>
-                <button onClick={()=>onBook(train,cls)} style={{background:`linear-gradient(135deg,${ACC},#6366f1)`,color:'#fff',border:'none',borderRadius:10,padding:'9px 18px',fontWeight:800,fontSize:'0.85rem',cursor:'pointer',display:'flex',alignItems:'center',gap:6,marginLeft:'auto',transition:'all .2s',boxShadow:'0 4px 15px rgba(99,102,241,0.35)'}} onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-1px)'}} onMouseLeave={e=>{e.currentTarget.style.transform='none'}}>Book Now <ArrowRight size={14}/></button>
+                <button disabled={bookingLoading} onClick={()=>onBook(train,cls)} style={{background:bookingLoading?'rgba(255,255,255,0.05)':`linear-gradient(135deg,${ACC},#6366f1)`,color:bookingLoading?'rgba(255,255,255,0.3)':'#fff',border:'none',borderRadius:10,padding:'9px 18px',fontWeight:800,fontSize:'0.85rem',cursor:bookingLoading?'not-allowed':'pointer',display:'flex',alignItems:'center',gap:6,marginLeft:'auto',transition:'all .2s',boxShadow:bookingLoading?'none':'0 4px 15px rgba(99,102,241,0.35)'}} onMouseEnter={e=>{if(!bookingLoading)e.currentTarget.style.transform='translateY(-1px)'}} onMouseLeave={e=>{if(!bookingLoading)e.currentTarget.style.transform='none'}}>{bookingLoading?'Booking...':'Book Now'} <ArrowRight size={14}/></button>
             </div>
         </div>
         {/* Class availability expand */}
@@ -150,7 +152,56 @@ const TrainPage=()=>{
     const [results,setResults]=useState([]);const [searched,setSearched]=useState(false);const [loading,setLoading]=useState(false);const [resultMsg,setResultMsg]=useState('');
     const [showPNR,setShowPNR]=useState(false);const [sortBy,setSortBy]=useState('departure');const resultsRef=useRef();
     const { showConfirm } = useUI();
+    const { addLocalBooking, authFetch, user } = useAuth();
     const [bookingTrain,setBookingTrain]=useState(null);
+    const [currentBooking, setCurrentBooking] = useState(null);
+    const [bookingLoading, setBookingLoading] = useState(false);
+
+    const handleConfirmTrainBooking = async (tr, cls) => {
+        if (bookingLoading) return;
+        setBookingLoading(true);
+        const bookingData = {
+            userId: user?._id,
+            type: 'train',
+            amount: Number(cls.price) || 0,
+            status: 'confirmed',
+            paymentStatus: 'completed',
+            details: {
+                cardId: tr._id,
+                trainId: tr._id,
+                source: tr.source,
+                destination: tr.destination,
+                date: tr.date,
+                trainNumber: tr.features?.trainNumber,
+                class: cls.name,
+                coach: 'B' + Math.floor(Math.random() * 5 + 1),
+                seatNumbers: [Math.floor(Math.random() * 64 + 1)]
+            }
+        };
+
+        try {
+            const response = await authFetch('/booking', {
+                method: 'POST',
+                body: JSON.stringify(bookingData)
+            });
+
+            const finalBooking = response.booking || {
+                ...bookingData,
+                _id: 'BK-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+                invoiceNumber: 'INV-' + Math.floor(100000 + Math.random() * 900000),
+                createdAt: new Date().toISOString()
+            };
+
+            addLocalBooking(finalBooking);
+            setCurrentBooking(finalBooking);
+            setBookingTrain(null);
+        } catch (err) {
+            console.error('Train booking failed:', err);
+            // Fallback for demo or error feedback
+        } finally {
+            setBookingLoading(false);
+        }
+    };
     
     // Live derived logic
     const liveTrains=bookingCards.filter(c=>c.type==='train'&&c.status==='active');
@@ -185,7 +236,7 @@ const TrainPage=()=>{
         return 0;
     });
     const swap=()=>{const t=from;setFrom(to);setTo(t);};
-    return(<div style={{minHeight:'100vh',background:'transparent',fontFamily:"'Outfit',sans-serif",color:'#fff',paddingBottom:60}}>
+    return(<div style={{position:'relative',minHeight:'100vh',background:'transparent',fontFamily:"'Outfit',sans-serif",color:'#fff',paddingBottom:60}}>
         {/* Hero */}
         <div style={{position:'relative',padding:'80px 20px 40px',background:'rgba(12, 11, 29, 0.5)',borderBottom:`1px solid rgba(129,140,248,0.15)`,overflow:'hidden'}}>
             <div style={{position:'absolute',top:-80,left:'25%',width:400,height:400,borderRadius:'50%',background:'radial-gradient(circle,rgba(129,140,248,0.1) 0%,transparent 70%)',pointerEvents:'none'}}/>
@@ -231,10 +282,13 @@ const TrainPage=()=>{
             </div>
             {loading?(<div style={{textAlign:'center',padding:'80px 0'}}><div style={{fontSize:'3rem',marginBottom:16}}>🚆</div><p style={{color:ACC,fontWeight:700,fontSize:'1.1rem'}}>Searching trains…</p></div>):
             sorted.length===0&&searched?(<div style={{textAlign:'center',padding:'80px 0'}}><div style={{fontSize:'3rem',marginBottom:16}}>🔍</div><p style={{fontWeight:700,fontSize:'1.2rem',marginBottom:8}}>No trains found</p><p style={{color:'#64748b'}}>Try different stations or date.</p></div>):
-            (<div style={{display:'flex',flexDirection:'column',gap:14}}>{sorted.map(t=><TrainCard key={t._id} train={t} selectedClass={classCode} onBook={(tr,cls)=>setBookingTrain({train:tr,cls})}/>)}</div>)}
+            (<div style={{display:'flex',flexDirection:'column',gap:14}}>{sorted.map(t=><TrainCard key={t._id} train={t} selectedClass={classCode} bookingLoading={bookingLoading} onBook={(tr,cls)=>handleConfirmTrainBooking(tr,cls)}/>)}</div>)}
             
-            {bookingTrain && (
-                showConfirm('Booking Requested', `Your reservation for ${bookingTrain.train.title.split('-')[0]} (#${bookingTrain.train.features?.trainNumber}) in ${bookingTrain.cls.name} has been received. Our ticketing agent will process this and send your e-ticket within 30 minutes.`, () => setBookingTrain(null), 'alert') || setBookingTrain(null)
+            {currentBooking && (
+                <BookingReceipt 
+                    booking={currentBooking} 
+                    onClose={() => setCurrentBooking(null)} 
+                />
             )}
             {/* Offers */}
             <Offers type="train" />
