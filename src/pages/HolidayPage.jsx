@@ -13,6 +13,13 @@ const ItineraryModal=({pkg,onClose,setCurrentBooking})=>{
     const { addLocalBooking, authFetch, user } = useAuth();
     const { showToast } = useUI();
     const [bookingLoading, setBookingLoading] = useState(false);
+    
+    // Handle body scroll lock
+    useEffect(() => {
+        document.body.classList.add('modal-open');
+        return () => document.body.classList.remove('modal-open');
+    }, []);
+
     const tips=pkg.features?.aiTips || ['Pack light clothing','Carry local currency'];
     const itinerary = pkg.features?.itinerary || ['Arrival & Check-in','Local sightseeing','Departure'];
     const inclusions = pkg.features?.inclusions || ['Flights','Hotels'];
@@ -67,99 +74,115 @@ const ItineraryModal=({pkg,onClose,setCurrentBooking})=>{
         }
     };
 
-    return(<div style={{position:'absolute',inset:0,background:'rgba(0,0,0,0.85)',backdropFilter:'blur(8px)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:20,overflowY:'auto',borderRadius:'inherit'}}>
-        <div style={{background:'linear-gradient(135deg,#1a0a18,#0d0a1a)',border:`1px solid rgba(244,114,182,0.25)`,borderRadius:24,width:'100%',maxWidth:820,boxShadow:'0 30px 60px rgba(0,0,0,0.7)',overflow:'hidden'}}>
-            {/* Header */}
-            <div style={{padding:'24px 28px',background:'linear-gradient(135deg,rgba(244,114,182,0.08),rgba(30,10,30,0.95))',borderBottom:`1px solid rgba(244,114,182,0.12)`,display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
-                <div>
-                    <div style={{fontSize:'2.5rem',marginBottom:6}}>{pkg.features?.image || '🌴'}</div>
-                    <h2 style={{margin:0,fontWeight:900,fontSize:'1.5rem'}}>{pkg.title}</h2>
-                    <div style={{display:'flex',alignItems:'center',gap:12,marginTop:6,flexWrap:'wrap'}}>
-                        <span style={{background:`rgba(244,114,182,0.15)`,color:ACC,fontSize:'0.75rem',fontWeight:700,padding:'3px 10px',borderRadius:20}}>{pkg.features?.holidayType || 'Holiday'}</span>
-                        <span style={{color:'#64748b',fontSize:'0.82rem'}}>📍 {pkg.destination}</span>
-                        <span style={{color:'#64748b',fontSize:'0.82rem'}}>⏱️ {pkg.features?.duration || '3N/4D'}</span>
-                        <div style={{display:'flex',alignItems:'center',gap:3,color:'#fbbf24',fontWeight:800,fontSize:'0.82rem'}}><Star size={11} fill="currentColor"/>{pkg.features?.rating || 4.5}</div>
+    return(
+        <>
+            <div className="premium-modal-overlay" onClick={onClose} />
+            <div className="premium-modal-container">
+                <div style={{background:'linear-gradient(135deg,#1a0a18,#0d0a1a)',border:`1px solid rgba(244,114,182,0.25)`,borderRadius:24,width:'100%',boxShadow:'0 30px 60px rgba(0,0,0,0.7)',overflow:'hidden', animation: 'scaleIn 0.3s ease', maxHeight: '90vh', display: 'flex', flexDirection: 'column'}}>
+                    {/* Header */}
+                    <div style={{padding:'24px 28px',background:'linear-gradient(135deg,rgba(244,114,182,0.08),rgba(30,10,30,0.95))',borderBottom:`1px solid rgba(244,114,182,0.12)`,display:'flex',justifyContent:'space-between',alignItems:'flex-start', flexShrink: 0}}>
+                        <div>
+                            <div style={{fontSize:'2.5rem',marginBottom:6}}>{pkg.features?.image || '🌴'}</div>
+                            <h2 style={{margin:0,fontWeight:900,fontSize:'1.5rem'}}>{pkg.title}</h2>
+                            <div style={{display:'flex',alignItems:'center',gap:12,marginTop:6,flexWrap:'wrap'}}>
+                                <span style={{background:`rgba(244,114,182,0.15)`,color:ACC,fontSize:'0.75rem',fontWeight:700,padding:'3px 10px',borderRadius:20}}>{pkg.features?.holidayType || 'Holiday'}</span>
+                                <span style={{color:'#64748b',fontSize:'0.82rem'}}>📍 {pkg.destination}</span>
+                                <span style={{color:'#64748b',fontSize:'0.82rem'}}>⏱️ {pkg.features?.duration || '3N/4D'}</span>
+                                <div style={{display:'flex',alignItems:'center',gap:3,color:'#fbbf24',fontWeight:800,fontSize:'0.82rem'}}><Star size={11} fill="currentColor"/>{pkg.features?.rating || 4.5}</div>
+                            </div>
+                        </div>
+                        <button onClick={onClose} style={{background:'rgba(255,255,255,0.07)',border:'none',borderRadius:8,padding:8,cursor:'pointer',color:'#94a3b8'}}><X size={18}/></button>
+                    </div>
+                    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:0, overflowY: 'auto'}}>
+                        {/* Left: itinerary + inclusions */}
+                        <div style={{padding:'22px 24px',borderRight:`1px solid rgba(255,255,255,0.06)`}}>
+                            <h3 style={{margin:'0 0 14px',fontSize:'0.95rem',color:ACC,fontWeight:800,textTransform:'uppercase',letterSpacing:1}}>📅 Day-by-Day Itinerary</h3>
+                            {itinerary.map((day,i)=><div key={i} style={{display:'flex',gap:12,marginBottom:14}}>
+                                <div style={{flexShrink:0,width:26,height:26,borderRadius:'50%',background:`rgba(244,114,182,0.15)`,border:`1px solid rgba(244,114,182,0.3)`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'0.7rem',fontWeight:800,color:ACC}}>{i+1}</div>
+                                <div style={{flex:1,fontSize:'0.82rem',color:'#cbd5e1',paddingTop:4,borderBottom:'1px solid rgba(255,255,255,0.05)',paddingBottom:10}}>{day}</div>
+                            </div>)}
+                            <h3 style={{margin:'14px 0 10px',fontSize:'0.95rem',color:'#4ade80',fontWeight:800,textTransform:'uppercase',letterSpacing:1}}>✅ Inclusions</h3>
+                            {inclusions.map(inc=><div key={inc} style={{display:'flex',alignItems:'center',gap:6,marginBottom:6,fontSize:'0.8rem',color:'#94a3b8'}}><CheckCircle2 size={13} color="#4ade80"/>{inc}</div>)}
+                            <h3 style={{margin:'14px 0 10px',fontSize:'0.95rem',color:'#f87171',fontWeight:800,textTransform:'uppercase',letterSpacing:1}}>❌ Exclusions</h3>
+                            {exclusions.map(exc=><div key={exc} style={{display:'flex',alignItems:'center',gap:6,marginBottom:6,fontSize:'0.8rem',color:'#94a3b8'}}><X size={11} color="#f87171"/>{exc}</div>)}
+                        </div>
+                        {/* Right: hotels, flights, AI tips, book */}
+                        <div style={{padding:'22px 24px'}}>
+                            <h3 style={{margin:'0 0 12px',fontSize:'0.95rem',color:'#fbbf24',fontWeight:800,textTransform:'uppercase',letterSpacing:1}}>🏨 Included Hotels</h3>
+                            {hotelsList.map(h=><div key={h} style={{background:'rgba(251,191,36,0.06)',border:'1px solid rgba(251,191,36,0.15)',borderRadius:10,padding:'10px 14px',marginBottom:8,fontSize:'0.82rem',display:'flex',alignItems:'center',gap:7}}><Hotel size={13} color="#fbbf24"/>{h}</div>)}
+                            <h3 style={{margin:'14px 0 12px',fontSize:'0.95rem',color:'#818cf8',fontWeight:800,textTransform:'uppercase',letterSpacing:1}}>✈️ Included Flights</h3>
+                            {flightsList.map(f=><div key={f} style={{background:'rgba(129,140,248,0.06)',border:'1px solid rgba(129,140,248,0.15)',borderRadius:10,padding:'10px 14px',marginBottom:8,fontSize:'0.82rem',display:'flex',alignItems:'center',gap:7}}><Plane size={13} color="#818cf8"/>{f}</div>)}
+                            <h3 style={{margin:'14px 0 12px',fontSize:'0.95rem',color:ACC,fontWeight:800,textTransform:'uppercase',letterSpacing:1}}>🎯 Activities</h3>
+                            <div style={{display:'flex',flexWrap:'wrap',gap:6,marginBottom:16}}>
+                                {activitiesList.map(a=><span key={a} style={{background:`rgba(244,114,182,0.08)`,border:`1px solid rgba(244,114,182,0.2)`,borderRadius:20,padding:'4px 10px',fontSize:'0.72rem',color:'#e2e8f0'}}>{a}</span>)}
+                            </div>
+                            <div style={{background:'rgba(129,140,248,0.07)',border:'1px solid rgba(129,140,248,0.2)',borderRadius:12,padding:'14px 16px',marginBottom:18}}>
+                                <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:9}}><Zap size={14} color="#818cf8"/><span style={{fontWeight:800,fontSize:'0.8rem',color:'#818cf8',textTransform:'uppercase',letterSpacing:1}}>AI Travel Tips</span></div>
+                                {tips.map((tip,i)=><div key={i} style={{display:'flex',alignItems:'flex-start',gap:7,marginBottom:6,fontSize:'0.78rem',color:'#94a3b8'}}><span style={{color:'#818cf8',flexShrink:0}}>💡</span>{tip}</div>)}
+                            </div>
+                            {/* Book */}
+                            <div style={{background:`rgba(244,114,182,0.08)`,border:`1px solid rgba(244,114,182,0.2)`,borderRadius:14,padding:'16px 18px', marginBottom: 20}}>
+                                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}><div><div style={{fontSize:'0.7rem',color:'#64748b'}}>Package Price</div><div style={{fontSize:'1.8rem',fontWeight:900,background:`linear-gradient(135deg,#fff 30%,${ACC})`,WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundClip:'text'}}>₹{pkg.price.toLocaleString('en-IN')}</div><div style={{fontSize:'0.7rem',color:'#64748b'}}>per person · {(pkg.features?.meals||'Breakfast Included')}</div></div></div>
+                                <div style={{fontSize:'0.72rem',color:'#64748b',marginBottom:12}}>Next start dates: {startDatesList.slice(0,3).join(' · ')}</div>
+                                <button 
+                                  onClick={() => {
+                                    if (startDatesList[0] === 'Coming soon') {
+                                       showToast('Registration for this package is coming soon! We will notify you once dates are announced.', 'info');
+                                    } else {
+                                       handleConfirmHolidayBooking();
+                                    }
+                                  }} 
+                                  style={{width:'100%',background:`linear-gradient(135deg,${ACC},#ec4899)`,color:'#fff',border:'none',borderRadius:11,padding:'12px',fontWeight:800,fontSize:'0.95rem',cursor:'pointer',boxShadow:`0 8px 25px rgba(244,114,182,0.35)`,display:'flex',alignItems:'center',justifyContent:'center',gap:8}}
+                                >
+                                  {startDatesList[0] === 'Coming soon' ? 'Notify Me' : (bookingLoading ? 'Booking...' : 'Book This Package')} <ArrowRight size={15}/>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <button onClick={onClose} style={{background:'rgba(255,255,255,0.07)',border:'none',borderRadius:8,padding:8,cursor:'pointer',color:'#94a3b8'}}><X size={18}/></button>
             </div>
-            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:0}}>
-                {/* Left: itinerary + inclusions */}
-                <div style={{padding:'22px 24px',borderRight:`1px solid rgba(255,255,255,0.06)`,maxHeight:440,overflowY:'auto'}}>
-                    <h3 style={{margin:'0 0 14px',fontSize:'0.95rem',color:ACC,fontWeight:800,textTransform:'uppercase',letterSpacing:1}}>📅 Day-by-Day Itinerary</h3>
-                    {itinerary.map((day,i)=><div key={i} style={{display:'flex',gap:12,marginBottom:14}}>
-                        <div style={{flexShrink:0,width:26,height:26,borderRadius:'50%',background:`rgba(244,114,182,0.15)`,border:`1px solid rgba(244,114,182,0.3)`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'0.7rem',fontWeight:800,color:ACC}}>{i+1}</div>
-                        <div style={{flex:1,fontSize:'0.82rem',color:'#cbd5e1',paddingTop:4,borderBottom:'1px solid rgba(255,255,255,0.05)',paddingBottom:10}}>{day}</div>
-                    </div>)}
-                    <h3 style={{margin:'14px 0 10px',fontSize:'0.95rem',color:'#4ade80',fontWeight:800,textTransform:'uppercase',letterSpacing:1}}>✅ Inclusions</h3>
-                    {inclusions.map(inc=><div key={inc} style={{display:'flex',alignItems:'center',gap:6,marginBottom:6,fontSize:'0.8rem',color:'#94a3b8'}}><CheckCircle2 size={13} color="#4ade80"/>{inc}</div>)}
-                    <h3 style={{margin:'14px 0 10px',fontSize:'0.95rem',color:'#f87171',fontWeight:800,textTransform:'uppercase',letterSpacing:1}}>❌ Exclusions</h3>
-                    {exclusions.map(exc=><div key={exc} style={{display:'flex',alignItems:'center',gap:6,marginBottom:6,fontSize:'0.8rem',color:'#94a3b8'}}><X size={11} color="#f87171"/>{exc}</div>)}
-                </div>
-                {/* Right: hotels, flights, AI tips, book */}
-                <div style={{padding:'22px 24px',maxHeight:440,overflowY:'auto'}}>
-                    <h3 style={{margin:'0 0 12px',fontSize:'0.95rem',color:'#fbbf24',fontWeight:800,textTransform:'uppercase',letterSpacing:1}}>🏨 Included Hotels</h3>
-                    {hotelsList.map(h=><div key={h} style={{background:'rgba(251,191,36,0.06)',border:'1px solid rgba(251,191,36,0.15)',borderRadius:10,padding:'10px 14px',marginBottom:8,fontSize:'0.82rem',display:'flex',alignItems:'center',gap:7}}><Hotel size={13} color="#fbbf24"/>{h}</div>)}
-                    <h3 style={{margin:'14px 0 12px',fontSize:'0.95rem',color:'#818cf8',fontWeight:800,textTransform:'uppercase',letterSpacing:1}}>✈️ Included Flights</h3>
-                    {flightsList.map(f=><div key={f} style={{background:'rgba(129,140,248,0.06)',border:'1px solid rgba(129,140,248,0.15)',borderRadius:10,padding:'10px 14px',marginBottom:8,fontSize:'0.82rem',display:'flex',alignItems:'center',gap:7}}><Plane size={13} color="#818cf8"/>{f}</div>)}
-                    <h3 style={{margin:'14px 0 12px',fontSize:'0.95rem',color:ACC,fontWeight:800,textTransform:'uppercase',letterSpacing:1}}>🎯 Activities</h3>
-                    <div style={{display:'flex',flexWrap:'wrap',gap:6,marginBottom:16}}>
-                        {activitiesList.map(a=><span key={a} style={{background:`rgba(244,114,182,0.08)`,border:`1px solid rgba(244,114,182,0.2)`,borderRadius:20,padding:'4px 10px',fontSize:'0.72rem',color:'#e2e8f0'}}>{a}</span>)}
-                    </div>
-                    <div style={{background:'rgba(129,140,248,0.07)',border:'1px solid rgba(129,140,248,0.2)',borderRadius:12,padding:'14px 16px',marginBottom:18}}>
-                        <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:9}}><Zap size={14} color="#818cf8"/><span style={{fontWeight:800,fontSize:'0.8rem',color:'#818cf8',textTransform:'uppercase',letterSpacing:1}}>AI Travel Tips</span></div>
-                        {tips.map((tip,i)=><div key={i} style={{display:'flex',alignItems:'flex-start',gap:7,marginBottom:6,fontSize:'0.78rem',color:'#94a3b8'}}><span style={{color:'#818cf8',flexShrink:0}}>💡</span>{tip}</div>)}
-                    </div>
-                    {/* Book */}
-                    <div style={{background:`rgba(244,114,182,0.08)`,border:`1px solid rgba(244,114,182,0.2)`,borderRadius:14,padding:'16px 18px'}}>
-                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}><div><div style={{fontSize:'0.7rem',color:'#64748b'}}>Package Price</div><div style={{fontSize:'1.8rem',fontWeight:900,background:`linear-gradient(135deg,#fff 30%,${ACC})`,WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundClip:'text'}}>₹{pkg.price.toLocaleString('en-IN')}</div><div style={{fontSize:'0.7rem',color:'#64748b'}}>per person · {(pkg.features?.meals||'Breakfast Included')}</div></div></div>
-                        <div style={{fontSize:'0.72rem',color:'#64748b',marginBottom:12}}>Next start dates: {startDatesList.slice(0,3).join(' · ')}</div>
-                        <button 
-                          onClick={() => {
-                            if (startDatesList[0] === 'Coming soon') {
-                               showToast('Registration for this package is coming soon! We will notify you once dates are announced.', 'info');
-                            } else {
-                               handleConfirmHolidayBooking();
-                            }
-                          }} 
-                          style={{width:'100%',background:`linear-gradient(135deg,${ACC},#ec4899)`,color:'#fff',border:'none',borderRadius:11,padding:'12px',fontWeight:800,fontSize:'0.95rem',cursor:'pointer',boxShadow:`0 8px 25px rgba(244,114,182,0.35)`,display:'flex',alignItems:'center',justifyContent:'center',gap:8}}
-                        >
-                          {startDatesList[0] === 'Coming soon' ? 'Notify Me' : (bookingLoading ? 'Booking...' : 'Book This Package')} <ArrowRight size={15}/>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>);
+        </>
+    );
 };
 
 // Compare modal
-const CompareModal=({packages,onClose})=>(
-    <div style={{position:'absolute',inset:0,background:'rgba(0,0,0,0.85)',backdropFilter:'blur(8px)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:20,overflowY:'auto',borderRadius:'inherit'}}>
-        <div style={{background:'linear-gradient(135deg,#1a0a18,#0d0a1a)',border:`1px solid rgba(244,114,182,0.25)`,borderRadius:24,width:'100%',maxWidth:860,boxShadow:'0 30px 60px rgba(0,0,0,0.7)',overflow:'hidden'}}>
-            <div style={{padding:'22px 28px',borderBottom:`1px solid rgba(244,114,182,0.12)`,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-                <span style={{fontWeight:900,fontSize:'1.2rem'}}>Package Comparison</span>
-                <button onClick={onClose} style={{background:'rgba(255,255,255,0.07)',border:'none',borderRadius:8,padding:8,cursor:'pointer',color:'#94a3b8'}}><X size={18}/></button>
+const CompareModal=({packages,onClose})=>{
+    // Handle body scroll lock
+    useEffect(() => {
+        document.body.classList.add('modal-open');
+        return () => document.body.classList.remove('modal-open');
+    }, []);
+
+    return (
+        <>
+            <div className="premium-modal-overlay" onClick={onClose} />
+            <div className="premium-modal-container">
+                <div style={{background:'linear-gradient(135deg,#1a0a18,#0d0a1a)',border:`1px solid rgba(244,114,182,0.25)`,borderRadius:24,width:'100%',boxShadow:'0 30px 60px rgba(0,0,0,0.7)',overflow:'hidden', animation: 'scaleIn 0.3s ease', maxHeight: '90vh'}}>
+                    <div style={{padding:'22px 28px',borderBottom:`1px solid rgba(244,114,182,0.12)`,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                        <span style={{fontWeight:900,fontSize:'1.2rem'}}>Package Comparison</span>
+                        <button onClick={onClose} style={{background:'rgba(255,255,255,0.07)',border:'none',borderRadius:8,padding:8,cursor:'pointer',color:'#94a3b8'}}><X size={18}/></button>
+                    </div>
+                    <div style={{padding:'20px 28px',overflowX:'auto'}}>
+                        <table style={{width:'100%',borderCollapse:'collapse'}}>
+                            <thead><tr>
+                                <th style={{textAlign:'left',padding:'10px 12px',fontSize:'0.75rem',color:'#64748b',fontWeight:700}}>Feature</th>
+                                {packages.map(p=><th key={p._id} style={{textAlign:'center',padding:'10px 12px',fontSize:'0.78rem',color:ACC,fontWeight:800}}>{p.features?.image||'🌴'} {p.title}</th>)}
+                            </tr></thead>
+                            <tbody>
+                                {[['Destination',p=>p.destination],['Duration',p=>p.features?.duration||'N/A'],['Type',p=>p.features?.holidayType||'Holiday'],['Price',p=>`₹${p.price.toLocaleString('en-IN')}`],['Rating',p=>`⭐ ${p.features?.rating||4.5}`],['Meals',p=>p.features?.meals||'Breakfast'],['Hotels',p=>(p.features?.hotels?.length||1)+' hotels'],['Activities',p=>(p.features?.activities?.length||3)+' activities']].map(([label,fn])=>(
+                                    <tr key={label} style={{borderTop:'1px solid rgba(255,255,255,0.05)'}}>
+                                        <td style={{padding:'10px 12px',fontSize:'0.8rem',color:'#64748b',fontWeight:700}}>{label}</td>
+                                        {packages.map(p=><td key={p._id} style={{padding:'10px 12px',textAlign:'center',fontSize:'0.82rem',color:'#e2e8f0',fontWeight:600}}>{fn(p)}</td>)}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-            <div style={{padding:'20px 28px',overflowX:'auto'}}>
-                <table style={{width:'100%',borderCollapse:'collapse'}}>
-                    <thead><tr>
-                        <th style={{textAlign:'left',padding:'10px 12px',fontSize:'0.75rem',color:'#64748b',fontWeight:700}}>Feature</th>
-                        {packages.map(p=><th key={p._id} style={{textAlign:'center',padding:'10px 12px',fontSize:'0.78rem',color:ACC,fontWeight:800}}>{p.features?.image||'🌴'} {p.title}</th>)}
-                    </tr></thead>
-                    <tbody>
-                        {[['Destination',p=>p.destination],['Duration',p=>p.features?.duration||'N/A'],['Type',p=>p.features?.holidayType||'Holiday'],['Price',p=>`₹${p.price.toLocaleString('en-IN')}`],['Rating',p=>`⭐ ${p.features?.rating||4.5}`],['Meals',p=>p.features?.meals||'Breakfast'],['Hotels',p=>(p.features?.hotels?.length||1)+' hotels'],['Activities',p=>(p.features?.activities?.length||3)+' activities']].map(([label,fn])=>(
-                            <tr key={label} style={{borderTop:'1px solid rgba(255,255,255,0.05)'}}>
-                                <td style={{padding:'10px 12px',fontSize:'0.8rem',color:'#64748b',fontWeight:700}}>{label}</td>
-                                {packages.map(p=><td key={p._id} style={{padding:'10px 12px',textAlign:'center',fontSize:'0.82rem',color:'#e2e8f0',fontWeight:600}}>{fn(p)}</td>)}
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-);
+        </>
+    );
+};
 
 const PkgCard=({pkg,onView,onCompare,comparing})=>{
     const activities = pkg.features?.activities || ['Sightseeing','Transfers'];
@@ -213,9 +236,9 @@ const HolidayPage=()=>{
         setComparing(prev=>prev.find(p=>p._id===pkg._id)?prev.filter(p=>p._id!==pkg._id):[...prev.slice(-1),pkg]);
     };
 
-    return(<div style={{position:'relative',minHeight:'100vh',background:'transparent',fontFamily:"'Outfit',sans-serif",color:'#fff',paddingBottom:60}}>
+    return(<div style={{position:'relative',minHeight:'100vh',background:'#0d050d',fontFamily:"'Outfit',sans-serif",color:'#fff',paddingBottom:60}}>
         {/* Hero */}
-        <div style={{position:'relative',padding:'80px 20px 50px',background:'rgba(26, 10, 24, 0.5)',borderBottom:`1px solid rgba(244,114,182,0.15)`,overflow:'hidden'}}>
+        <div style={{position:'relative',padding:'80px 20px 50px',background:'linear-gradient(rgba(26, 10, 24, 0.85), rgba(26, 10, 24, 0.85)), url("/images/holiday.png")',backgroundSize:'cover',backgroundPosition:'center',borderBottom:`1px solid rgba(244,114,182,0.15)`,overflow:'hidden'}}>
             <div style={{position:'absolute',top:-80,left:'20%',width:400,height:400,borderRadius:'50%',background:'radial-gradient(circle,rgba(244,114,182,0.08) 0%,transparent 70%)',pointerEvents:'none'}}/>
             <div style={{position:'absolute',top:-60,right:'10%',width:300,height:300,borderRadius:'50%',background:'radial-gradient(circle,rgba(129,140,248,0.07) 0%,transparent 70%)',pointerEvents:'none'}}/>
             <div style={{maxWidth:1200,margin:'0 auto',position:'relative',textAlign:'center'}}>

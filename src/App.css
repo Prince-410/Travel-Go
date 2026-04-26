@@ -38,6 +38,48 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Modal System Utilities */
+body.modal-open {
+  overflow: hidden !important;
+}
+
+.premium-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(5, 5, 20, 0.8);
+  backdrop-filter: blur(10px);
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+}
+
+.premium-modal-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10000;
+  width: 100%;
+  max-width: 100%;
+  max-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none; /* Let clicks pass through to overlay if not on modal */
+}
+
+.premium-modal-container > * {
+  pointer-events: auto; /* Re-enable for modal content */
+  max-height: 95vh;
+  overflow-y: auto;
+}
+
+.premium-modal-container::-webkit-scrollbar {
+  display: none;
+}
+
 /* Custom Premium Scrollbar */
 ::-webkit-scrollbar {
   width: 10px;

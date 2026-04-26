@@ -419,11 +419,13 @@ const FlightPage = () => {
     ];
 
     return (
-        <div style={{ position: 'relative', minHeight: '100vh', background: 'transparent', fontFamily: "'Outfit', sans-serif", color: '#fff', paddingBottom: 60 }}>
+        <div style={{ position: 'relative', minHeight: '100vh', background: '#03030d', fontFamily: "'Outfit', sans-serif", color: '#fff', paddingBottom: 60 }}>
             {/* Hero Banner */}
             <div style={{
                 position: 'relative', padding: '80px 20px 40px',
-                background: 'rgba(5, 5, 20, 0.5)',
+                background: 'linear-gradient(rgba(3, 3, 13, 0.85), rgba(3, 3, 13, 0.85)), url("/images/flight.png")',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
                 borderBottom: '1px solid rgba(129,140,248,0.15)',
                 overflow: 'hidden'
             }}>

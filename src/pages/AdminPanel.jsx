@@ -2347,8 +2347,10 @@ const AdminPanel = () => {
 
       {/* Invoice Generator Modal */}
       {showInvoiceModal && selectedInvoice && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', backdropFilter:'blur(20px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:10000 }} onClick={()=>setShowInvoiceModal(false)}>
-          <div className="ng-admin-card" style={{ width:'100%', maxWidth:700, padding:0, background:'#fff', color:'#1e293b', border:'none', boxShadow:'0 40px 100px rgba(0,0,0,0.5)', overflow:'hidden' }} onClick={e=>e.stopPropagation()}>
+        <>
+          <div className="premium-modal-overlay" onClick={()=>setShowInvoiceModal(false)} style={{ zIndex: 10000 }} />
+          <div className="premium-modal-container" style={{ zIndex: 10000 }}>
+            <div className="ng-admin-card" style={{ width:'100%', maxWidth:700, padding:0, background:'#fff', color:'#1e293b', border:'none', boxShadow:'0 40px 100px rgba(0,0,0,0.5)', overflow:'hidden', animation: 'scaleIn 0.3s ease' }} onClick={e=>e.stopPropagation()}>
              {/* Invoice Header */}
              <div style={{ background:'#0f172a', color:'#fff', padding:'40px', display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
                 <div>
@@ -2453,6 +2455,7 @@ const AdminPanel = () => {
              </div>
           </div>
         </div>
+      </>
       )}
     </div>
   );

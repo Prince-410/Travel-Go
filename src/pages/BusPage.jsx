@@ -67,6 +67,7 @@ const CityDrop = ({ value, onChange, placeholder, exclude, availableCities }) =>
 };
 
 // ─── Seat Selection Modal ───────────────────────────────────────────────────
+// ─── Seat Selection Modal ───────────────────────────────────────────────────
 const BusSeatModal = ({ bus, onClose, setCurrentBooking }) => {
     const { addLocalBooking, authFetch, user } = useAuth();
     const { bookingCards } = useAdminConfig();
@@ -75,6 +76,12 @@ const BusSeatModal = ({ bus, onClose, setCurrentBooking }) => {
     const type = liveBus.busType || liveBus.features?.busType || 'Sleeper';
     const isSleeper = type.toLowerCase().includes('sleeper');
     
+    // Handle body scroll lock
+    useEffect(() => {
+        document.body.classList.add('modal-open');
+        return () => document.body.classList.remove('modal-open');
+    }, []);
+
     const defaultSeatMap = Array.from({ length: 10 }, (_, i) => [
         `${i + 1}A`, `${i + 1}B`, '', `${i + 1}C`, `${i + 1}D`
     ]);
@@ -228,149 +235,171 @@ const BusSeatModal = ({ bus, onClose, setCurrentBooking }) => {
     };
 
     return (
-        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, animation: 'fadeIn 0.3s ease-out', borderRadius: 'inherit' }}>
-            <div style={{ background: 'linear-gradient(145deg, #0b1120 0%, #064e3b 100%)', border: `1px solid rgba(74,222,128,0.2)`, borderRadius: 28, width: '100%', maxWidth: 860, maxHeight: '92vh', display: 'flex', overflow: 'hidden', boxShadow: '0 30px 60px -12px rgba(0,0,0,0.8), 0 0 40px rgba(74,222,128,0.1)' }}>
-                {/* Left: Bus diagram */}
-                <div style={{ flex: 1, padding: 36, overflowY: 'auto', borderRight: '1px solid rgba(74,222,128,0.1)', background: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%234ade80\' fill-opacity=\'0.03\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'/%3E%3C/g%3E%3C/svg%3E")' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 25 }}>
-                        <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 800, background: 'linear-gradient(to right, #fff, #4ade80)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Choose Your Seats</h3>
-                        <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: 0, fontWeight: 600 }}>{liveBus.operator} · {liveBus.busType}</p>
-                    </div>
-                    <div style={{ display: 'flex', gap: 16, marginBottom: 25, fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8' }}>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <div style={{ width: 14, height: 14, borderRadius: 4, background: 'rgba(255,255,255,0.03)', border: `1px solid rgba(255,255,255,0.15)` }} /> Available
-                        </span>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <div style={{ width: 14, height: 14, borderRadius: 4, background: 'linear-gradient(135deg, #4ade80, #16a34a)', boxShadow: '0 0 8px rgba(74,222,128,0.5)' }} /> Selected
-                        </span>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <div style={{ width: 14, height: 14, borderRadius: 4, background: 'rgba(255,255,255,0.08)' }} /> Booked
-                        </span>
-                    </div>
-                    <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '60px 60px 30px 30px', padding: '40px 20px 30px', border: '1px solid rgba(74,222,128,0.08)', boxShadow: 'inset 0 10px 30px rgba(0,0,0,0.3)', position: 'relative' }}>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '40px', marginBottom: 30 }}>
-                            <div style={{ width: 40, height: 40, border: '2px solid rgba(74,222,128,0.3)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(74,222,128,0.05)' }}>
-                                <span style={{ fontSize: '1.2rem' }}>👨‍✈️</span>
-                            </div>
+        <>
+            <div className="premium-modal-overlay" onClick={onClose} />
+            <div className="premium-modal-container">
+                <div style={{ background: 'linear-gradient(145deg, #0b1120 0%, #064e3b 100%)', border: `1px solid rgba(74,222,128,0.2)`, borderRadius: 28, width: '100%', maxHeight: '90vh', display: 'flex', overflow: 'hidden', boxShadow: '0 30px 60px -12px rgba(0,0,0,0.8), 0 0 40px rgba(74,222,128,0.1)', animation: 'scaleIn 0.3s ease' }}>
+                    {/* Left: Bus diagram */}
+                    <div style={{ flex: 1, padding: 36, overflowY: 'auto', borderRight: '1px solid rgba(74,222,128,0.1)', background: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%234ade80\' fill-opacity=\'0.03\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'/%3E%3C/g%3E%3C/svg%3E")' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 25 }}>
+                            <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 800, background: 'linear-gradient(to right, #fff, #4ade80)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Choose Your Seats</h3>
+                            <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: 0, fontWeight: 600 }}>{liveBus.operator} · {liveBus.busType}</p>
                         </div>
-                        {!isLocked ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
-                                {seatMap.map((rowArr, rIdx) => (
-                                    <div key={rIdx} style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                                        <span style={{ width: 18, fontSize: '0.65rem', color: '#64748b', textAlign: 'right', fontWeight: 800 }}>{rIdx + 1}</span>
-                                        {rowArr.map((seatId, cIdx) => (
-                                            seatId === '' ? <div key={cIdx} style={{ width: 38 }} /> : (
-                                                <div 
-                                                    key={seatId} 
-                                                    onClick={() => toggle(seatId)} 
-                                                    style={{
-                                                        ...seatStyle(seatId, true),
-                                                        background: selected.includes(seatId) ? 'linear-gradient(135deg, #4ade80, #16a34a)' : (booked.has(seatId) ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.06)'),
-                                                        border: selected.includes(seatId) ? '1px solid #4ade80' : (booked.has(seatId) ? '1px solid transparent' : '1px solid rgba(255,255,255,0.15)'),
-                                                        transform: selected.includes(seatId) ? 'scale(1.05)' : 'none',
-                                                        boxShadow: selected.includes(seatId) ? '0 0 15px rgba(74,222,128,0.3)' : 'none',
-                                                        width: 40, height: 40,
-                                                        cursor: (booked.has(seatId) || isLocked) ? 'not-allowed' : 'pointer'
-                                                    }}
-                                                >
-                                                    {selected.includes(seatId) ? <Check size={14} color="#000" strokeWidth={3} /> : (booked.has(seatId) ? '' : seatId)}
-                                                </div>
-                                            )
-                                        ))}
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div style={{ padding: '60px 40px', textAlign: 'center', background: 'rgba(0,0,0,0.2)', borderRadius: '24px', border: '1px solid rgba(248,113,113,0.2)', maxWidth: '350px', margin: '0 auto' }}>
-                                <div style={{ fontSize: '3.5rem', marginBottom: 20 }}>⏳</div>
-                                <h3 style={{ fontWeight: 900, color: '#fff', fontSize: '1.4rem', marginBottom: 12 }}>Booking Closed</h3>
-                                <p style={{ color: '#94a3b8', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: 24 }}>This journey has already commenced or the booking window has closed.</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-                {/* Right: Summary */}
-                <div style={{ width: 340, padding: 36, display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.02)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 24 }}>
-                        <button onClick={onClose} style={{ color: '#94a3b8', background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '50%', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><X size={18} /></button>
-                    </div>
-                    <div style={{ marginBottom: 30 }}>
-                        <div style={{ fontSize: '0.7rem', color: '#4ade80', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>Journey Details</div>
-                        <div style={{ fontWeight: 800, fontSize: '1.4rem', margin: '0 0 4px 0', color: '#fff' }}>{liveBus.source} → {liveBus.destination}</div>
-                        <div style={{ color: '#94a3b8', fontSize: '0.85rem' }}>{liveBus.date} · {liveBus.startTime || liveBus.departureTime || liveBus.time}</div>
-                    </div>
-                    <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '0.75rem', color: ACC, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 16 }}>Selected Seats ({selected.length}/6)</div>
-                        {selected.length === 0 ? (
-                            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 12, padding: 20, textAlign: 'center' }}>
-                                <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>No seats selected yet.</p>
-                            </div>
-                        ) : (
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-                                {selected.map(s => (
-                                    <div key={s} style={{ background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.25)', borderRadius: 10, padding: '8px 16px', fontSize: '0.95rem', fontWeight: 800, color: '#fff' }}>{s}</div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 24 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16, alignItems: 'center' }}>
-                            <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Total Fare</span>
-                            <span style={{ fontWeight: 900, color: '#fff', fontSize: '1.4rem' }}>₹{(totalPrice || liveBus.price).toLocaleString('en-IN')}</span>
+                        <div style={{ display: 'flex', gap: 16, marginBottom: 25, fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8' }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <div style={{ width: 14, height: 14, borderRadius: 4, background: 'rgba(255,255,255,0.03)', border: `1px solid rgba(255,255,255,0.15)` }} /> Available
+                            </span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <div style={{ width: 14, height: 14, borderRadius: 4, background: 'linear-gradient(135deg, #4ade80, #16a34a)', boxShadow: '0 0 8px rgba(74,222,128,0.5)' }} /> Selected
+                            </span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <div style={{ width: 14, height: 14, borderRadius: 4, background: 'rgba(255,255,255,0.08)' }} /> Booked
+                            </span>
                         </div>
-                        <button disabled={selected.length === 0 || bookingLoading}
-                            onClick={handleConfirmBooking}
-                            style={{ width: '100%', padding: '16px', background: (selected.length > 0 && !bookingLoading) ? `linear-gradient(135deg,${ACC},#16a34a)` : 'rgba(255,255,255,0.05)', color: (selected.length > 0 && !bookingLoading) ? '#000' : 'rgba(255,255,255,0.3)', border: 'none', borderRadius: 14, fontWeight: 800, fontSize: '1.05rem', cursor: (selected.length > 0 && !bookingLoading) ? 'pointer' : 'not-allowed' }}>
-                            {bookingLoading ? 'Processing...' : 'Confirm Booking'}
-                        </button>
+                        <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '60px 60px 30px 30px', padding: '40px 20px 30px', border: '1px solid rgba(74,222,128,0.08)', boxShadow: 'inset 0 10px 30px rgba(0,0,0,0.3)', position: 'relative' }}>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '40px', marginBottom: 30 }}>
+                                <div style={{ width: 40, height: 40, border: '2px solid rgba(74,222,128,0.3)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(74,222,128,0.05)' }}>
+                                    <span style={{ fontSize: '1.2rem' }}>👨‍✈️</span>
+                                </div>
+                            </div>
+                            {!isLocked ? (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
+                                    {seatMap.map((rowArr, rIdx) => (
+                                        <div key={rIdx} style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                                            <span style={{ width: 18, fontSize: '0.65rem', color: '#64748b', textAlign: 'right', fontWeight: 800 }}>{rIdx + 1}</span>
+                                            {rowArr.map((seatId, cIdx) => (
+                                                seatId === '' ? <div key={cIdx} style={{ width: 38 }} /> : (
+                                                    <div 
+                                                        key={seatId} 
+                                                        onClick={() => toggle(seatId)} 
+                                                        style={{
+                                                            ...seatStyle(seatId, true),
+                                                            background: selected.includes(seatId) ? 'linear-gradient(135deg, #4ade80, #16a34a)' : (booked.has(seatId) ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.06)'),
+                                                            border: selected.includes(seatId) ? '1px solid #4ade80' : (booked.has(seatId) ? '1px solid transparent' : '1px solid rgba(255,255,255,0.15)'),
+                                                            transform: selected.includes(seatId) ? 'scale(1.05)' : 'none',
+                                                            boxShadow: selected.includes(seatId) ? '0 0 15px rgba(74,222,128,0.3)' : 'none',
+                                                            width: 40, height: 40,
+                                                            cursor: (booked.has(seatId) || isLocked) ? 'not-allowed' : 'pointer'
+                                                        }}
+                                                    >
+                                                        {selected.includes(seatId) ? <Check size={14} color="#000" strokeWidth={3} /> : (booked.has(seatId) ? '' : seatId)}
+                                                    </div>
+                                                )
+                                            ))}
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div style={{ padding: '60px 40px', textAlign: 'center', background: 'rgba(0,0,0,0.2)', borderRadius: '24px', border: '1px solid rgba(248,113,113,0.2)', maxWidth: '350px', margin: '0 auto' }}>
+                                    <div style={{ fontSize: '3.5rem', marginBottom: 20 }}>⏳</div>
+                                    <h3 style={{ fontWeight: 900, color: '#fff', fontSize: '1.4rem', marginBottom: 12 }}>Booking Closed</h3>
+                                    <p style={{ color: '#94a3b8', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: 24 }}>This journey has already commenced or the booking window has closed.</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    {/* Right: Summary */}
+                    <div style={{ width: 340, padding: 36, display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.02)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 24 }}>
+                            <button onClick={onClose} style={{ color: '#94a3b8', background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '50%', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><X size={18} /></button>
+                        </div>
+                        <div style={{ marginBottom: 30 }}>
+                            <div style={{ fontSize: '0.7rem', color: '#4ade80', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>Journey Details</div>
+                            <div style={{ fontWeight: 800, fontSize: '1.4rem', margin: '0 0 4px 0', color: '#fff' }}>{liveBus.source} → {liveBus.destination}</div>
+                            <div style={{ color: '#94a3b8', fontSize: '0.85rem' }}>{liveBus.date} · {liveBus.startTime || liveBus.departureTime || liveBus.time}</div>
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: '0.75rem', color: ACC, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 16 }}>Selected Seats ({selected.length}/6)</div>
+                            {selected.length === 0 ? (
+                                <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 12, padding: 20, textAlign: 'center' }}>
+                                    <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>No seats selected yet.</p>
+                                </div>
+                            ) : (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                                    {selected.map(s => (
+                                        <div key={s} style={{ background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.25)', borderRadius: 10, padding: '8px 16px', fontSize: '0.95rem', fontWeight: 800, color: '#fff' }}>{s}</div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 24 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16, alignItems: 'center' }}>
+                                <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Total Fare</span>
+                                <span style={{ fontWeight: 900, color: '#fff', fontSize: '1.4rem' }}>₹{(totalPrice || liveBus.price).toLocaleString('en-IN')}</span>
+                            </div>
+                            <button disabled={selected.length === 0 || bookingLoading}
+                                onClick={handleConfirmBooking}
+                                style={{ width: '100%', padding: '16px', background: (selected.length > 0 && !bookingLoading) ? `linear-gradient(135deg,${ACC},#16a34a)` : 'rgba(255,255,255,0.05)', color: (selected.length > 0 && !bookingLoading) ? '#000' : 'rgba(255,255,255,0.3)', border: 'none', borderRadius: 14, fontWeight: 800, fontSize: '1.05rem', cursor: (selected.length > 0 && !bookingLoading) ? 'pointer' : 'not-allowed' }}>
+                                {bookingLoading ? 'Processing...' : 'Confirm Booking'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 };
 
 // ─── Live Tracking Modal ────────────────────────────────────────────────────
 const LiveTrackModal = ({ bus, onClose }) => {
     const [progress, setProgress] = useState(22);
+    
+    // Handle body scroll lock
+    useEffect(() => {
+        document.body.classList.add('modal-open');
+        return () => document.body.classList.remove('modal-open');
+    }, []);
+
     useEffect(() => { const t = setInterval(() => setProgress(p => Math.min(p + 1, 98)), 800); return () => clearInterval(t); }, []);
     return (
-        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, borderRadius: 'inherit' }}>
-            <div style={{ background: 'linear-gradient(135deg,#0b1120,#021008)', border: `1px solid rgba(74,222,128,0.25)`, borderRadius: 24, width: '100%', maxWidth: 540, padding: 32 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><div style={{ width: 10, height: 10, borderRadius: '50%', background: ACC }} /><span style={{ fontWeight: 800, fontSize: '1.1rem' }}>Live Tracking</span></div>
-                    <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.07)', border: 'none', borderRadius: 8, padding: 8, cursor: 'pointer', color: '#94a3b8' }}><X size={18} /></button>
+        <>
+            <div className="premium-modal-overlay" onClick={onClose} />
+            <div className="premium-modal-container">
+                <div style={{ background: 'linear-gradient(135deg,#0b1120,#021008)', border: `1px solid rgba(74,222,128,0.25)`, borderRadius: 24, width: '100%', padding: 32, boxShadow: '0 30px 60px rgba(0,0,0,0.6)', animation: 'scaleIn 0.3s ease' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><div style={{ width: 10, height: 10, borderRadius: '50%', background: ACC }} /><span style={{ fontWeight: 800, fontSize: '1.1rem' }}>Live Tracking</span></div>
+                        <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.07)', border: 'none', borderRadius: 8, padding: 8, cursor: 'pointer', color: '#94a3b8' }}><X size={18} /></button>
+                    </div>
+                    <div style={{ background: 'rgba(74,222,128,0.06)', border: `1px solid rgba(74,222,128,0.15)`, borderRadius: 14, padding: '14px 18px', marginBottom: 24 }}>
+                        <div style={{ fontWeight: 800 }}>{bus.operator}</div>
+                        <div style={{ color: '#64748b', fontSize: '0.82rem' }}>{bus.source} → {bus.destination}</div>
+                    </div>
+                    <div style={{ position: 'relative', height: 8, background: 'rgba(255,255,255,0.08)', borderRadius: 4, overflow: 'hidden', marginBottom: 24 }}>
+                        <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${progress}%`, background: `linear-gradient(90deg,${ACC},#16a34a)`, borderRadius: 4 }} />
+                    </div>
+                    <p style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.85rem' }}>Estimated Arrival: {bus.arrivalTime}</p>
                 </div>
-                <div style={{ background: 'rgba(74,222,128,0.06)', border: `1px solid rgba(74,222,128,0.15)`, borderRadius: 14, padding: '14px 18px', marginBottom: 24 }}>
-                    <div style={{ fontWeight: 800 }}>{bus.operator}</div>
-                    <div style={{ color: '#64748b', fontSize: '0.82rem' }}>{bus.source} → {bus.destination}</div>
-                </div>
-                <div style={{ position: 'relative', height: 8, background: 'rgba(255,255,255,0.08)', borderRadius: 4, overflow: 'hidden', marginBottom: 24 }}>
-                    <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${progress}%`, background: `linear-gradient(90deg,${ACC},#16a34a)`, borderRadius: 4 }} />
-                </div>
-                <p style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.85rem' }}>Estimated Arrival: {bus.arrivalTime}</p>
             </div>
-        </div>
+        </>
     );
 };
 
 // ─── Boarding Point Modal ───────────────────────────────────────────────────
 const BoardingModal = ({ bus, onClose }) => {
+    // Handle body scroll lock
+    useEffect(() => {
+        document.body.classList.add('modal-open');
+        return () => document.body.classList.remove('modal-open');
+    }, []);
+
     const bps = (BOARDING_POINTS && BOARDING_POINTS[bus.source]) || [bus.boardingPoint || bus.source + ' Bus Stand'];
     return (
-        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, borderRadius: 'inherit' }}>
-            <div style={{ background: 'linear-gradient(135deg,#0c1a1a,#0b1120)', border: `1px solid rgba(74,222,128,0.2)`, borderRadius: 24, width: '100%', maxWidth: 500, padding: 32 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><Map size={20} color={ACC} /><span style={{ fontWeight: 800, fontSize: '1.1rem' }}>Boarding Points</span></div>
-                    <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.07)', border: 'none', borderRadius: 8, padding: 8, cursor: 'pointer', color: '#94a3b8' }}><X size={18} /></button>
-                </div>
-                {bps.map(bp => (
-                    <div key={bp} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '12px 14px', marginBottom: 8 }}>
-                        <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>{bp}</div>
+        <>
+            <div className="premium-modal-overlay" onClick={onClose} />
+            <div className="premium-modal-container">
+                <div style={{ background: 'linear-gradient(135deg,#0c1a1a,#0b1120)', border: `1px solid rgba(74,222,128,0.2)`, borderRadius: 24, width: '100%', padding: 32, boxShadow: '0 30px 60px rgba(0,0,0,0.6)', animation: 'scaleIn 0.3s ease' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><Map size={20} color={ACC} /><span style={{ fontWeight: 800, fontSize: '1.1rem' }}>Boarding Points</span></div>
+                        <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.07)', border: 'none', borderRadius: 8, padding: 8, cursor: 'pointer', color: '#94a3b8' }}><X size={18} /></button>
                     </div>
-                ))}
+                    {bps.map(bp => (
+                        <div key={bp} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '12px 14px', marginBottom: 8 }}>
+                            <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>{bp}</div>
+                        </div>
+                    ))}
+                </div>
             </div>
-        </div>
+        </>
     );
 };
 
@@ -446,8 +475,8 @@ const BusPage = () => {
     };
 
     return (
-        <div style={{ position: 'relative', minHeight: '100vh', background: 'transparent', fontFamily: "'Outfit',sans-serif", color: '#fff', paddingBottom: 60 }}>
-            <div style={{ position: 'relative', padding: '80px 20px 40px', background: 'rgba(3, 15, 7, 0.5)', borderBottom: '1px solid rgba(74,222,128,0.12)' }}>
+        <div style={{ position: 'relative', minHeight: '100vh', background: '#030d07', fontFamily: "'Outfit',sans-serif", color: '#fff', paddingBottom: 60 }}>
+            <div style={{ position: 'relative', padding: '80px 20px 40px', background: 'linear-gradient(rgba(3, 15, 7, 0.85), rgba(3, 15, 7, 0.85)), url("/images/bus.png")', backgroundSize: 'cover', backgroundPosition: 'center', borderBottom: '1px solid rgba(74,222,128,0.12)' }}>
                 <div style={{ maxWidth: 1200, margin: '0 auto' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}><Bus size={28} color={ACC} /><span style={{ fontSize: '0.8rem', color: ACC, fontWeight: 700, textTransform: 'uppercase' }}>Bus Booking</span></div>
                     <h1 style={{ fontSize: '3rem', fontWeight: 900 }}>Book Buses</h1>

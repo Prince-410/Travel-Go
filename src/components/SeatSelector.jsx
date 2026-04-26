@@ -47,19 +47,24 @@ const SeatSelector = ({ bookingCard, onClose, onPayment }) => {
     }
   };
 
-  useEffect(() => () => {
-    if (!selectedSeatRef.current) return;
-
-    fetch(`/api/admin/cards/${liveCard._id}/unlock-seat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ seatId: selectedSeatRef.current })
-    }).catch((e) => console.error('Error unlocking seat', e));
+  useEffect(() => {
+    document.body.classList.add('modal-open');
+    return () => {
+      document.body.classList.remove('modal-open');
+      if (!selectedSeatRef.current) return;
+      fetch(`/api/admin/cards/${liveCard._id}/unlock-seat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ seatId: selectedSeatRef.current })
+      }).catch((e) => console.error('Error unlocking seat', e));
+    };
   }, [liveCard._id]);
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(5px)', display: 'flex', justifyContent: 'center', alignItems: 'center' }} onClick={onClose}>
-      <div style={{ background: 'var(--card-bg)', width: '100%', maxWidth: '800px', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }} onClick={e => e.stopPropagation()}>
+    <>
+      <div className="premium-modal-overlay" onClick={onClose} />
+      <div className="premium-modal-container">
+        <div style={{ background: 'var(--card-bg)', width: '100%', maxWidth: '800px', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', animation: 'scaleIn 0.3s ease' }} onClick={e => e.stopPropagation()}>
         <div style={{ padding: '24px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <h2 style={{ margin: 0, color: 'var(--text-color)' }}>Select {liveCard.type === 'hotel' ? 'Room' : 'Seat'}</h2>
@@ -138,7 +143,7 @@ const SeatSelector = ({ bookingCard, onClose, onPayment }) => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

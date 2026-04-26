@@ -123,31 +123,27 @@ const SeatSelectionModal = ({ flight, onClose }) => {
         }
     };
 
+    // Handle body scroll lock
+    useEffect(() => {
+        document.body.classList.add('modal-open');
+        return () => document.body.classList.remove('modal-open');
+    }, []);
+
     return (
-        <div style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'rgba(0, 0, 0, 0.7)',
-            backdropFilter: 'blur(8px)',
-            zIndex: 1000,
-            padding: isMobile ? '10px' : '20px',
-            animation: 'fadeIn 0.3s ease-out',
-            borderRadius: 'inherit' // Match parent curvature if any
-        }}>
-            <div style={{
-                background: 'linear-gradient(145deg, #0f172a 0%, #1e1b4b 100%)',
-                borderRadius: '28px',
-                width: isTabletOrSmaller ? 'min(96vw, 860px)' : 'min(92vw, 850px)',
-                border: '1px solid rgba(167, 139, 250, 0.15)',
-                boxShadow: '0 30px 60px -12px rgba(0, 0, 0, 0.8), 0 0 40px rgba(167, 139, 250, 0.1)',
-                display: isTabletOrSmaller ? 'block' : 'flex',
-                overflow: 'hidden',
-                maxHeight: isTabletOrSmaller ? '92vh' : 'min(88vh, 760px)',
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)'
-            }}>
+        <>
+            <div className="premium-modal-overlay" onClick={onClose} />
+            <div className="premium-modal-container">
+                <div style={{
+                    background: 'linear-gradient(145deg, #0f172a 0%, #1e1b4b 100%)',
+                    borderRadius: '28px',
+                    width: isTabletOrSmaller ? 'min(96vw, 860px)' : 'min(92vw, 850px)',
+                    border: '1px solid rgba(167, 139, 250, 0.15)',
+                    boxShadow: '0 30px 60px -12px rgba(0, 0, 0, 0.8), 0 0 40px rgba(167, 139, 250, 0.1)',
+                    display: isTabletOrSmaller ? 'block' : 'flex',
+                    overflow: 'hidden',
+                    maxHeight: '90vh',
+                    animation: 'scaleIn 0.3s ease'
+                }}>
                 {/* Left Side: Seat Map */}
                 <div style={{
                     flex: 1,
@@ -433,7 +429,8 @@ const SeatSelectionModal = ({ flight, onClose }) => {
                     }}
                 />
             )}
-        </div>
+            </div>
+        </>
     );
 };
 

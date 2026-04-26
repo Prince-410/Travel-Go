@@ -12,46 +12,59 @@ const VEHICLE_TYPES=[{type:'Go Mini',icon:'🚗'},{type:'Go Sedan',icon:'🚙'},
 const ACC='#a78bfa';
 
 // Live tracking modal
+// Live tracking modal
 const TrackModal=({cab,onClose})=>{
     const [pos,setPos]=useState(20);
+    
+    // Handle body scroll lock
+    useEffect(() => {
+        document.body.classList.add('modal-open');
+        return () => document.body.classList.remove('modal-open');
+    }, []);
+
     useEffect(()=>{const t=setInterval(()=>setPos(p=>Math.min(p+2,95)),600);return()=>clearInterval(t)},[]);
-    return(<div style={{position:'absolute',inset:0,background:'rgba(0,0,0,0.85)',backdropFilter:'blur(8px)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:20,borderRadius:'inherit'}}>
-        <div style={{background:'linear-gradient(135deg,#0d0a1a,#120d24)',border:`1px solid rgba(167,139,250,0.25)`,borderRadius:24,width:'100%',maxWidth:520,padding:28,boxShadow:'0 30px 60px rgba(0,0,0,0.6)'}}>
-            <div style={{display:'flex',justifyContent:'space-between',marginBottom:20}}>
-                <div style={{display:'flex',alignItems:'center',gap:8}}><div style={{width:9,height:9,borderRadius:'50%',background:ACC,boxShadow:`0 0 8px ${ACC}`,animation:'pulse 1.5s infinite'}}/><span style={{fontWeight:800,fontSize:'1.1rem'}}>Driver is on the way</span></div>
-                <button onClick={onClose} style={{background:'rgba(255,255,255,0.07)',border:'none',borderRadius:8,padding:7,cursor:'pointer',color:'#94a3b8'}}><X size={17}/></button>
-            </div>
-            <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}`}</style>
-            <div style={{background:'rgba(167,139,250,0.07)',border:`1px solid rgba(167,139,250,0.18)`,borderRadius:14,padding:'14px 18px',marginBottom:20}}>
-                <div style={{fontWeight:800}}>{cab.features?.vehicleType||'Go Mini'} {cab.features?.icon||'🚗'} — {cab.features?.operator||'City Taxi'}</div>
-                <div style={{color:'#64748b',fontSize:'0.8rem',marginTop:4}}>Driver: {cab.features?.driver||'Ramesh'} · ⭐ {cab.features?.driverRating||4.8}</div>
-            </div>
-            {/* Progress */}
-            <div style={{marginBottom:20}}>
-                <div style={{display:'flex',justifyContent:'space-between',fontSize:'0.72rem',color:'#64748b',marginBottom:8}}>
-                    <span>🚗 Driver location</span><span>📍 Your pickup</span>
+    return(
+        <>
+            <div className="premium-modal-overlay" onClick={onClose} />
+            <div className="premium-modal-container">
+                <div style={{background:'linear-gradient(135deg,#0d0a1a,#120d24)',border:`1px solid rgba(167,139,250,0.25)`,borderRadius:24,width:'100%',padding:28,boxShadow:'0 30px 60px rgba(0,0,0,0.6)', animation: 'scaleIn 0.3s ease'}}>
+                    <div style={{display:'flex',justifyContent:'space-between',marginBottom:20}}>
+                        <div style={{display:'flex',alignItems:'center',gap:8}}><div style={{width:9,height:9,borderRadius:'50%',background:ACC,boxShadow:`0 0 8px ${ACC}`,animation:'pulse 1.5s infinite'}}/><span style={{fontWeight:800,fontSize:'1.1rem'}}>Driver is on the way</span></div>
+                        <button onClick={onClose} style={{background:'rgba(255,255,255,0.07)',border:'none',borderRadius:8,padding:7,cursor:'pointer',color:'#94a3b8'}}><X size={17}/></button>
+                    </div>
+                    <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}`}</style>
+                    <div style={{background:'rgba(167,139,250,0.07)',border:`1px solid rgba(167,139,250,0.18)`,borderRadius:14,padding:'14px 18px',marginBottom:20}}>
+                        <div style={{fontWeight:800}}>{cab.features?.vehicleType||'Go Mini'} {cab.features?.icon||'🚗'} — {cab.features?.operator||'City Taxi'}</div>
+                        <div style={{color:'#64748b',fontSize:'0.8rem',marginTop:4}}>Driver: {cab.features?.driver||'Ramesh'} · ⭐ {cab.features?.driverRating||4.8}</div>
+                    </div>
+                    {/* Progress */}
+                    <div style={{marginBottom:20}}>
+                        <div style={{display:'flex',justifyContent:'space-between',fontSize:'0.72rem',color:'#64748b',marginBottom:8}}>
+                            <span>🚗 Driver location</span><span>📍 Your pickup</span>
+                        </div>
+                        <div style={{position:'relative',height:8,background:'rgba(255,255,255,0.08)',borderRadius:4,overflow:'hidden'}}>
+                            <div style={{position:'absolute',left:0,top:0,height:'100%',width:`${pos}%`,background:`linear-gradient(90deg,${ACC},#7c3aed)`,borderRadius:4,transition:'width .6s'}}/>
+                            <div style={{position:'absolute',top:'50%',left:`${pos}%`,transform:'translate(-50%,-50%)',fontSize:'0.9rem',transition:'left .6s'}}>🚗</div>
+                        </div>
+                        <div style={{textAlign:'center',marginTop:8,fontSize:'0.8rem',color:ACC,fontWeight:700}}>ETA: ~{Math.max(1,Math.round((cab.features?.eta||5)*(1-pos/100)))} mins away</div>
+                    </div>
+                    {/* Map stub */}
+                    <div style={{background:'rgba(255,255,255,0.03)',borderRadius:14,height:148,position:'relative',overflow:'hidden',border:'1px solid rgba(255,255,255,0.07)'}}>
+                        <div style={{position:'absolute',inset:0,opacity:0.05}}>{Array.from({length:10},(_,i)=><div key={i} style={{position:'absolute',left:`${i*11}%`,top:0,bottom:0,width:1,background:'#fff'}}/>)}{Array.from({length:7},(_,i)=><div key={i} style={{position:'absolute',top:`${i*15}%`,left:0,right:0,height:1,background:'#fff'}}/>)}</div>
+                        <svg style={{position:'absolute',inset:0,width:'100%',height:'100%'}} viewBox="0 0 400 148">
+                            <path d="M40,120 C120,60 260,90 360,30" stroke={ACC} strokeWidth="2.5" strokeDasharray="6,3" fill="none" opacity="0.5"/>
+                            <circle cx={40+(360-40)*pos/100} cy={120-(90)*pos/100} r="8" fill={ACC}/>
+                            <circle cx="40" cy="120" r="5" fill={ACC}/>
+                            <circle cx="360" cy="30" r="7" fill="#4ade80"/>
+                            <text x="35" y="140" fill="#818cf8" fontSize="10">Driver</text>
+                            <text x="340" y="25" fill="#4ade80" fontSize="10">You</text>
+                        </svg>
+                        <div style={{position:'absolute',bottom:8,right:12,fontSize:'0.68rem',color:ACC,display:'flex',alignItems:'center',gap:4}}><div style={{width:6,height:6,borderRadius:'50%',background:ACC,animation:'pulse 1.5s infinite'}}/>LIVE</div>
+                    </div>
                 </div>
-                <div style={{position:'relative',height:8,background:'rgba(255,255,255,0.08)',borderRadius:4,overflow:'hidden'}}>
-                    <div style={{position:'absolute',left:0,top:0,height:'100%',width:`${pos}%`,background:`linear-gradient(90deg,${ACC},#7c3aed)`,borderRadius:4,transition:'width .6s'}}/>
-                    <div style={{position:'absolute',top:'50%',left:`${pos}%`,transform:'translate(-50%,-50%)',fontSize:'0.9rem',transition:'left .6s'}}>🚗</div>
-                </div>
-                <div style={{textAlign:'center',marginTop:8,fontSize:'0.8rem',color:ACC,fontWeight:700}}>ETA: ~{Math.max(1,Math.round((cab.features?.eta||5)*(1-pos/100)))} mins away</div>
             </div>
-            {/* Map stub */}
-            <div style={{background:'rgba(255,255,255,0.03)',borderRadius:14,height:148,position:'relative',overflow:'hidden',border:'1px solid rgba(255,255,255,0.07)'}}>
-                <div style={{position:'absolute',inset:0,opacity:0.05}}>{Array.from({length:10},(_,i)=><div key={i} style={{position:'absolute',left:`${i*11}%`,top:0,bottom:0,width:1,background:'#fff'}}/>)}{Array.from({length:7},(_,i)=><div key={i} style={{position:'absolute',top:`${i*15}%`,left:0,right:0,height:1,background:'#fff'}}/>)}</div>
-                <svg style={{position:'absolute',inset:0,width:'100%',height:'100%'}} viewBox="0 0 400 148">
-                    <path d="M40,120 C120,60 260,90 360,30" stroke={ACC} strokeWidth="2.5" strokeDasharray="6,3" fill="none" opacity="0.5"/>
-                    <circle cx={40+(360-40)*pos/100} cy={120-(90)*pos/100} r="8" fill={ACC}/>
-                    <circle cx="40" cy="120" r="5" fill={ACC}/>
-                    <circle cx="360" cy="30" r="7" fill="#4ade80"/>
-                    <text x="35" y="140" fill="#818cf8" fontSize="10">Driver</text>
-                    <text x="340" y="25" fill="#4ade80" fontSize="10">You</text>
-                </svg>
-                <div style={{position:'absolute',bottom:8,right:12,fontSize:'0.68rem',color:ACC,display:'flex',alignItems:'center',gap:4}}><div style={{width:6,height:6,borderRadius:'50%',background:ACC,animation:'pulse 1.5s infinite'}}/>LIVE</div>
-            </div>
-        </div>
-    </div>);
+        </>
+    );
 };
 
 // Cab Card
@@ -176,10 +189,10 @@ const CabPage=()=>{
         },400);
     };
 
-    return(<div style={{position:'relative',minHeight:'100vh',background:'transparent',fontFamily:"'Outfit',sans-serif",color:'#fff',paddingBottom:60}}>
+    return(<div style={{position:'relative',minHeight:'100vh',background:'#0d0a14',fontFamily:"'Outfit',sans-serif",color:'#fff',paddingBottom:60}}>
         <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}`}</style>
         {/* Hero */}
-        <div style={{position:'relative',padding:'80px 20px 40px',background:'rgba(13, 10, 26, 0.5)',borderBottom:`1px solid rgba(167,139,250,0.15)`,overflow:'hidden'}}>
+        <div style={{position:'relative',padding:'80px 20px 40px',background:'linear-gradient(rgba(13, 10, 26, 0.85), rgba(13, 10, 26, 0.85)), url("/images/cab.png")',backgroundSize:'cover',backgroundPosition:'center',borderBottom:`1px solid rgba(167,139,250,0.15)`,overflow:'hidden'}}>
             <div style={{position:'absolute',top:-80,left:'25%',width:350,height:350,borderRadius:'50%',background:'radial-gradient(circle,rgba(167,139,250,0.1) 0%,transparent 70%)',pointerEvents:'none'}}/>
             <div style={{maxWidth:1200,margin:'0 auto',position:'relative'}}>
                 <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10}}><Car size={28} color={ACC}/><span style={{fontSize:'0.8rem',color:ACC,fontWeight:700,textTransform:'uppercase',letterSpacing:2}}>Cab Booking</span></div>

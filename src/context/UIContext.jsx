@@ -48,6 +48,16 @@ export const UIProvider = ({ children }) => {
 
   const theme = getModalTheme();
 
+  // Handle body scroll lock
+  React.useEffect(() => {
+    if (modal) {
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.classList.remove('modal-open');
+    }
+    return () => document.body.classList.remove('modal-open');
+  }, [modal]);
+
   return (
     <UIContext.Provider value={{ showToast, showConfirm }}>
       {children}
@@ -87,52 +97,50 @@ export const UIProvider = ({ children }) => {
 
       {/* Modern Modal / Confirm Dialog */}
       {modal && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-          background: 'rgba(5, 5, 20, 0.85)', backdropFilter: 'blur(10px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 99999, animation: 'fadeIn 0.3s'
-        }}>
-          <div style={{
-            background: 'rgba(15, 23, 42, 0.98)', border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: 32, padding: 48, width: '100%', maxWidth: 480, textAlign: 'center',
-            boxShadow: '0 50px 120px rgba(0,0,0,0.7)', animation: 'scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)'
-          }}>
+        <>
+          <div className="premium-modal-overlay" onClick={modal.onCancel} />
+          <div className="premium-modal-container">
             <div style={{
-              width: 90, height: 90, borderRadius: '50%', margin: '0 auto 28px',
-              background: theme.bg,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: theme.color,
-              border: `1px solid ${theme.color}30`
+              background: 'rgba(15, 23, 42, 0.98)', border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: 32, padding: 48, width: '100%', textAlign: 'center',
+              boxShadow: '0 50px 120px rgba(0,0,0,0.7)', animation: 'scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)'
             }}>
-              {theme.icon}
-            </div>
-            <h3 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: 14, color: '#fff', letterSpacing: '-0.5px' }}>{modal.title}</h3>
-            <p style={{ color: '#94a3b8', fontSize: '1.05rem', lineHeight: 1.7, marginBottom: 40 }}>{modal.message}</p>
-            
-            <div style={{ display: 'flex', gap: 16 }}>
-              <button onClick={modal.onConfirm} style={{
-                flex: 1, padding: '18px', borderRadius: 18, border: 'none',
-                background: theme.btn,
-                color: '#fff', fontWeight: 800, fontSize: '1.05rem', cursor: 'pointer',
-                boxShadow: `0 12px 24px ${theme.color}40`,
-                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
-              }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-3px)'} onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
-                {modal.type === 'confirm' ? 'Confirm Action' : 'Accept'}
-              </button>
-              {modal.type === 'confirm' && (
-                <button onClick={modal.onCancel} style={{
-                  flex: 1, padding: '18px', borderRadius: 18, 
-                  background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-                  color: '#94a3b8', fontWeight: 800, fontSize: '1.05rem', cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'} onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}>
-                  Cancel
+              <div style={{
+                width: 90, height: 90, borderRadius: '50%', margin: '0 auto 28px',
+                background: theme.bg,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: theme.color,
+                border: `1px solid ${theme.color}30`
+              }}>
+                {theme.icon}
+              </div>
+              <h3 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: 14, color: '#fff', letterSpacing: '-0.5px' }}>{modal.title}</h3>
+              <p style={{ color: '#94a3b8', fontSize: '1.05rem', lineHeight: 1.7, marginBottom: 40 }}>{modal.message}</p>
+              
+              <div style={{ display: 'flex', gap: 16 }}>
+                <button onClick={modal.onConfirm} style={{
+                  flex: 1, padding: '18px', borderRadius: 18, border: 'none',
+                  background: theme.btn,
+                  color: '#fff', fontWeight: 800, fontSize: '1.05rem', cursor: 'pointer',
+                  boxShadow: `0 12px 24px ${theme.color}40`,
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-3px)'} onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
+                  {modal.type === 'confirm' ? 'Confirm Action' : 'Accept'}
                 </button>
-              )}
+                {modal.type === 'confirm' && (
+                  <button onClick={modal.onCancel} style={{
+                    flex: 1, padding: '18px', borderRadius: 18, 
+                    background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                    color: '#94a3b8', fontWeight: 800, fontSize: '1.05rem', cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'} onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}>
+                    Cancel
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        </>
       )}
 
       <style>{`

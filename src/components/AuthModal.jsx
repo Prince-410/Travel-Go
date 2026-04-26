@@ -20,15 +20,15 @@ const AuthModal = ({ isOpen, onClose, onSuccess, isClosable = true }) => {
 
     useEffect(() => {
         if (isOpen) {
-            document.body.style.overflow = 'hidden';
+            document.body.classList.add('modal-open');
             setIsLogin(true);
             setError('');
             setSuccess('');
         } else {
-            document.body.style.overflow = 'auto';
+            document.body.classList.remove('modal-open');
         }
         return () => {
-            document.body.style.overflow = 'auto';
+            document.body.classList.remove('modal-open');
         };
     }, [isOpen]);
 
@@ -96,31 +96,22 @@ const AuthModal = ({ isOpen, onClose, onSuccess, isClosable = true }) => {
     };
 
     return (
-        <div style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 9999,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '20px',
-            background: 'rgba(15, 23, 42, 0.75)',
-            backdropFilter: 'blur(8px)',
-            animation: 'fadeIn 0.3s ease'
-        }}>
-            <div style={{
-                background: 'var(--card-bg)',
-                borderRadius: '24px',
-                boxShadow: '0 25px 50px -12px rgba(15, 23, 42, 0.5)',
-                maxWidth: '450px',
-                width: '100%',
-                overflow: 'hidden',
-                position: 'relative',
-                animation: 'slideUp 0.3s ease',
-                maxHeight: '90vh',
-                display: 'flex',
-                flexDirection: 'column'
-            }}>
+        <>
+            <div className="premium-modal-overlay" onClick={onClose} />
+            <div className="premium-modal-container">
+                <div style={{
+                    background: 'var(--card-bg)',
+                    borderRadius: '24px',
+                    boxShadow: '0 25px 50px -12px rgba(15, 23, 42, 0.5)',
+                    maxWidth: '450px',
+                    width: '100%',
+                    overflow: 'hidden',
+                    position: 'relative',
+                    animation: 'scaleIn 0.3s ease',
+                    maxHeight: '90vh',
+                    display: 'flex',
+                    flexDirection: 'column'
+                }}>
                 {/* Close Button */}
                 {isClosable && (
                     <button
@@ -461,13 +452,8 @@ const AuthModal = ({ isOpen, onClose, onSuccess, isClosable = true }) => {
                     )}
                 </div>
             </div>
-            <style>{`
-                @keyframes slideUp {
-                    from { opacity: 0; transform: translateY(20px) scale(0.95); }
-                    to { opacity: 1; transform: translateY(0) scale(1); }
-                }
-            `}</style>
         </div>
+    </>
     );
 };
 

@@ -41,6 +41,13 @@ const StationDrop=({value,onChange,placeholder,exclude,availableStations})=>{
 // PNR Status Modal
 const PNRModal=({onClose})=>{
     const [pnr,setPnr]=useState('');const [result,setResult]=useState(null);const [err,setErr]=useState('');
+    
+    // Handle body scroll lock
+    useEffect(() => {
+        document.body.classList.add('modal-open');
+        return () => document.body.classList.remove('modal-open');
+    }, []);
+
     const check=()=>{
         if(pnr.length<5){setErr('Enter a valid PNR');return;}
         setErr('');
@@ -48,30 +55,33 @@ const PNRModal=({onClose})=>{
         const statuses=['Confirmed','Waitlist WL/4','RAC/2'];
         setResult({pnr,status:statuses[Math.floor(Math.random()*statuses.length)],train:'Shatabdi Express #12009',from:'Ahmedabad',to:'Mumbai',date:new Date().toISOString().split('T')[0],classType:'Second AC (2A)',coach:'B3',seat:'42 Lower'});
     };
-    return(<div style={{position:'absolute',inset:0,background:'rgba(0,0,0,0.8)',backdropFilter:'blur(8px)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:20,borderRadius:'inherit'}}>
-        <div style={{background:'linear-gradient(135deg,#0c0b1d,#1a1833)',border:`1px solid rgba(129,140,248,0.25)`,borderRadius:24,width:'100%',maxWidth:480,padding:32,boxShadow:'0 30px 60px rgba(0,0,0,0.6)'}}>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24}}>
-                <div style={{display:'flex',alignItems:'center',gap:10}}><Search size={20} color={ACC}/><span style={{fontWeight:800,fontSize:'1.1rem'}}>PNR Status</span></div>
-                <button onClick={onClose} style={{background:'rgba(255,255,255,0.07)',border:'none',borderRadius:8,padding:8,cursor:'pointer',color:'#94a3b8'}}><X size={18}/></button>
-            </div>
-            <div style={{display:'flex',gap:10,marginBottom:20}}>
-                <input value={pnr} onChange={e=>setPnr(e.target.value)} placeholder="Enter 10-digit PNR number" style={{flex:1,background:'rgba(255,255,255,0.06)',border:`1px solid rgba(129,140,248,0.3)`,borderRadius:10,padding:'11px 14px',color:'#fff',fontSize:'0.95rem',outline:'none'}}/>
-                <button onClick={check} style={{background:`linear-gradient(135deg,${ACC},#6366f1)`,color:'#fff',border:'none',borderRadius:10,padding:'11px 20px',fontWeight:800,cursor:'pointer'}}>Check</button>
-            </div>
-            {err&&<p style={{color:'#f87171',fontSize:'0.82rem',marginBottom:12}}>{err}</p>}
-            {result&&(<div style={{background:'rgba(129,140,248,0.07)',border:`1px solid rgba(129,140,248,0.2)`,borderRadius:14,padding:20}}>
-                <div style={{display:'flex',justifyContent:'space-between',marginBottom:14}}>
-                    <span style={{fontWeight:700,fontSize:'0.8rem',color:'#64748b'}}>PNR: {result.pnr}</span>
-                    <span style={{background:result.status.startsWith('C')?'rgba(74,222,128,0.15)':'rgba(251,191,36,0.15)',color:result.status.startsWith('C')?'#4ade80':'#fbbf24',fontSize:'0.78rem',fontWeight:800,padding:'3px 10px',borderRadius:20,border:`1px solid ${result.status.startsWith('C')?'rgba(74,222,128,0.3)':'rgba(251,191,36,0.3)'}`}}>{result.status}</span>
+    return(<>
+        <div className="premium-modal-overlay" onClick={onClose} />
+        <div className="premium-modal-container">
+            <div style={{background:'linear-gradient(135deg,#0c0b1d,#1a1833)',border:`1px solid rgba(129,140,248,0.25)`,borderRadius:24,width:'100%',padding:32,boxShadow:'0 30px 60px rgba(0,0,0,0.6)'}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24}}>
+                    <div style={{display:'flex',alignItems:'center',gap:10}}><Search size={20} color={ACC}/><span style={{fontWeight:800,fontSize:'1.1rem'}}>PNR Status</span></div>
+                    <button onClick={onClose} style={{background:'rgba(255,255,255,0.07)',border:'none',borderRadius:8,padding:8,cursor:'pointer',color:'#94a3b8'}}><X size={18}/></button>
                 </div>
-                {[['Train',result.train],['From',result.from],['To',result.to],['Date',result.date],['Class',result.classType],['Coach/Seat',`${result.coach} — Seat ${result.seat}`]].map(([k,v])=>(
-                    <div key={k} style={{display:'flex',justifyContent:'space-between',padding:'7px 0',borderBottom:'1px solid rgba(255,255,255,0.05)'}}>
-                        <span style={{fontSize:'0.8rem',color:'#64748b'}}>{k}</span><span style={{fontSize:'0.85rem',fontWeight:600}}>{v}</span>
+                <div style={{display:'flex',gap:10,marginBottom:20}}>
+                    <input value={pnr} onChange={e=>setPnr(e.target.value)} placeholder="Enter 10-digit PNR number" style={{flex:1,background:'rgba(255,255,255,0.06)',border:`1px solid rgba(129,140,248,0.3)`,borderRadius:10,padding:'11px 14px',color:'#fff',fontSize:'0.95rem',outline:'none'}}/>
+                    <button onClick={check} style={{background:`linear-gradient(135deg,${ACC},#6366f1)`,color:'#fff',border:'none',borderRadius:10,padding:'11px 20px',fontWeight:800,cursor:'pointer'}}>Check</button>
+                </div>
+                {err&&<p style={{color:'#f87171',fontSize:'0.82rem',marginBottom:12}}>{err}</p>}
+                {result&&(<div style={{background:'rgba(129,140,248,0.07)',border:`1px solid rgba(129,140,248,0.2)`,borderRadius:14,padding:20}}>
+                    <div style={{display:'flex',justifyContent:'space-between',marginBottom:14}}>
+                        <span style={{fontWeight:700,fontSize:'0.8rem',color:'#64748b'}}>PNR: {result.pnr}</span>
+                        <span style={{background:result.status.startsWith('C')?'rgba(74,222,128,0.15)':'rgba(251,191,36,0.15)',color:result.status.startsWith('C')?'#4ade80':'#fbbf24',fontSize:'0.78rem',fontWeight:800,padding:'3px 10px',borderRadius:20,border:`1px solid ${result.status.startsWith('C')?'rgba(74,222,128,0.3)':'rgba(251,191,36,0.3)'}`}}>{result.status}</span>
                     </div>
-                ))}
-            </div>)}
+                    {[['Train',result.train],['From',result.from],['To',result.to],['Date',result.date],['Class',result.classType],['Coach/Seat',`${result.coach} — Seat ${result.seat}`]].map(([k,v])=>(
+                        <div key={k} style={{display:'flex',justifyContent:'space-between',padding:'7px 0',borderBottom:'1px solid rgba(255,255,255,0.05)'}}>
+                            <span style={{fontSize:'0.8rem',color:'#64748b'}}>{k}</span><span style={{fontSize:'0.85rem',fontWeight:600}}>{v}</span>
+                        </div>
+                    ))}
+                </div>)}
+            </div>
         </div>
-    </div>);
+    </>);
 };
 
 // Train Card
@@ -236,9 +246,9 @@ const TrainPage=()=>{
         return 0;
     });
     const swap=()=>{const t=from;setFrom(to);setTo(t);};
-    return(<div style={{position:'relative',minHeight:'100vh',background:'transparent',fontFamily:"'Outfit',sans-serif",color:'#fff',paddingBottom:60}}>
+    return(<div style={{position:'relative',minHeight:'100vh',background:'#050514',fontFamily:"'Outfit',sans-serif",color:'#fff',paddingBottom:60}}>
         {/* Hero */}
-        <div style={{position:'relative',padding:'80px 20px 40px',background:'rgba(12, 11, 29, 0.5)',borderBottom:`1px solid rgba(129,140,248,0.15)`,overflow:'hidden'}}>
+        <div style={{position:'relative',padding:'80px 20px 40px',background:'linear-gradient(rgba(12, 11, 29, 0.85), rgba(12, 11, 29, 0.85)), url("/images/train.png")',backgroundSize:'cover',backgroundPosition:'center',borderBottom:`1px solid rgba(129,140,248,0.15)`,overflow:'hidden'}}>
             <div style={{position:'absolute',top:-80,left:'25%',width:400,height:400,borderRadius:'50%',background:'radial-gradient(circle,rgba(129,140,248,0.1) 0%,transparent 70%)',pointerEvents:'none'}}/>
             <div style={{maxWidth:1200,margin:'0 auto',position:'relative'}}>
                 <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:12}}>
