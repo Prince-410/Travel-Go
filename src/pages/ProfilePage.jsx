@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useUI } from '../context/UIContext';
+import BookingReceipt from '../components/BookingReceipt';
 import '../App.css';
 
 const ACC = '#818cf8';
@@ -77,6 +78,7 @@ const ProfilePage = () => {
   const [saveMsg, setSaveMsg] = useState('');
   const [jobApps, setJobApps] = useState([]);
   const [loadingJobs, setLoadingJobs] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
 
   useEffect(() => {
     if (tab === 'bookings' && isAuthenticated) {
@@ -430,11 +432,14 @@ const ProfilePage = () => {
                         <div style={{ textAlign: 'right', minWidth: 100, borderLeft: '1px solid rgba(255,255,255,0.08)', paddingLeft: 20 }}>
                            <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 700, marginBottom: 2 }}>TOTAL PAID</div>
                            <div style={{ fontWeight: 900, fontSize: '1.3rem', color: '#fff' }}>₹{booking.amount?.toLocaleString('en-IN')}</div>
-                           <button style={{ 
-                             background: 'transparent', border: 'none', color: ACC, 
-                             fontSize: '0.75rem', fontWeight: 700, marginTop: 4, 
-                             cursor: 'pointer', padding: 0, textDecoration: 'underline' 
-                           }}>View Invoice</button>
+                           <button 
+                             onClick={() => setSelectedBooking(booking)}
+                             style={{ 
+                               background: 'transparent', border: 'none', color: ACC, 
+                               fontSize: '0.75rem', fontWeight: 700, marginTop: 4, 
+                               cursor: 'pointer', padding: 0, textDecoration: 'underline' 
+                             }}
+                           >View Invoice</button>
                         </div>
                       </div>
                     ))}
@@ -798,6 +803,12 @@ const ProfilePage = () => {
           </div>
         </div>
       </div>
+      {selectedBooking && (
+        <BookingReceipt 
+          booking={selectedBooking} 
+          onClose={() => setSelectedBooking(null)} 
+        />
+      )}
     </div>
   );
 };

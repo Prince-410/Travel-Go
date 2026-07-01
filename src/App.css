@@ -80,30 +80,55 @@ body.modal-open {
   display: none;
 }
 
-/* Custom Premium Scrollbar */
+/* Ensure themed scrollbars on all popup screens and their scrollable child elements */
+.premium-modal-container * {
+  scrollbar-width: thin !important;
+  scrollbar-color: #818cf8 rgba(9, 13, 22, 0.4) !important;
+}
+
+.premium-modal-container *::-webkit-scrollbar {
+  display: block !important;
+  width: 8px !important;
+  height: 8px !important;
+}
+
+.premium-modal-container *::-webkit-scrollbar-track {
+  background: rgba(9, 13, 22, 0.4) !important;
+  border-radius: 10px !important;
+}
+
+.premium-modal-container *::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #818cf8 0%, #6366f1 100%) !important;
+  border-radius: 10px !important;
+}
+
+.premium-modal-container *::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #a78bfa 0%, #818cf8 100%) !important;
+}
+
+/* Custom Premium Scrollbar (Ticket themed) */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: #090d16;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: linear-gradient(180deg, #818cf8 0%, #6366f1 100%);
   border-radius: 10px;
-  border: 2px solid #0f172a;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #818cf8;
+  background: linear-gradient(180deg, #a78bfa 0%, #818cf8 100%);
 }
 
 /* Firefox Support */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #1e293b #0f172a;
+  scrollbar-color: #818cf8 #090d16;
 }
 
 a {

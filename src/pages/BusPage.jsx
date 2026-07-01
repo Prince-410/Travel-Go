@@ -299,7 +299,7 @@ const BusSeatModal = ({ bus, onClose, setCurrentBooking }) => {
                         </div>
                     </div>
                     {/* Right: Summary */}
-                    <div style={{ width: 340, padding: 36, display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.02)' }}>
+                    <div style={{ width: 340, padding: 36, display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.02)', overflowY: 'auto' }}>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 24 }}>
                             <button onClick={onClose} style={{ color: '#94a3b8', background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '50%', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><X size={18} /></button>
                         </div>

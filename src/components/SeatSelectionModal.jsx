@@ -15,7 +15,7 @@ const SeatSelectionModal = ({ flight, onClose }) => {
     const [showPayment, setShowPayment] = useState(false);
     const [currentBooking, setCurrentBooking] = useState(null);
     const selectedSeatsRef = useRef([]);
-    const { authFetch, user } = useAuth();
+    const { authFetch, user, addLocalBooking } = useAuth();
     const [viewport, setViewport] = useState({
         width: typeof window !== 'undefined' ? window.innerWidth : 1280,
         height: typeof window !== 'undefined' ? window.innerHeight : 800
@@ -270,14 +270,14 @@ const SeatSelectionModal = ({ flight, onClose }) => {
                     </div>
                 </div>
 
-                {/* Right Side: Summary */}
                 <div style={{
                     width: isTabletOrSmaller ? '100%' : '340px',
                     padding: isMobile ? '18px' : '28px',
                     display: 'flex',
                     flexDirection: 'column',
                     background: 'rgba(255,255,255,0.02)',
-                    borderTop: isTabletOrSmaller ? '1px solid rgba(167, 139, 250, 0.1)' : 'none'
+                    borderTop: isTabletOrSmaller ? '1px solid rgba(167, 139, 250, 0.1)' : 'none',
+                    overflowY: 'auto'
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '24px' }}>
                         <button onClick={onClose} style={{ color: '#94a3b8', background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '50%', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
